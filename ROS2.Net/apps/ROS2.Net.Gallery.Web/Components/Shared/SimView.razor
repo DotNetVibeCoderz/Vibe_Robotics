@@ -1,0 +1,163 @@
+@inherits RosComponentBase
+@using System.Text
+@using ROS2.Net.Simulation
+@inject GalleryRuntime Runtime
+@inject IJSRuntime JS
+
+<div class="sim @(Bare ? "bare" : "rn-card")" style="height:@(Height)px">
+    @if (_snap is { } s)
+    {
+        var b = s.Bounds;
+        <svg @ref="_svg" viewBox="@($"{F(b.MinX)} {F(-b.MaxY)} {F(b.Width)} {F(b.Height)}")" preserveAspectRatio="xMidYMid meet" @onclick="OnClick">
+            <defs>
+                <pattern id="floorgrid" width="1" height="1" patternUnits="userSpaceOnUse">
+                    <path d="M 1 0 L 0 0 0 1" fill="none" class="gridline" />
+                </pattern>
+            </defs>
+            <g transform="scale(1,-1)">
+                <rect x="@F(b.MinX)" y="@F(b.MinY)" width="@F(b.Width)" height="@F(b.Height)" class="floor" />
+                <rect x="@F(b.MinX)" y="@F(b.MinY)" width="@F(b.Width)" height="@F(b.Height)" fill="url(#floorgrid)" />
+                @foreach (var o in s.Obstacles)
+                {
+                    if (o.Kind == ShapeKind.Cylinder)
+                    {
+                        <circle cx="@F(o.Center.X)" cy="@F(o.Center.Y)" r="@F(o.Radius)" class="@ObstacleClass(o)" />
+                    }
+                    else if (o.Vertices.Count > 0)
+                    {
+                        <polygon points="@Points(o.Vertices)" class="@ObstacleClass(o)" />
+                    }
+                }
+                @foreach (var r in s.Robots)
+                {
+                    if (r.Trail.Count > 1)
+                    {
+                        <polyline points="@Points(r.Trail)" class="trail" />
+                    }
+
+                    if (ShowRays && r.LaserOrigin is { } lo && r.LaserHits.Count > 2)
+                    {
+                        <polygon points="@ScanArea(lo, r.LaserHits)" class="scan-area" />
+                        <path d="@HitDots(r.LaserHits)" class="scan-hit" />
+                    }
+                }
+                @Overlay
+                @foreach (var r in s.Robots)
+                {
+                    <g transform="@($"translate({F(r.Pose.X)} {F(r.Pose.Y)}) rotate({F(r.Pose.Theta * 180 / Math.PI)})")">
+                        <circle r="@F(Math.Max(r.Radius, 0.16))" class="robot @(r.Bumper ? "bump" : "")" />
+                        <path d="@($"M {F(Math.Max(r.Radius, 0.16) * 1.35)} 0 L 0 0.09 L 0 -0.09 Z")" class="robot-dir" />
+                    </g>
+                }
+            </g>
+        </svg>
+        @if (ShowHud)
+        {
+            var robot = s.Robots.FirstOrDefault();
+            <div class="hud mono">
+                <span>t <b>@s.Time.ToString("0.0", CultureInfo.InvariantCulture)s</b></span>
+                @if (robot is not null)
+                {
+                    <span>v <b>@robot.LinearVelocity.ToString("0.00", CultureInfo.InvariantCulture)</b></span>
+                    <span>ω <b>@robot.AngularVelocity.ToString("0.00", CultureInfo.InvariantCulture)</b></span>
+                    <span>x,y <b>@robot.Pose.X.ToString("0.0", CultureInfo.InvariantCulture), @robot.Pose.Y.ToString("0.0", CultureInfo.InvariantCulture)</b></span>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private WorldSnapshot? _snap;
+    private ElementReference _svg;
+
+    /// <summary>World to draw; defaults to the gallery's shared warehouse.</summary>
+    [Parameter] public SimWorld? World { get; set; }
+
+    [Parameter] public int Height { get; set; } = 460;
+
+    [Parameter] public bool ShowRays { get; set; } = true;
+
+    [Parameter] public bool ShowHud { get; set; } = true;
+
+    /// <summary>Draw without card chrome (hero use).</summary>
+    [Parameter] public bool Bare { get; set; }
+
+    [Parameter] public double Fps { get; set; } = 12;
+
+    /// <summary>Extra SVG in world coordinates (meters, y up).</summary>
+    [Parameter] public RenderFragment? Overlay { get; set; }
+
+    /// <summary>Raised with world coordinates of a click.</summary>
+    [Parameter] public EventCallback<(double X, double Y)> OnWorldClick { get; set; }
+
+    protected override void OnInitialized() => Every(TimeSpan.FromSeconds(1.0 / Fps), _ =>
+    {
+        _snap = (World ?? Runtime.World).Snapshot();
+        return Task.CompletedTask;
+    });
+
+    private async Task OnClick(MouseEventArgs e)
+    {
+        if (!OnWorldClick.HasDelegate || _snap is null)
+        {
+            return;
+        }
+
+        var rect = await JS.InvokeAsync<Size>("rnRect", _svg);
+        var b = _snap.Bounds;
+        var scale = Math.Min(rect.Width / b.Width, rect.Height / b.Height);
+        var padX = (rect.Width - (b.Width * scale)) / 2;
+        var padY = (rect.Height - (b.Height * scale)) / 2;
+        var x = b.MinX + ((e.OffsetX - padX) / scale);
+        var y = b.MaxY - ((e.OffsetY - padY) / scale);
+        await OnWorldClick.InvokeAsync((x, y));
+    }
+
+    private sealed record Size(double Width, double Height);
+
+    private static string F(double v) => v.ToString("0.###", CultureInfo.InvariantCulture);
+
+    private static string Points(IReadOnlyList<Vec2> pts)
+    {
+        var sb = new StringBuilder(pts.Count * 12);
+        foreach (var p in pts)
+        {
+            sb.Append(F(p.X)).Append(',').Append(F(p.Y)).Append(' ');
+        }
+
+        return sb.ToString();
+    }
+
+    private static string ScanArea(ROS2.Net.Simulation.Pose2D origin, IReadOnlyList<Vec2> hits)
+    {
+        var sb = new StringBuilder(hits.Count * 12);
+        sb.Append(F(origin.X)).Append(',').Append(F(origin.Y)).Append(' ');
+        foreach (var p in hits)
+        {
+            sb.Append(F(p.X)).Append(',').Append(F(p.Y)).Append(' ');
+        }
+
+        return sb.ToString();
+    }
+
+    private static string HitDots(IReadOnlyList<Vec2> hits)
+    {
+        var sb = new StringBuilder(hits.Count * 30);
+        for (var i = 0; i < hits.Count; i += 2)
+        {
+            var p = hits[i];
+            sb.Append('M').Append(F(p.X - 0.03)).Append(' ').Append(F(p.Y - 0.03)).Append("h.06v.06h-.06Z");
+        }
+
+        return sb.ToString();
+    }
+
+    private static string ObstacleClass(ObstacleSnapshot o) => o.IsDynamic ? "obs crate" : o.Tag switch
+    {
+        "shelf" => "obs shelf",
+        "wall" => "obs wall",
+        "dock" or "charger" => "obs dock",
+        _ => "obs",
+    };
+}

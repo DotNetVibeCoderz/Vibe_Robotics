@@ -1,0 +1,122 @@
+@page "/rl"
+@inherits GalleryPage
+@using ROS2.Net.AI.Gym
+@using ROS2.Net.Simulation
+@using RLNet.Agents
+
+<PageTitle>RL agent · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="rl" Code="@Code">
+    <div class="grid two">
+        <div class="stack">
+            <SimView World="_watchEnv.World" Height="430" Overlay="@GoalMarker" />
+            <LivePlot @ref="_plot" Height="200" />
+        </div>
+        <div class="panel stack">
+            <h3>@T("Point-goal navigation", "Navigasi ke titik target")</h3>
+            <p class="note">@T("Observation: distance and bearing to the goal, plus 8 LiDAR sectors. Actions: forward, turn left/right, forward-left/right. Reward: progress, +10 at the goal, −10 on collision.",
+                               "Observasi: jarak dan arah ke target, ditambah 8 sektor LiDAR. Aksi: maju, belok kiri/kanan, maju-kiri/kanan. Reward: kemajuan, +10 di target, −10 saat menabrak.")</p>
+            <div class="row">
+                <button class="rn-btn primary" @onclick="Train" disabled="@_training">@T("Train", "Latih") 300 @T("episodes", "episode")</button>
+                <button class="rn-btn" @onclick="Watch" disabled="@(_training || _agent is null)">@T("Watch the policy", "Tonton kebijakan")</button>
+            </div>
+            <div class="progress"><span style="width:@(_episode * 100.0 / 300)%"></span></div>
+            <dl class="kv">
+                <dt>@T("Episode", "Episode")</dt><dd>@_episode</dd>
+                <dt>@T("Mean return (last 20)", "Rata-rata return (20 terakhir)")</dt><dd>@_meanReturn.ToString("0.00", CultureInfo.InvariantCulture)</dd>
+                <dt>@T("Success rate (last 20)", "Tingkat sukses (20 terakhir)")</dt><dd>@((_success * 100).ToString("0", CultureInfo.InvariantCulture))%</dd>
+                <dt>@T("Watching", "Menonton")</dt><dd>@_watchStatus</dd>
+            </dl>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private static readonly RobotGymOptions s_options = new() { Scenario = ScenarioKind.Empty, MaxEpisodeSteps = 120, MinGoalDistance = 1.0, MaxGoalDistance = 2.5 };
+    private readonly RobotGymEnv _watchEnv = new(s_options);
+    private LivePlot? _plot;
+    private QTableAgent? _agent;
+    private bool _training;
+    private int _episode;
+    private double _meanReturn, _success;
+    private string _watchStatus = "—";
+    private readonly Queue<EpisodeStats> _recent = new();
+
+    private RenderFragment GoalMarker => __builder =>
+    {
+        var g = _watchEnv.Goal;
+        <circle cx="@g.X.ToString(CultureInfo.InvariantCulture)" cy="@g.Y.ToString(CultureInfo.InvariantCulture)" r="0.3" fill="none" stroke="var(--rn-warn)" stroke-width="0.04" />
+        <circle cx="@g.X.ToString(CultureInfo.InvariantCulture)" cy="@g.Y.ToString(CultureInfo.InvariantCulture)" r="0.08" fill="var(--rn-warn)" />
+    };
+
+    private void Train()
+    {
+        _training = true;
+        _episode = 0;
+        _ = Task.Run(() =>
+        {
+            var env = new RobotGymEnv(s_options);
+            var agent = AgentFactory.CreateQTable(env, bins: 6, seed: 1);
+            RlTrainer.Train(env, agent, 300, stats =>
+            {
+                _episode = stats.Episode + 1;
+                _recent.Enqueue(stats);
+                while (_recent.Count > 20)
+                {
+                    _recent.Dequeue();
+                }
+
+                _meanReturn = _recent.Average(s => s.Return);
+                _success = _recent.Count(s => s.Terminated && s.Return > 0) / (double)_recent.Count;
+                _plot?.Push("episode return", stats.Return);
+                _plot?.Push("mean (20)", _meanReturn);
+                RequestRender();
+            }, seed: 1, cancellationToken: Disposing);
+            _agent = agent;
+            _training = false;
+            RequestRender();
+            Watch();
+        });
+    }
+
+    private void Watch()
+    {
+        if (_agent is null)
+        {
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            for (var run = 1; run <= 5 && !Disposing.IsCancellationRequested; run++)
+            {
+                _watchEnv.Reset();
+                for (var step = 0; step < s_options.MaxEpisodeSteps; step++)
+                {
+                    var action = _agent.SelectAction(_watchEnv.Observation, false);
+                    var r = _watchEnv.Step(action);
+                    _watchStatus = $"run {run}/5 · step {step}";
+                    RequestRender();
+                    await Task.Delay(60, Disposing);
+                    if (r.Done)
+                    {
+                        _watchStatus = _watchEnv.ReachedGoal ? $"run {run}: goal reached" : $"run {run}: {( _watchEnv.Collided ? "collision" : "time out")}";
+                        await Task.Delay(700, Disposing);
+                        break;
+                    }
+                }
+            }
+        });
+    }
+
+    private const string Code = """
+        using ROS2.Net.AI.Gym;
+
+        var env = new RobotGymEnv(new RobotGymOptions { Scenario = ScenarioKind.Empty });   // RLNet IDiscreteEnvironment
+        var agent = AgentFactory.CreateQTable(env, bins: 6);                                // or CreateDqn(env)
+        RlTrainer.Train(env, agent, episodes: 300, onEpisode: s => Console.WriteLine(s.Return));
+
+        // Deploy on a real (or simulated) robot over ROS 2:
+        using var runner = new PolicyRunnerNode(context, obs => agent.SelectAction(obs, explore: false));
+        """;
+}

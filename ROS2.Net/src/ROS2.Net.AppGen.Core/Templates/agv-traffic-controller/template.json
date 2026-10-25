@@ -1,0 +1,15 @@
+{
+  "name": "AGV traffic controller",
+  "category": "Industry",
+  "description": "A central traffic controller keeps four AGVs in a warehouse from colliding by granting right-of-way at close encounters, in fast lock-step simulation.",
+  "appKind": "console",
+  "tags": [
+    "fleet",
+    "multi-robot",
+    "traffic",
+    "warehouse"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Reinforcement learning navigation lab",
+  "category": "Education",
+  "description": "Trains a Q-learning agent to drive a simulated robot to a goal (RLNet + ROS2.Net.AI gym), compares it with a random policy and prints the learning curve.",
+  "appKind": "console",
+  "tags": [
+    "reinforcement-learning",
+    "ai",
+    "education",
+    "simulation"
+  ],
+  "packages": [
+    "ROS2.Net.AI",
+    "ROS2.Net.Simulation"
+  ]
+}

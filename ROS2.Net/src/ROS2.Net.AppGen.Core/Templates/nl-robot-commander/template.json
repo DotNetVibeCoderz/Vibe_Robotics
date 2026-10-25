@@ -1,0 +1,16 @@
+{
+  "name": "Natural-language robot commander",
+  "category": "Work",
+  "description": "Type commands in English or Bahasa Indonesia ('forward 1 m then turn left 90', 'pergi ke dock') and a simulated robot executes them safely; swap in any OpenAI-compatible LLM.",
+  "appKind": "console",
+  "tags": [
+    "llm",
+    "ai",
+    "natural-language",
+    "teleop"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation",
+    "ROS2.Net.AI"
+  ]
+}

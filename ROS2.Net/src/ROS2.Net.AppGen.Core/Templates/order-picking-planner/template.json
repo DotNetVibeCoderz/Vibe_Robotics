@@ -1,0 +1,16 @@
+{
+  "name": "Order picking route planner",
+  "category": "Logistics",
+  "description": "Plans warehouse picking tours: A* distances between shelves on an inflated costmap, nearest-neighbor + 2-opt tour optimization, and a printed pick list with travel estimates.",
+  "appKind": "console",
+  "tags": [
+    "logistics",
+    "warehouse",
+    "planning",
+    "optimization"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation",
+    "ROS2.Net.Navigation"
+  ]
+}

@@ -1,0 +1,32 @@
+# The trajectory for all revolute, continuous or prismatic joints
+trajectory_msgs/JointTrajectory trajectory
+# The trajectory for all planar or floating joints (i.e. individual joints with more than one DOF)
+trajectory_msgs/MultiDOFJointTrajectory multi_dof_trajectory
+
+JointTolerance[] path_tolerance
+JointComponentTolerance[] component_path_tolerance
+
+JointTolerance[] goal_tolerance
+JointComponentTolerance[] component_goal_tolerance
+builtin_interfaces/Duration goal_time_tolerance
+---
+int32 SUCCESSFUL = 0
+int32 INVALID_GOAL = -1
+int32 INVALID_JOINTS = -2
+int32 OLD_HEADER_TIMESTAMP = -3
+int32 PATH_TOLERANCE_VIOLATED = -4
+int32 GOAL_TOLERANCE_VIOLATED = -5
+
+int32 error_code
+string error_string
+---
+std_msgs/Header header
+string[] joint_names
+trajectory_msgs/JointTrajectoryPoint desired
+trajectory_msgs/JointTrajectoryPoint actual
+trajectory_msgs/JointTrajectoryPoint error
+
+string[] multi_dof_joint_names
+trajectory_msgs/MultiDOFJointTrajectoryPoint multi_dof_desired
+trajectory_msgs/MultiDOFJointTrajectoryPoint multi_dof_actual
+trajectory_msgs/MultiDOFJointTrajectoryPoint multi_dof_error

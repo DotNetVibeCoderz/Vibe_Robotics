@@ -1,0 +1,15 @@
+{
+  "name": "Maze escape wall-follower",
+  "category": "Simulator",
+  "description": "A robot escapes a generated maze with the right-hand rule using only its LiDAR, stepping the simulator as fast as possible.",
+  "appKind": "console",
+  "tags": [
+    "simulation",
+    "maze",
+    "algorithm",
+    "lidar"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

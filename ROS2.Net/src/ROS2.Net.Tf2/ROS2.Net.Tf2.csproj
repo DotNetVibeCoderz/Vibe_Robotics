@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Tf2</RootNamespace>
+    <Description>TF2 for ROS2.Net: coordinate frame tracking with a time-cached transform buffer, interpolation, time travel, transform listeners and (static) broadcasters, plus 3D math types.</Description>
+    <PackageTags>$(PackageTags);tf;tf2;transforms;frames</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Tf2.Tests" />
+  </ItemGroup>
+
+</Project>

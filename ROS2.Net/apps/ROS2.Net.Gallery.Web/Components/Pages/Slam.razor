@@ -1,0 +1,75 @@
+@page "/slam"
+@inherits GalleryPage
+@using ROS2.Net.Navigation.Slam
+@using ROS2.Net.Navigation.Nodes
+
+<PageTitle>SLAM · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="slam" Code="@Code">
+    <div class="grid halves">
+        <div class="stack">
+            <OccupancyGridView Topic="/slam/map" RobotPose="@_estimate" Height="470" EmptyText="@T("Waiting for the first keyframes…", "Menunggu keyframe pertama…")" />
+            <p class="note">@T("Map built by ROS2.Net SLAM from /scan and /odom only. The robot keeps wandering; loop closures snap drift back.",
+                               "Peta dibangun oleh SLAM ROS2.Net hanya dari /scan dan /odom. Robot terus menjelajah; loop closure mengoreksi drift.")</p>
+        </div>
+        <div class="stack">
+            <SimView Height="330" />
+            <div class="panel">
+                <h3>@T("Pose graph", "Pose graph")</h3>
+                <dl class="kv">
+                    <dt>@T("Keyframes", "Keyframe")</dt><dd>@_keyframes</dd>
+                    <dt>@T("Loop closures", "Loop closure")</dt><dd>@_loops</dd>
+                    <dt>@T("Estimate vs ground truth", "Estimasi vs ground truth")</dt><dd>@_error</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private SlamNode? _slam;
+    private PlanarPose? _estimate;
+    private int _keyframes, _loops;
+    private string _error = "—";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var options = new NodeOptions { StartParameterServices = false };
+        options.Remappings.Add(new RemapRule("/map", "/slam/map"));
+        options.ParameterOverrides.Add(new Parameter("map_update_interval", 1.5));
+        _slam = new SlamNode(Runtime.Context, new SlamOptions { Resolution = 0.08, MaxLaserRange = 8 }, "/odom", $"slam_{Random.Shared.Next(1000, 9999)}", options);
+        Every(TimeSpan.FromMilliseconds(400), _ =>
+        {
+            var s = _slam.Slam;
+            var p = s.Pose;
+            _estimate = new PlanarPose(p.X, p.Y, p.Theta);
+            _keyframes = s.Graph.Nodes.Count;
+            _loops = s.LoopClosureCount;
+            var truth = Runtime.Robot.Pose;
+            var start = Runtime.Robot.StartPose;
+            // The SLAM map frame is the odometry frame: the robot's start pose.
+            var local = start.InverseTransformPoint(truth.Position);
+            _error = string.Create(CultureInfo.InvariantCulture, $"{Math.Sqrt(Math.Pow(p.X - local.X, 2) + Math.Pow(p.Y - local.Y, 2)):0.00} m");
+            return Task.CompletedTask;
+        });
+    }
+
+    protected override async ValueTask DisposeCoreAsync()
+    {
+        _slam?.Dispose();
+        await base.DisposeCoreAsync();
+    }
+
+    private const string Code = """
+        // ROS node: /scan + /odom → /map (latched) and map → odom on /tf
+        var slam = new SlamNode(context, new SlamOptions { Resolution = 0.05, MaxLaserRange = 12 });
+        // later: slam.SaveMap("maps/warehouse");   // map_server YAML + PGM
+
+        // Or the algorithm alone:
+        var engine = new OnlineSlam(new SlamOptions());
+        foreach (var (odomPose, scan) in recording)
+            engine.Process(odomPose, scan);
+        OccupancyGridMap map = engine.GetMap();
+        """;
+}

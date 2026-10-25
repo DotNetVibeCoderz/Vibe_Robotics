@@ -1,0 +1,18 @@
+<Project>
+
+  <!--
+    Interface files reach the generator as AdditionalFiles. Declare them with:
+      <RosInterface Include="interfaces/**/*.msg;interfaces/**/*.srv;interfaces/**/*.action" />
+    The package name is taken from the folder layout <package>/<msg|srv|action>/<Name>.<ext>.
+  -->
+  <ItemGroup>
+    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="RosInterface" />
+  </ItemGroup>
+
+  <Target Name="_ROS2NetAddRosInterfaces" BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun;CoreCompile">
+    <ItemGroup>
+      <AdditionalFiles Include="@(RosInterface)" RosInterface="true" />
+    </ItemGroup>
+  </Target>
+
+</Project>

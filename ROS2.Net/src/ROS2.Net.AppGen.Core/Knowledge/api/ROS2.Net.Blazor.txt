@@ -1,0 +1,126 @@
+class ROS2.Net.Blazor._Imports
+  ctor()
+class ROS2.Net.Blazor.CloudLayer
+  ctor(PointCloud Cloud, String Color, Double Opacity=0.95)
+  PointCloud Cloud { get; set; }
+  String Color { get; set; }
+  Double Opacity { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(CloudLayer other)
+  CloudLayer <Clone>$()
+  Void Deconstruct(PointCloud& Cloud, String& Color, Double& Opacity)
+enum ROS2.Net.Blazor.CloudProjection
+  Top, Front, Side
+class ROS2.Net.Blazor.Components.BatteryGauge : RosComponentBase
+  ctor()
+  String Topic { get; set; }
+  Nullable<Double> Percentage { get; set; }
+  Int32 Size { get; set; }
+  String Label { get; set; }
+class ROS2.Net.Blazor.Components.ImageView : RosComponentBase
+  ctor()
+  String Topic { get; set; }
+  Image Image { get; set; }
+  Double MaxFps { get; set; }
+  Int32 Height { get; set; }
+  String Alt { get; set; }
+class ROS2.Net.Blazor.Components.JointStatePanel : RosComponentBase
+  ctor()
+  String Topic { get; set; }
+  JointState State { get; set; }
+class ROS2.Net.Blazor.Components.LaserScanView : RosComponentBase
+  ctor()
+  String Topic { get; set; }
+  LaserScan Scan { get; set; }
+  Double MaxRange { get; set; }
+  Int32 Height { get; set; }
+class ROS2.Net.Blazor.Components.LifecycleStateView : RosComponentBase
+  ctor()
+  String TargetNode { get; set; }
+class ROS2.Net.Blazor.Components.LivePlot : RosComponentBase
+  ctor()
+  String Topic { get; set; }
+  IReadOnlyList<String> Fields { get; set; }
+  Double WindowSeconds { get; set; }
+  Int32 Height { get; set; }
+  Nullable<ValueTuple<Double,Double>> Range { get; set; }
+  Void Push(String series, Double value)
+class ROS2.Net.Blazor.Components.LogConsole : RosComponentBase
+  ctor()
+  String Topic { get; set; }
+  Int32 MaxLines { get; set; }
+  Int32 Height { get; set; }
+class ROS2.Net.Blazor.Components.NodeGraph : RosComponentBase
+  ctor()
+  Int32 Height { get; set; }
+  Boolean IncludeHidden { get; set; }
+  IReadOnlyCollection<String> Exclude { get; set; }
+  Boolean HideUiNodes { get; set; }
+class ROS2.Net.Blazor.Components.OccupancyGridView : RosComponentBase
+  ctor()
+  String Topic { get; set; }
+  OccupancyGrid Map { get; set; }
+  String PathTopic { get; set; }
+  IReadOnlyList<PlanarPose> Path { get; set; }
+  Nullable<PlanarPose> RobotPose { get; set; }
+  Double RobotRadius { get; set; }
+  Nullable<PlanarPose> Goal { get; set; }
+  RenderFragment Overlay { get; set; }
+  EventCallback<PlanarPose> OnMapClick { get; set; }
+  Int32 Height { get; set; }
+  String EmptyText { get; set; }
+  String FreeColor { get; set; }
+  String OccupiedColor { get; set; }
+  String UnknownColor { get; set; }
+class ROS2.Net.Blazor.Components.ParameterEditor : RosComponentBase
+  ctor()
+  String TargetNode { get; set; }
+  TimeSpan Timeout { get; set; }
+class ROS2.Net.Blazor.Components.PointCloudView : RosComponentBase
+  ctor()
+  String Topic { get; set; }
+  PointCloud Cloud { get; set; }
+  IReadOnlyList<CloudLayer> Layers { get; set; }
+  CloudProjection Projection { get; set; }
+  Int32 MaxPoints { get; set; }
+  Double PointSize { get; set; }
+  Int32 Height { get; set; }
+  String Title { get; set; }
+class ROS2.Net.Blazor.Components.TeleopJoystick : RosComponentBase
+  ctor()
+  String Topic { get; set; }
+  Double MaxLinear { get; set; }
+  Double MaxAngular { get; set; }
+  Double RateHz { get; set; }
+  Int32 Size { get; set; }
+  EventCallback<Twist> OnCommand { get; set; }
+  Double Linear { get; }
+  Double Angular { get; }
+  Void SetStick(Double x, Double y)
+class ROS2.Net.Blazor.Components.TfTree : RosComponentBase
+  ctor()
+  TfBuffer Buffer { get; set; }
+class ROS2.Net.Blazor.Components.TopicMonitor : RosComponentBase
+  ctor()
+  Boolean IncludeHidden { get; set; }
+  IReadOnlyCollection<String> Exclude { get; set; }
+  Boolean Measure { get; set; }
+  TimeSpan Interval { get; set; }
+struct ROS2.Net.Blazor.PlanarPose
+  ctor(Double X, Double Y, Double Theta=0)
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Theta { get; set; }
+  static PlanarPose FromMsg(Pose pose)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(PlanarPose other)
+  Void Deconstruct(Double& X, Double& Y, Double& Theta)
+class ROS2.Net.Blazor.Ros2BlazorExtensions
+  static IServiceCollection AddRos2Blazor(IServiceCollection services, Action<Ros2HostOptions> configure=null)
+class ROS2.Net.Blazor.RosComponentBase : ComponentBase
+  Double RefreshHz { get; set; }
+  ValueTask DisposeAsync()

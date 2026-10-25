@@ -1,0 +1,9 @@
+.joints { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.joint { display: grid; grid-template-columns: minmax(110px, 1.2fr) 2fr 64px 84px; align-items: center; gap: 10px; font-size: 12px; }
+.name { color: var(--rn-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar { position: relative; height: 6px; border-radius: 3px; background: var(--rn-surface-2); }
+.zero { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--rn-line); }
+.mark { position: absolute; top: -3px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--rn-grad); box-shadow: 0 0 8px color-mix(in srgb, var(--rn-cyan) 60%, transparent); }
+.val { text-align: right; color: var(--rn-ink); }
+.vel { color: var(--rn-muted); text-align: right; }
+.empty { color: var(--rn-muted); font-size: 13px; padding: 10px 0; }

@@ -1,0 +1,14 @@
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="typeof(Layout.MainLayout)">
+            <section class="notfound">
+                <h1>No demo at this address</h1>
+                <p>Pick a demo from the list on the left, or go back to the <a href="/">overview</a>.</p>
+            </section>
+        </LayoutView>
+    </NotFound>
+</Router>

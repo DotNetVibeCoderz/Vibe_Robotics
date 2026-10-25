@@ -1,0 +1,16 @@
+{
+  "name": "Vacuum robot coverage planner",
+  "category": "Housekeeping",
+  "description": "Plans a boustrophedon (lawn-mower) cleaning route over the free space of an office map, links the lanes with A* on an inflated costmap and drives it in simulation with Regulated Pure Pursuit.",
+  "appKind": "console",
+  "tags": [
+    "navigation",
+    "coverage",
+    "cleaning",
+    "planning"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation",
+    "ROS2.Net.Navigation"
+  ]
+}

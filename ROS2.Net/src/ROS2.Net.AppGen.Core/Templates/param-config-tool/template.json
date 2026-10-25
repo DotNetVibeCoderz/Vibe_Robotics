@@ -1,0 +1,13 @@
+{
+  "name": "Parameter configuration tool",
+  "category": "Tools",
+  "description": "Manages node parameters remotely like `ros2 param`: lists, describes, loads a YAML file atomically and dumps the result, against a demo controller node.",
+  "appKind": "console",
+  "tags": [
+    "tools",
+    "parameters",
+    "yaml",
+    "configuration"
+  ],
+  "packages": []
+}

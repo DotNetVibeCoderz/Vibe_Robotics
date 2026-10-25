@@ -1,0 +1,14 @@
+{
+  "name": "Turtlesim playground",
+  "category": "Simulator",
+  "description": "A drop-in turtlesim: spawns a second turtle through the /spawn service and drives both in patterns from /turtleN/cmd_vel while reading their poses.",
+  "appKind": "console",
+  "tags": [
+    "turtlesim",
+    "services",
+    "beginner"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

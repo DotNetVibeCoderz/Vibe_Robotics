@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Perception.Onnx</RootNamespace>
+    <Description>ONNX Runtime object detection for ROS2.Net: a YOLO (v5/v8/v11) detector implementing IObjectDetector, ready to plug into DetectionNode.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Perception\ROS2.Net.Perception.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" />
+  </ItemGroup>
+
+</Project>

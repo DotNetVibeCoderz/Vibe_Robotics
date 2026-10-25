@@ -1,0 +1,15 @@
+{
+  "name": "Patient vitals monitor (web)",
+  "category": "Healthcare",
+  "description": "Blazor bedside dashboard: simulated heart rate and SpO\u2082 streams over ROS 2 with streaming anomaly detection that logs clinical alerts.",
+  "appKind": "blazor",
+  "tags": [
+    "healthcare",
+    "monitoring",
+    "anomaly-detection",
+    "web"
+  ],
+  "packages": [
+    "ROS2.Net.AI"
+  ]
+}

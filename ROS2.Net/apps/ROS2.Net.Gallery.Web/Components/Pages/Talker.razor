@@ -1,0 +1,91 @@
+@page "/talker"
+@inherits GalleryPage
+@using StdMsgs = ROS2.Net.Msgs.StdMsgs
+
+<PageTitle>Talker & listener · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="talker" Code="@Code">
+    <div class="grid two">
+        <div class="panel stack">
+            <h3>@T("Listener on /chatter", "Listener pada /chatter")</h3>
+            <ul class="feed">
+                @foreach (var m in _received)
+                {
+                    <li><span class="ok">@m.Time</span> · I heard: [@m.Text]</li>
+                }
+            </ul>
+            <p class="note">@T("A demo talker publishes twice a second. Messages sent from this page arrive on the same topic.",
+                               "Talker demo menerbitkan dua kali per detik. Pesan yang dikirim dari halaman ini masuk ke topic yang sama.")</p>
+        </div>
+        <div class="stack">
+            <div class="panel stack">
+                <h3>@T("Publish", "Terbitkan")</h3>
+                <input class="rn-input" @bind="_text" aria-label="Message" />
+                <div class="row">
+                    <button class="rn-btn primary" @onclick="Publish">@T("Publish once", "Terbitkan sekali")</button>
+                    <button class="rn-btn" @onclick="Burst">@T("Publish 50", "Terbitkan 50")</button>
+                </div>
+                <dl class="kv">
+                    <dt>@T("Received", "Diterima")</dt><dd>@_count</dd>
+                    <dt>@T("Matched subscriptions", "Subscription terhubung")</dt><dd>@(_pub?.SubscriptionCount ?? 0)</dd>
+                    <dt>QoS</dt><dd>KeepLast(10), Reliable, Volatile</dd>
+                </dl>
+            </div>
+            <LogConsole Height="230" />
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private readonly LinkedList<(string Time, string Text)> _received = new();
+    private Publisher<StdMsgs.String>? _pub;
+    private string _text = "Hello from the browser";
+    private long _count;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _pub = Node.CreatePublisher<StdMsgs.String>("/chatter");
+        Subscribe<StdMsgs.String>("/chatter", m =>
+        {
+            Interlocked.Increment(ref _count);
+            lock (_received)
+            {
+                _received.AddFirst((DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture), m.Data));
+                if (_received.Count > 40)
+                {
+                    _received.RemoveLast();
+                }
+            }
+        });
+    }
+
+    private void Publish() => _pub!.Publish(new StdMsgs.String { Data = _text });
+
+    private void Burst()
+    {
+        for (var i = 1; i <= 50; i++)
+        {
+            _pub!.Publish(new StdMsgs.String { Data = $"{_text} ({i}/50)" });
+        }
+    }
+
+    private const string Code = """
+        using ROS2.Net;
+        using StdMsgs = ROS2.Net.Msgs.StdMsgs;
+
+        await using var context = await Ros2Context.CreateAsync();
+
+        var talker = context.CreateNode("talker");
+        var pub = talker.CreatePublisher<StdMsgs.String>("chatter");
+        var count = 0;
+        talker.CreateTimer(TimeSpan.FromSeconds(0.5), () =>
+            pub.Publish(new StdMsgs.String { Data = $"Hello ROS2.Net #{++count}" }));
+
+        var listener = context.CreateNode("listener");
+        listener.CreateSubscription<StdMsgs.String>("chatter",
+            msg => Console.WriteLine($"I heard: [{msg.Data}]"));
+
+        await context.SpinAsync();
+        """;
+}

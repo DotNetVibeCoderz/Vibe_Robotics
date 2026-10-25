@@ -1,0 +1,19 @@
+.console { display: flex; flex-direction: column; overflow: hidden; }
+header { display: flex; gap: 6px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--rn-line); flex-wrap: wrap; }
+.chip { font: 600 10px var(--rn-mono); letter-spacing: .05em; padding: 5px 8px; border-radius: 4px; border: 1px solid var(--rn-line); background: var(--rn-surface-2); color: var(--rn-ink); cursor: pointer; }
+.chip.off { opacity: .35; }
+.chip.warn { color: var(--rn-warn); }
+.chip.error, .chip.fatal { color: var(--rn-danger); }
+.chip.info { color: var(--rn-cyan); }
+.chip:focus-visible { outline: 2px solid var(--rn-cyan); }
+.filter { margin-left: auto; min-width: 160px; }
+.lines { flex: 1; overflow: auto; padding: 6px 0; font-size: 12px; }
+.line { display: grid; grid-template-columns: 92px 52px auto 1fr; gap: 8px; padding: 3px 12px; white-space: nowrap; }
+.line .msg { white-space: pre-wrap; word-break: break-word; color: var(--rn-ink); }
+.t { color: var(--rn-muted); }
+.who { color: var(--rn-violet); }
+.info .lvl { color: var(--rn-cyan); }
+.warn .lvl { color: var(--rn-warn); }
+.error .lvl, .fatal .lvl { color: var(--rn-danger); }
+.debug .lvl { color: var(--rn-muted); }
+.error { background: color-mix(in srgb, var(--rn-danger) 7%, transparent); }

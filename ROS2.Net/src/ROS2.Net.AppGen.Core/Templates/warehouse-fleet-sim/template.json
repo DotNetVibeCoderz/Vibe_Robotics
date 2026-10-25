@@ -1,0 +1,15 @@
+{
+  "name": "Warehouse AMR fleet simulator",
+  "category": "Simulator",
+  "description": "Three autonomous mobile robots roam a simulated warehouse, avoiding shelves with their LiDAR; a fleet report prints poses, odometry and collisions.",
+  "appKind": "console",
+  "tags": [
+    "simulation",
+    "multi-robot",
+    "lidar",
+    "warehouse"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

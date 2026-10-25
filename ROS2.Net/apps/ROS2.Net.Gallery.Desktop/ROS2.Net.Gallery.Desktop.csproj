@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Ros2NetGallery</RootNamespace>
+    <AssemblyName>ROS2.Net.Gallery.Desktop</AssemblyName>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <ApplicationIcon>..\..\assets\icon.ico</ApplicationIcon>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ROS2.Net.Avalonia\ROS2.Net.Avalonia.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Simulation\ROS2.Net.Simulation.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Navigation\ROS2.Net.Navigation.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Manipulation\ROS2.Net.Manipulation.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Control\ROS2.Net.Control.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Perception\ROS2.Net.Perception.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Native\ROS2.Net.Native.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Bag\ROS2.Net.Bag.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Tf2\ROS2.Net.Tf2.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.AI\ROS2.Net.AI.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Rmw.Rtps\ROS2.Net.Rmw.Rtps.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Rmw.Rosbridge\ROS2.Net.Rmw.Rosbridge.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="..\..\assets\icon-128.png" Link="Assets\icon-128.png" />
+  </ItemGroup>
+
+</Project>

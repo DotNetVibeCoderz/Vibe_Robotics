@@ -1,0 +1,15 @@
+{
+  "name": "Machine health monitor",
+  "category": "Industry",
+  "description": "Monitors motor temperature and vibration telemetry of a production machine with streaming anomaly detection and publishes /diagnostics like a condition-monitoring system.",
+  "appKind": "console",
+  "tags": [
+    "industry",
+    "predictive-maintenance",
+    "anomaly-detection",
+    "diagnostics"
+  ],
+  "packages": [
+    "ROS2.Net.AI"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "rodin": {
+      "type": "stdio",
+      "command": "C:\\experiment\\MCP\\release\\rodin\\rodin.exe",
+      "args": [],
+      "env": {}
+    },
+    "blender": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-for-blender"],
+      "env": {}
+    }
+  }
+}

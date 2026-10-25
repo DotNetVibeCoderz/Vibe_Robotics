@@ -1,0 +1,13 @@
+.graph { position: relative; overflow: auto; }
+svg { width: 100%; display: block; }
+.node { fill: color-mix(in srgb, var(--rn-violet) 18%, var(--rn-surface)); stroke: var(--rn-violet); stroke-width: 1.2; }
+.topic { fill: var(--rn-surface-2); stroke: color-mix(in srgb, var(--rn-cyan) 60%, var(--rn-line)); stroke-width: 1; }
+.label { font: 500 13px var(--rn-font); fill: var(--rn-ink); }
+.label.mono { font: 12px var(--rn-mono); }
+.edge { fill: none; stroke-width: 1.4; opacity: .75; }
+.edge.pub { stroke: var(--rn-violet); }
+.edge.sub { stroke: var(--rn-cyan); stroke-dasharray: 5 4; }
+.empty { color: var(--rn-muted); padding: 32px; text-align: center; }
+.legend { position: absolute; top: 10px; right: 14px; display: flex; gap: 14px; font-size: 11px; color: var(--rn-muted); }
+.legend .pub { color: var(--rn-violet); }
+.legend .sub { color: var(--rn-cyan); }

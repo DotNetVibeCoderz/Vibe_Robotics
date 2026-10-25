@@ -1,0 +1,12 @@
+@page "/"
+
+<PageTitle>{{ProjectName}}</PageTitle>
+
+<h1>Bed 12 — vitals</h1>
+<p class="muted">Simulated bedside monitor streaming over ROS 2. Alerts come from a streaming anomaly detector (ROS2.Net.AI).</p>
+
+<section class="grid">
+    <div class="card"><h2>Heart rate (bpm)</h2><LivePlot Topic="/patient/heart_rate" Fields="@(["data"])" WindowSeconds="60" /></div>
+    <div class="card"><h2>SpO₂ (%)</h2><LivePlot Topic="/patient/spo2" Fields="@(["data"])" WindowSeconds="60" /></div>
+    <div class="card"><h2>Clinical alerts</h2><LogConsole /></div>
+</section>

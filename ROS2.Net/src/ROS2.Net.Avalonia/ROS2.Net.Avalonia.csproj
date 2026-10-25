@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Avalonia</RootNamespace>
+    <Description>Avalonia UI controls for ROS2.Net: teleop joystick, LiDAR, occupancy grid, point cloud, image, TF tree, node graph, topic monitor, parameter editor, log console, live plots, battery gauge, joint states and a simulator world view.</Description>
+    <PackageTags>$(PackageTags);avalonia;ui;desktop;visualization</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Tf2\ROS2.Net.Tf2.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Simulation\ROS2.Net.Simulation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+  </ItemGroup>
+
+</Project>

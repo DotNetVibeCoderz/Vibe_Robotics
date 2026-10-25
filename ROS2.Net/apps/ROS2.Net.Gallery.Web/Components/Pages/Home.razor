@@ -1,0 +1,99 @@
+@page "/"
+@inherits GalleryPage
+@using ROS2.Net.Msgs.NavMsgs
+@using ROS2.Net.Msgs.SensorMsgs
+
+<PageTitle>ROS2.Net Gallery</PageTitle>
+
+<section class="hero">
+    <div class="hero-copy">
+        <div class="eyebrow">ros2net · @T("live in this browser tab", "berjalan langsung di tab ini")</div>
+        <h1 tabindex="-1">@T("ROS 2, native to", "ROS 2, asli di") <span class="grad">.NET</span></h1>
+        <p class="lede">
+            @T("Nodes, topics, services, actions, TF2, rosbag2, Nav2-style navigation and SLAM in pure .NET 10. No ROS installation needed: the warehouse on the right is a simulated robot, driven by the same APIs you would use on hardware.",
+               "Node, topic, service, action, TF2, rosbag2, navigasi ala Nav2, dan SLAM dalam .NET 10 murni. Tidak perlu memasang ROS: gudang di sebelah kanan adalah robot simulasi yang digerakkan oleh API yang sama dengan yang Anda pakai di perangkat keras.")
+        </p>
+        <div class="terminal mono" aria-label="Live topic readout">
+            <div><span class="prompt">$</span> ros2net topic hz /scan</div>
+            <div class="out">@_scanHz.ToString("0.0", CultureInfo.InvariantCulture) Hz · @_beams beams · min @_minRange.ToString("0.00", CultureInfo.InvariantCulture) m</div>
+            <div><span class="prompt">$</span> ros2net topic echo /odom --field twist</div>
+            <div class="out">linear.x @_v.ToString("+0.00;-0.00", CultureInfo.InvariantCulture) · angular.z @_w.ToString("+0.00;-0.00", CultureInfo.InvariantCulture)</div>
+        </div>
+        <div class="cta">
+            <a class="rn-btn primary" href="navigation">@T("Send the robot somewhere", "Kirim robot ke suatu tempat")</a>
+            <a class="rn-btn" href="teleop">@T("Drive it yourself", "Kemudikan sendiri")</a>
+        </div>
+    </div>
+    <div class="hero-world">
+        <SimView Height="400" Bare="true" ShowHud="false" />
+        <div class="world-tag mono">/warehouse · @T("autopilot", "autopilot") @(Runtime.AutopilotActive ? "on" : T("held by a demo", "ditahan demo"))</div>
+    </div>
+</section>
+
+<section class="catalog">
+    @foreach (var group in Demos.All.GroupBy(d => d.Group))
+    {
+        <div class="cat-group">
+            <h2>@(L.IsIndonesian ? group.First().GroupId : group.Key)</h2>
+            <div class="cards">
+                @foreach (var d in group)
+                {
+                    <a class="card" href="@d.Href">
+                        <span class="ros mono">@d.RosName</span>
+                        <b>@(L.IsIndonesian ? d.TitleId : d.Title)</b>
+                        <span class="sum">@(L.IsIndonesian ? d.SummaryId : d.Summary)</span>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</section>
+
+<section class="about">
+    <div>
+        <h2>@T("About", "Tentang")</h2>
+        <p>
+            @T("ROS2.Net is a ROS 2 client library for .NET with its own middlewares: in-process (zero copy), a managed DDS-RTPS stack that speaks the ROS 2 wire protocol, and rosbridge. The gallery runs entirely on the in-process middleware.",
+               "ROS2.Net adalah client library ROS 2 untuk .NET dengan middleware sendiri: in-process (tanpa salinan), stack DDS-RTPS terkelola yang berbicara dengan protokol jaringan ROS 2, dan rosbridge. Galeri ini berjalan sepenuhnya di middleware in-process.")
+        </p>
+    </div>
+    <p class="credit-line">@T("Made by Gravicode Studios, led by Kang Fadhil.", "Dibuat oleh Gravicode Studios dipimpin oleh Kang Fadhil.")</p>
+</section>
+
+@code {
+    private int _scanCount;
+    private double _scanHz;
+    private int _beams;
+    private double _minRange;
+    private double _v, _w;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Subscribe<LaserScan>("/scan", s =>
+        {
+            Interlocked.Increment(ref _scanCount);
+            _beams = s.Ranges.Length;
+            var min = double.PositiveInfinity;
+            foreach (var r in s.Ranges)
+            {
+                if (float.IsFinite(r) && r > s.RangeMin)
+                {
+                    min = Math.Min(min, r);
+                }
+            }
+
+            _minRange = double.IsFinite(min) ? min : 0;
+        }, QosProfile.SensorData);
+        Subscribe<Odometry>("/odom", o =>
+        {
+            _v = o.Twist.Twist.Linear.X;
+            _w = o.Twist.Twist.Angular.Z;
+        });
+        Every(TimeSpan.FromSeconds(1), _ =>
+        {
+            _scanHz = Interlocked.Exchange(ref _scanCount, 0);
+            return Task.CompletedTask;
+        });
+    }
+}

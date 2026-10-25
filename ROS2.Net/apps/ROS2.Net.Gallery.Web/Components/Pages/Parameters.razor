@@ -1,0 +1,64 @@
+@page "/parameters"
+@inherits GalleryPage
+
+<PageTitle>Parameters · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="parameters" Code="@Code">
+    <div class="grid two">
+        <ParameterEditor TargetNode="/gallery/controller" />
+        <div class="panel stack">
+            <h3>/parameter_events</h3>
+            <ul class="feed">
+                @foreach (var e in _events)
+                {
+                    <li>@e</li>
+                }
+            </ul>
+            <p class="note">@T("Try max_speed = 3: the declared range rejects it. robot_name is read-only.",
+                               "Coba max_speed = 3: rentang yang dideklarasikan menolaknya. robot_name bersifat read-only.")</p>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private readonly LinkedList<string> _events = new();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Subscribe<ROS2.Net.Msgs.RclInterfaces.ParameterEvent>("/parameter_events", e =>
+        {
+            if (!e.Node.StartsWith("/gallery", StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            foreach (var p in e.ChangedParameters.Concat(e.NewParameters))
+            {
+                lock (_events)
+                {
+                    _events.AddFirst($"{DateTime.Now:HH:mm:ss} {e.Node} {p.Name} = {ROS2.Net.Parameter.FromMsg(p).Value}");
+                    if (_events.Count > 30)
+                    {
+                        _events.RemoveLast();
+                    }
+                }
+            }
+        }, QosProfile.ParameterEvents);
+    }
+
+    private const string Code = """
+        var node = context.CreateNode("controller", "/gallery");
+        node.DeclareParameter("max_speed", 0.5, new ParameterDescriptor
+        {
+            Description = "Linear speed limit [m/s]",
+            FloatingPointRange = new FloatingPointRange(0, 2),
+        });
+        node.DeclareParameter("robot_name", "waffle-01", "Fleet identifier", readOnly: true);
+        node.ParametersChanged += changes => { /* react */ };
+
+        // From another node (what `ros2 param set` does):
+        using var client = new ParameterClient(tool, "/gallery/controller");
+        var result = await client.SetAsync("max_speed", 0.8);
+        """;
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Robot soccer referee",
+  "category": "Entertainment",
+  "description": "Two robots chase a pushable ball in an arena while a referee node watches ground truth, scores goals and resets kick-off.",
+  "appKind": "console",
+  "tags": [
+    "game",
+    "multi-robot",
+    "simulation",
+    "fun"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

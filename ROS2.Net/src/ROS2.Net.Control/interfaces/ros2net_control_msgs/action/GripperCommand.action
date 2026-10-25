@@ -1,0 +1,13 @@
+# Target gripper opening and the maximum effort to apply.
+float64 position
+float64 max_effort
+---
+float64 position
+float64 effort
+bool stalled
+bool reached_goal
+---
+float64 position
+float64 effort
+bool stalled
+bool reached_goal

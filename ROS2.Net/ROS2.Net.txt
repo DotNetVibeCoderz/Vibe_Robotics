@@ -1,0 +1,32 @@
+Name: ROS2.Net
+
+Deskripsi: .NET Wrapper library dari ROS 2 (https://github.com/ros2/ros2)
+
+Features
+---
+Fitur-fitur bisa lihat di file @features.md
+
+---
+Notes:
+- Dibangun dengan .NET 10, Rust (jika diperlukan untuk performance dengan low level library) 
+- Tambahkan juga komponen untuk Blazor (web), Avalonia UI (desktop)
+- Optimasi kode dengan best practice, best performance dan efisiensi memory
+- Dokumentasi yang lengkap, jelas, mudah dengan dua Bahasa (English dan Bahasa Indonesia)
+- Tambahkan screenshot-nya ke readme dan docs
+- Tambahkan info pada dokumentasi dan aplikasi: Dibuat oleh Gravicode Studios dipimpin oleh Kang Fadhil
+- PLAN.md untuk roadmap pengembangan, dan Progress.md untuk tracking development
+- Tambahkan ROS2.Net Gallery yaitu gallery penggunaan library dengan berbagai use case, tersedia sample code dibuat UI UX-nya yang keren dan professional dibantu dengan skill 'frontend-design' baik untuk target web dengan Blazor dan desktop dengan Avalonia UI 
+- untuk publish nuget api key ada di 'C:\Users\mifma\Documents\CodeSandbox\PackageCredentials.txt'
+- nuget-nya buatkan icon yang keren
+- Buatkan tools dan dukungan library yang diperlukan seperti Simulator Robot, Cli Tool, .Net Project Template untuk ROS2.Net
+- MCP Blender dan Rodin bisa digunakan untuk modelling, rigging, animating, create 3D asset, create 2D art
+
+Supporting Library (jika diperlukan):
+Reinforcement Learning -> https://github.com/DotNetVibeCoderz/Vibe_Library/tree/main/RLNet
+Visulization Library -> https://github.com/DotNetVibeCoderz/Vibe_Charting/tree/main/Visual.Net
+multiplatform 3D graphics engine -> https://github.com/DotNetVibeCoderz/Vibe_Graphics/tree/main/ThreeNet
+Numpy, Pandas, Scikit Learn, Scipy -> https://github.com/DotNetVibeCoderz/Vibe_ML/tree/main/GravicodeScience
+Hugging Face support -> https://github.com/DotNetVibeCoderz/Vibe_ML/tree/main/HF.Net
+Google Media Pipe -> https://github.com/DotNetVibeCoderz/Vibe_ML/tree/main/MediaPipeNet
+IoT Support -> https://github.com/DotNetVibeCoderz/Vibe_IoT/tree/main/IoTComNet 
+dan library lain yang mungkin diperlukan seperti TorchSharp, OpenCVSharp, ML.Net, dsb.

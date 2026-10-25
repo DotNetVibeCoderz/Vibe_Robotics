@@ -1,0 +1,73 @@
+@page "/tf"
+@inherits GalleryPage
+@using ROS2.Net.Tf2
+
+<PageTitle>TF tree · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="tf" Code="@Code">
+    <div class="grid two">
+        <div class="stack">
+            <TfTree Buffer="_buffer" />
+            <div class="panel">
+                <h3>tf2_echo map laser_link</h3>
+                <pre class="code" style="margin:0">@_echo</pre>
+            </div>
+        </div>
+        <div class="panel stack">
+            <h3>view_frames (Mermaid)</h3>
+            <pre class="code" style="margin:0;max-height:520px">@_graph</pre>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private readonly TfBuffer _buffer = new();
+    private TransformListener? _listener;
+    private string _echo = "waiting…";
+    private string _graph = "waiting…";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _listener = new TransformListener(_buffer, Node);
+        Every(TimeSpan.FromMilliseconds(500), _ =>
+        {
+            var target = _buffer.FrameExists("map") ? "map" : "odom";
+            var source = _buffer.FrameNames.FirstOrDefault(f => f.Contains("laser")) ?? "base_link";
+            if (_buffer.TryLookupTransform(target, source, RosTime.Zero, out var t, out var error))
+            {
+                var (r, p, y) = t.Rotation.ToRpy();
+                _echo = string.Create(CultureInfo.InvariantCulture,
+                    $"At time {RosTime.Now()}\n- Translation: [{t.Translation.X:0.000}, {t.Translation.Y:0.000}, {t.Translation.Z:0.000}]\n- Rotation: in RPY (degree) [{r * 180 / Math.PI:0.0}, {p * 180 / Math.PI:0.0}, {y * 180 / Math.PI:0.0}]");
+            }
+            else
+            {
+                _echo = error ?? "waiting…";
+            }
+
+            _graph = _buffer.ToMermaid();
+            return Task.CompletedTask;
+        });
+    }
+
+    protected override async ValueTask DisposeCoreAsync()
+    {
+        _listener?.Dispose();
+        await base.DisposeCoreAsync();
+    }
+
+    private const string Code = """
+        var buffer = new TfBuffer();
+        using var listener = new TransformListener(buffer, node);   // /tf + /tf_static
+
+        var t = await buffer.WaitForTransformAsync("map", "laser_link", RosTime.Zero, TimeSpan.FromSeconds(1));
+        var inMap = buffer.TransformPoint(pointInLaserFrame, "map");
+
+        // Broadcasting
+        var tf = new TransformBroadcaster(node);
+        tf.SendTransform(transformStamped);
+
+        @* Blazor *@
+        <TfTree Buffer="buffer" />
+        """;
+}

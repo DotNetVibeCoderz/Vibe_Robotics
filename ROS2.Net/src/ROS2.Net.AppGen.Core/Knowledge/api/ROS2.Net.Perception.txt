@@ -1,0 +1,311 @@
+struct ROS2.Net.Perception.Aabb
+  ctor(Vector3 Min, Vector3 Max)
+  Vector3 Min { get; set; }
+  Vector3 Max { get; set; }
+  Vector3 Center { get; }
+  Vector3 Size { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Aabb other)
+  Void Deconstruct(Vector3& Min, Vector3& Max)
+enum ROS2.Net.Perception.Axis
+  X, Y, Z
+class ROS2.Net.Perception.BoundingBoxes
+  static Aabb ComputeAabb(ReadOnlySpan<Single> xyz, IReadOnlyList<Int32> indices=null)
+  static Aabb ComputeAabb(PointCloud cloud, IReadOnlyList<Int32> indices=null)
+  static Obb ComputeObb(PointCloud cloud, IReadOnlyList<Int32> indices=null)
+class ROS2.Net.Perception.Filters
+  static PointCloud PassThrough(PointCloud cloud, Axis axis, Single min, Single max, Boolean negative=False)
+  static PointCloud CropBox(PointCloud cloud, Vector3 min, Vector3 max, Boolean negative=False)
+  static PointCloud RemoveNonFinite(PointCloud cloud)
+  static PointCloud VoxelGrid(PointCloud cloud, Single leafSize)
+  static PointCloud StatisticalOutlierRemoval(PointCloud cloud, Int32 meanK=16, Double stdDevMultiplier=1)
+  static PointCloud RadiusOutlierRemoval(PointCloud cloud, Single radius, Int32 minNeighbors)
+enum ROS2.Net.Perception.IcpMethod
+  PointToPoint, PointToPlane
+class ROS2.Net.Perception.IcpOptions
+  ctor()
+  IcpMethod Method { get; set; }
+  Int32 MaxIterations { get; set; }
+  Single MaxCorrespondenceDistance { get; set; }
+  Double Tolerance { get; set; }
+  Int32 NormalNeighbors { get; set; }
+  Double[] InitialTransform { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(IcpOptions other)
+  IcpOptions <Clone>$()
+class ROS2.Net.Perception.Images.CameraModel
+  ctor(Int32 width, Int32 height, Double fx, Double fy, Double cx, Double cy, Double[] distortion=null, String distortionModel=plumb_bob)
+  Int32 Width { get; }
+  Int32 Height { get; }
+  Double Fx { get; }
+  Double Fy { get; }
+  Double Cx { get; }
+  Double Cy { get; }
+  String DistortionModel { get; }
+  IReadOnlyList<Double> Distortion { get; }
+  Double[] R { get; }
+  Double[] P { get; }
+  Boolean HasDistortion { get; }
+  static CameraModel FromCameraInfo(CameraInfo info)
+  CameraInfo ToCameraInfo(String frameId=)
+  ValueTuple<Double,Double> Distort(Double x, Double y)
+  ValueTuple<Double,Double> Undistort(Double xd, Double yd, Int32 iterations=20)
+  Boolean TryProject(Vector3 point, Vector2& pixel)
+  Vector2 Project(Vector3 point)
+  Vector3 Unproject(Double u, Double v)
+  Vector3 Unproject(Double u, Double v, Single depth)
+  ValueTuple<Single[],Single[]> BuildRectifyMap()
+  Image Rectify(Image raw, Nullable<ValueTuple<Single[],Single[]>> map=null)
+enum ROS2.Net.Perception.Images.ChannelDepth
+  U8, U16, F32
+class ROS2.Net.Perception.Images.CompressedImageCodec
+  static CompressedImage Encode(Image image, String format=png)
+  static Image Decode(CompressedImage message)
+class ROS2.Net.Perception.Images.DepthProjection
+  static PointCloud ToPointCloud(Image depth, CameraModel camera, Int32 stride=1, Single maxDepth=∞, Boolean organized=False)
+class ROS2.Net.Perception.Images.DistortionModels
+  field static String PlumbBob
+  field static String RationalPolynomial
+  field static String Equidistant
+class ROS2.Net.Perception.Images.ImageEncodings
+  field static String Rgb8
+  field static String Bgr8
+  field static String Rgba8
+  field static String Bgra8
+  field static String Mono8
+  field static String Mono16
+  field static String Type32FC1
+  field static String Type16UC1
+  field static String Type8UC1
+  field static String Type8UC3
+  field static String Yuv422
+  field static String Yuv422Yuy2
+  static Boolean IsSupported(String encoding)
+  static Boolean TryGetLayout(String encoding, Int32& channels, ChannelDepth& depth)
+  static Int32 Channels(String encoding)
+  static Int32 BytesPerElement(ChannelDepth depth)
+  static Int32 BytesPerPixel(String encoding)
+  static Boolean IsColor(String encoding)
+  static Boolean HasAlpha(String encoding)
+  static Boolean IsDepth(String encoding)
+class ROS2.Net.Perception.Images.ImageOps
+  static Image Create(Int32 width, Int32 height, String encoding, String frameId=)
+  static Image ConvertTo(Image image, String encoding)
+  static Image Resize(Image image, Int32 width, Int32 height)
+  static Image Crop(Image image, Int32 x, Int32 y, Int32 width, Int32 height)
+  static Image FlipHorizontal(Image image)
+  static Image FlipVertical(Image image)
+  static Image GaussianBlur(Image image, Single sigma)
+  static Image Sobel(Image image)
+  static Image Threshold(Image image, Single threshold, Boolean invert=False)
+struct ROS2.Net.Perception.Images.ImageView
+  ctor(Image image)
+  Image Image { get; }
+  Int32 Width { get; }
+  Int32 Height { get; }
+  Int32 Step { get; }
+  String Encoding { get; }
+  Int32 Channels { get; }
+  ChannelDepth Depth { get; }
+  Int32 ElementSize { get; }
+  ReadOnlySpan<Byte> Row(Int32 y)
+  Single Get(Int32 x, Int32 y, Int32 c=0)
+  Void Set(Int32 x, Int32 y, Int32 c, Single value)
+  ValueTuple<Byte,Byte,Byte> GetRgb(Int32 x, Int32 y)
+  Single Gray(Int32 x, Int32 y)
+class ROS2.Net.Perception.Images.Png
+  static Byte[] Encode(Image image, CompressionLevel level=Fastest)
+  static Image Decode(ReadOnlySpan<Byte> png)
+class ROS2.Net.Perception.LaserScanProjector
+  static PointCloud Project(LaserScan scan, Boolean includeIntensity=True)
+  static PointCloud2 ToPointCloud2(LaserScan scan, Boolean includeIntensity=True)
+  static Single[] ProjectXy(LaserScan scan)
+class ROS2.Net.Perception.Nodes.DepthToCloudNode : Node
+  ctor(Ros2Context context, NodeOptions options)
+  ctor(Ros2Context context, String name=depth_to_cloud, NodeOptions options=null)
+class ROS2.Net.Perception.Nodes.DetectionNode : Node
+  ctor(Ros2Context context, IObjectDetector detector, String name=object_detector, NodeOptions options=null)
+  Int64 DroppedFrames { get; }
+  event Action<IReadOnlyList<Detection>> Detected
+class ROS2.Net.Perception.Nodes.PointCloudFilterNode : Node
+  ctor(Ros2Context context, NodeOptions options)
+  ctor(Ros2Context context, String name=pointcloud_filter, NodeOptions options=null)
+  Int64 Processed { get; }
+  PointCloud Process(PointCloud cloud)
+class ROS2.Net.Perception.Nodes.ScanToCloudNode : Node
+  ctor(Ros2Context context, NodeOptions options)
+  ctor(Ros2Context context, String name=scan_to_cloud, NodeOptions options=null)
+class ROS2.Net.Perception.Normals
+  static PcaResult Pca(ReadOnlySpan<Single> xyz, IReadOnlyList<Int32> indices=null)
+  static Single[] Estimate(PointCloud cloud, Int32 k=16, Nullable<Vector3> viewpoint=null, Single[] curvature=null)
+class ROS2.Net.Perception.Obb
+  ctor(Vector3 Center, Vector3[] Axes, Vector3 HalfExtents)
+  Vector3 Center { get; set; }
+  Vector3[] Axes { get; set; }
+  Vector3 HalfExtents { get; set; }
+  Quaternion Orientation { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Obb other)
+  Obb <Clone>$()
+  Void Deconstruct(Vector3& Center, Vector3[]& Axes, Vector3& HalfExtents)
+class ROS2.Net.Perception.PcaResult
+  ctor(Vector3 Mean, Double[] EigenValues, Vector3[] EigenVectors)
+  Vector3 Mean { get; set; }
+  Double[] EigenValues { get; set; }
+  Vector3[] EigenVectors { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(PcaResult other)
+  PcaResult <Clone>$()
+  Void Deconstruct(Vector3& Mean, Double[]& EigenValues, Vector3[]& EigenVectors)
+class ROS2.Net.Perception.PlaneSegmentation
+  ctor(PlaneFit Plane, Int32[] Inliers, Int32[] Outliers)
+  PlaneFit Plane { get; set; }
+  Int32[] Inliers { get; set; }
+  Int32[] Outliers { get; set; }
+  Vector3 Normal { get; }
+  Double Distance(Vector3 p)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(PlaneSegmentation other)
+  PlaneSegmentation <Clone>$()
+  Void Deconstruct(PlaneFit& Plane, Int32[]& Inliers, Int32[]& Outliers)
+class ROS2.Net.Perception.PointCloud
+  ctor(Int32 capacity=0)
+  Int32 Count { get; }
+  String FrameId { get; set; }
+  RosTime Stamp { get; set; }
+  Span<Single> Xyz { get; }
+  Single[] XyzBuffer { get; }
+  Boolean HasIntensity { get; }
+  Boolean HasRgb { get; }
+  Boolean HasNormals { get; }
+  Span<Single> Intensity { get; }
+  Span<UInt32> Rgb { get; }
+  Span<Single> Normals { get; }
+  Vector3 Item { get; set; }
+  static PointCloud FromXyz(Single[] xyz, Nullable<Int32> count=null)
+  static PointCloud FromPoints(IEnumerable<Vector3> points)
+  PointCloud WithIntensity()
+  PointCloud WithRgb()
+  Void SetNormals(Single[] normals)
+  Void Add(Single x, Single y, Single z, Single intensity=0, UInt32 rgb=0)
+  Void Add(Vector3 p)
+  Void Clear()
+  PointCloud Select(ReadOnlySpan<Byte> mask)
+  PointCloud Select(IReadOnlyList<Int32> indices)
+  PointCloud Clone()
+  PointCloud Transform(ReadOnlySpan<Double> m)
+  PointCloud Transform(Matrix4x4 m)
+  Void AddRange(PointCloud other)
+  Vector3 Centroid()
+  static PointCloud FromMessage(PointCloud2 message, Boolean skipNonFinite=False)
+  PointCloud2 ToMessage(String frameId=null, Nullable<RosTime> stamp=null)
+struct ROS2.Net.Perception.PointCloud2Reader
+  ctor(PointCloud2 message)
+  Int32 Count { get; }
+  Int32 Width { get; }
+  Int32 Height { get; }
+  Boolean IsBigEndian { get; }
+  PointCloud2 Message { get; }
+  ReadOnlySpan<Byte> Point(Int32 index)
+  Boolean HasField(String name)
+  PointFieldAccessor GetField(String name)
+  Boolean TryGetField(String name, PointFieldAccessor& accessor)
+  Int32 ReadXyz(Span<Single> destination, Boolean skipNonFinite=False)
+  static PointCloud ToPointCloud(PointCloud2 message, Boolean skipNonFinite=False)
+class ROS2.Net.Perception.PointCloud2Writer
+  ctor()
+  Int32 PointStep { get; }
+  Boolean BigEndian { get; set; }
+  PointCloud2Writer AddField(String name, Byte datatype, Int32 count=1)
+  PointCloud2Writer Pad(Int32 bytes)
+  PointFieldAccessor Field(String name)
+  PointCloud2 Create(Int32 width, Int32 height=1, String frameId=, Nullable<RosTime> stamp=null, Boolean isDense=True)
+  static PointCloud2 FromPointCloud(PointCloud cloud, String frameId=null, Nullable<RosTime> stamp=null)
+struct ROS2.Net.Perception.PointFieldAccessor
+  ctor(String Name, Int32 Offset, Byte Datatype, Int32 Count, Boolean BigEndian)
+  String Name { get; set; }
+  Int32 Offset { get; set; }
+  Byte Datatype { get; set; }
+  Int32 Count { get; set; }
+  Boolean BigEndian { get; set; }
+  Int32 ElementSize { get; }
+  static Int32 SizeOf(Byte datatype)
+  Double Read(ReadOnlySpan<Byte> point, Int32 element=0)
+  UInt32 ReadBits32(ReadOnlySpan<Byte> point)
+  Void Write(Span<Byte> point, Double value, Int32 element=0)
+  Void WriteBits32(Span<Byte> point, UInt32 bits)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(PointFieldAccessor other)
+  Void Deconstruct(String& Name, Int32& Offset, Byte& Datatype, Int32& Count, Boolean& BigEndian)
+class ROS2.Net.Perception.Registration
+  static IcpResult Icp(PointCloud source, PointCloud target, IcpOptions options=null)
+  static Double[] Identity()
+  static Double[] Multiply(Double[] a, Double[] b)
+  static Double[] FromRpyTranslation(Double roll, Double pitch, Double yaw, Double tx, Double ty, Double tz)
+  static Matrix4x4 ToMatrix4x4(Double[] m)
+class ROS2.Net.Perception.Segmentation
+  static PlaneSegmentation SegmentPlane(PointCloud cloud, Double distanceThreshold=0.02, Int32 iterations=500, UInt64 seed=1)
+  static IReadOnlyList<Int32[]> EuclideanClusters(PointCloud cloud, Single tolerance, Int32 minSize=10, Int32 maxSize=2147483647)
+struct ROS2.Net.Perception.Vision.BoxF
+  ctor(Single X, Single Y, Single Width, Single Height)
+  Single X { get; set; }
+  Single Y { get; set; }
+  Single Width { get; set; }
+  Single Height { get; set; }
+  Single Right { get; }
+  Single Bottom { get; }
+  Single Area { get; }
+  Single CenterX { get; }
+  Single CenterY { get; }
+  static BoxF FromCenter(Single cx, Single cy, Single w, Single h)
+  Single IoU(BoxF other)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(BoxF other)
+  Void Deconstruct(Single& X, Single& Y, Single& Width, Single& Height)
+class ROS2.Net.Perception.Vision.Detection
+  ctor(Int32 ClassId, String Label, Single Score, BoxF Box)
+  Int32 ClassId { get; set; }
+  String Label { get; set; }
+  Single Score { get; set; }
+  BoxF Box { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Detection other)
+  Detection <Clone>$()
+  Void Deconstruct(Int32& ClassId, String& Label, Single& Score, BoxF& Box)
+class ROS2.Net.Perception.Vision.DetectionPostprocessing
+  static List<Detection> NonMaxSuppression(IEnumerable<Detection> detections, Single iouThreshold=0.45, Boolean classAgnostic=False, Int32 maxDetections=300)
+  static List<Detection> DecodeYoloV8(ReadOnlySpan<Single> output, Int32 classes, Int32 boxes, Single scoreThreshold, IReadOnlyList<String> labels=null, Boolean transposed=False)
+  static List<Detection> DecodeYoloV5(ReadOnlySpan<Single> output, Int32 classes, Int32 boxes, Single scoreThreshold, IReadOnlyList<String> labels=null)
+  static Detection2DArray ToMessage(IEnumerable<Detection> detections, Header header)
+interface ROS2.Net.Perception.Vision.IObjectDetector
+  IReadOnlyList<String> Labels { get; }
+  ValueTask<IReadOnlyList<Detection>> DetectAsync(Image image, CancellationToken cancellationToken=null)
+struct ROS2.Net.Perception.Vision.Letterbox
+  ctor(Single Scale, Single PadX, Single PadY, Int32 InputSize)
+  Single Scale { get; set; }
+  Single PadX { get; set; }
+  Single PadY { get; set; }
+  Int32 InputSize { get; set; }
+  static Letterbox Compute(Int32 imageWidth, Int32 imageHeight, Int32 inputSize)
+  BoxF ToImage(BoxF box)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Letterbox other)
+  Void Deconstruct(Single& Scale, Single& PadX, Single& PadY, Int32& InputSize)

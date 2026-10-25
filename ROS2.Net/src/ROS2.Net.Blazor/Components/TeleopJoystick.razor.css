@@ -1,0 +1,10 @@
+.teleop { display: inline-flex; flex-direction: column; align-items: center; gap: 10px; outline: none; user-select: none; touch-action: none; }
+.teleop:focus-visible svg { outline: 2px solid var(--rn-cyan); outline-offset: 4px; border-radius: 50%; }
+svg { cursor: grab; touch-action: none; }
+svg * { pointer-events: none; }
+.glyph { font: 600 0.11px var(--rn-mono); fill: var(--rn-muted); text-anchor: middle; }
+.knob { filter: drop-shadow(0 0 0.06px var(--rn-violet)); transition: r .12s; }
+.knob.active { filter: drop-shadow(0 0 0.12px var(--rn-cyan)); }
+.readout { display: flex; gap: 14px; font-size: 12px; color: var(--rn-muted); }
+.readout b { color: var(--rn-ink); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .knob { transition: none; } }

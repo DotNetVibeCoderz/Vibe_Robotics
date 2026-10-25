@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Navigation</RootNamespace>
+    <Description>Nav2-style navigation for ROS2.Net: occupancy grids and costmaps, A*/Dijkstra/Theta*/Hybrid-A* planners, Pure Pursuit/Regulated Pure Pursuit/DWB controllers, recovery behaviors, a BehaviorTree.CPP-compatible behavior tree engine, AMCL and EKF localization, online pose-graph SLAM, and Nav2-compatible server nodes.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Navigation.Tests" />
+  </ItemGroup>
+
+</Project>

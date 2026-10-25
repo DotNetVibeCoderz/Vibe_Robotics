@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Umbrella package: no code of its own, only the libraries a typical robot application needs. -->
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <Description>ROS2.Net: a pure .NET 10 ROS 2 client library. This umbrella package brings Core, the standard messages, the RTPS (DDS) and rosbridge middlewares, TF2, rosbag2 and hosting integration.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Rmw.Rtps\ROS2.Net.Rmw.Rtps.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Rmw.Rosbridge\ROS2.Net.Rmw.Rosbridge.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Tf2\ROS2.Net.Tf2.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Bag\ROS2.Net.Bag.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Hosting\ROS2.Net.Hosting.csproj" />
+  </ItemGroup>
+
+</Project>

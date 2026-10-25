@@ -1,0 +1,16 @@
+{
+  "name": "Hospital medicine delivery",
+  "category": "Healthcare",
+  "description": "A hospital robot delivers medication on a schedule with the Nav2-style stack and waits at each ward until a nurse confirms receipt through a std_srvs/Trigger service.",
+  "appKind": "console",
+  "tags": [
+    "healthcare",
+    "navigation",
+    "delivery",
+    "services"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation",
+    "ROS2.Net.Navigation"
+  ]
+}

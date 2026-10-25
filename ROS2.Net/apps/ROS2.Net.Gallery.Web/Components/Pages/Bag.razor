@@ -1,0 +1,118 @@
+@page "/bag"
+@inherits GalleryPage
+@using ROS2.Net.Bag
+@using ROS2.Net.Bag.Mcap
+
+<PageTitle>rosbag2 · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="bag" Code="@Code">
+    <div class="grid two">
+        <div class="stack">
+            <div class="panel stack">
+                <h3>@T("Record", "Rekam")</h3>
+                <div class="row">
+                    <button class="rn-btn primary" @onclick="RecordAsync" disabled="@_busy">@T("Record 5 s", "Rekam 5 dtk")</button>
+                    <button class="rn-btn" @onclick="PlayAsync" disabled="@(_busy || _bagPath is null)">@T("Play back at 2×", "Putar ulang 2×")</button>
+                </div>
+                <div class="progress"><span style="width:@(_progress)%"></span></div>
+                <p class="note">@_status</p>
+            </div>
+            <div class="panel">
+                <h3>ros2net bag info</h3>
+                <pre class="code" style="margin:0;max-height:320px">@(_info ?? T("Record a bag to see its summary.", "Rekam bag untuk melihat ringkasannya."))</pre>
+            </div>
+        </div>
+        <div class="stack">
+            <LaserScanView Topic="/replay/scan" MaxRange="6" Height="380" />
+            <div class="panel">
+                <h3>@T("First JSONL lines (training export)", "Baris JSONL pertama (ekspor pelatihan)")</h3>
+                <pre class="code" style="margin:0;max-height:180px;white-space:pre-wrap;word-break:break-all">@_jsonl</pre>
+            </div>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private string? _bagPath;
+    private string? _info;
+    private string _jsonl = "—";
+    private string _status = "";
+    private bool _busy;
+    private double _progress;
+
+    private async Task RecordAsync()
+    {
+        _busy = true;
+        var dir = Path.Combine(Path.GetTempPath(), "ros2net-gallery", $"bag_{DateTime.Now:yyyyMMdd_HHmmss}");
+        var options = new BagRecorderOptions { Writer = new BagWriterOptions { Compression = McapCompression.Zstd } };
+        options.Topics.AddRange(["/scan", "/odom", "/cmd_vel", "/imu"]);
+        await using (var recorder = new BagRecorder(Node, dir, options))
+        {
+            recorder.Start();
+            for (var i = 1; i <= 50; i++)
+            {
+                await Task.Delay(100);
+                _progress = i * 2;
+                _status = $"{T("recording", "merekam")} · {recorder.MessageCount} {T("messages", "pesan")}";
+                StateHasChanged();
+            }
+
+            await recorder.StopAsync();
+        }
+
+        _bagPath = dir;
+        _info = BagInfo.Read(dir).ToString();
+        using (var reader = BagReader.Open(dir))
+        using (var sw = new StringWriter())
+        {
+            BagExporter.ToJsonLines(reader, sw, ["/odom"]);
+            _jsonl = string.Join('\n', sw.ToString().Split('\n').Take(2).Select(l => l.Length > 420 ? l[..420] + "…" : l));
+        }
+
+        _status = $"{T("saved to", "disimpan di")} {dir}";
+        _busy = false;
+    }
+
+    private async Task PlayAsync()
+    {
+        _busy = true;
+        var options = new BagPlayerOptions { Rate = 2.0 };
+        options.Topics.Add("/scan");
+        options.Remappings["/scan"] = "/replay/scan";
+        using var player = new BagPlayer(Node, _bagPath!, options);
+        var total = player.Reader.Metadata.MessageCount;
+        player.MessagePlayed += _ =>
+        {
+            _progress = Math.Min(100, player.PlayedCount * 100.0 / Math.Max(1, total / 4.0));
+            _status = $"{T("playing", "memutar")} · {player.PlayedCount}";
+            RequestRender();
+        };
+        await player.PlayAsync(Disposing);
+        _progress = 100;
+        _status = $"{T("played", "selesai diputar")} {player.PlayedCount} {T("messages on /replay/scan", "pesan di /replay/scan")}";
+        _busy = false;
+    }
+
+    private const string Code = """
+        using ROS2.Net.Bag;
+
+        // Record (MCAP + metadata.yaml, readable by `ros2 bag info`)
+        var options = new BagRecorderOptions { Writer = new() { Compression = McapCompression.Zstd } };
+        options.Topics.AddRange(["/scan", "/odom"]);
+        await using var recorder = new BagRecorder(node, "bags/run1", options);
+        recorder.Start();
+        await Task.Delay(TimeSpan.FromSeconds(5));
+        await recorder.StopAsync();
+
+        Console.WriteLine(BagInfo.Read("bags/run1"));
+
+        // Play back faster, remapped
+        var play = new BagPlayerOptions { Rate = 2 };
+        play.Remappings["/scan"] = "/replay/scan";
+        using var player = new BagPlayer(node, "bags/run1", play);
+        await player.PlayAsync();
+
+        // Export for training
+        BagExporter.ToJsonLinesFile(BagReader.Open("bags/run1"), "odom.jsonl", ["/odom"]);
+        """;
+}

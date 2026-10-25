@@ -1,0 +1,561 @@
+class ROS2.Net.Simulation.AckermannRobot : SimRobot
+  ctor(String name, Pose2D pose, RobotParameters parameters=null)
+  Boolean AngularIsSteeringAngle { get; set; }
+class ROS2.Net.Simulation.Angles
+  static Double Normalize(Double a)
+  static Double ToRadians(Double degrees)
+  static Double ToDegrees(Double radians)
+class ROS2.Net.Simulation.BatterySensor : SimSensor
+  ctor(String name=battery, Double rateHz=1)
+  Double CapacityAh { get; set; }
+  Double NominalVoltage { get; set; }
+  Double FullVoltage { get; set; }
+  Double EmptyVoltage { get; set; }
+  Double IdleCurrent { get; set; }
+  Double MotionCurrentPerSpeed { get; set; }
+  Double DrainFactor { get; set; }
+  Double ChargeCurrent { get; set; }
+  Boolean IsCharging { get; set; }
+  Double ChargeAh { get; }
+  Double Current { get; }
+  Double Voltage { get; }
+  Double Percentage { get; }
+struct ROS2.Net.Simulation.Bounds2D
+  ctor(Double MinX, Double MinY, Double MaxX, Double MaxY)
+  Double MinX { get; set; }
+  Double MinY { get; set; }
+  Double MaxX { get; set; }
+  Double MaxY { get; set; }
+  Double Width { get; }
+  Double Height { get; }
+  Boolean Contains(Vec2 p)
+  Bounds2D Union(Bounds2D o)
+  Bounds2D Inflate(Double m)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Bounds2D other)
+  Void Deconstruct(Double& MinX, Double& MinY, Double& MaxX, Double& MaxY)
+class ROS2.Net.Simulation.CameraSensor : SimSensor
+  ctor(String name=camera, Int32 width=96, Int32 height=96, Double metersPerPixel=0.04, Double rateHz=5)
+  Int32 Width { get; }
+  Int32 Height { get; }
+  Double MetersPerPixel { get; }
+  Byte[] Pixels { get; }
+class ROS2.Net.Simulation.DiffDriveRobot : SimRobot
+  ctor(String name, Pose2D pose, RobotParameters parameters=null)
+struct ROS2.Net.Simulation.GeoOrigin
+  ctor(Double Latitude, Double Longitude, Double Altitude)
+  Double Latitude { get; set; }
+  Double Longitude { get; set; }
+  Double Altitude { get; set; }
+  static GeoOrigin Default { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(GeoOrigin other)
+  Void Deconstruct(Double& Latitude, Double& Longitude, Double& Altitude)
+class ROS2.Net.Simulation.GpsSensor : SimSensor
+  ctor(String name=gps, Double rateHz=5)
+  Double NoiseStdDev { get; set; }
+  Double Latitude { get; }
+  Double Longitude { get; }
+  Double Altitude { get; }
+  static ValueTuple<Double,Double> ToGeodetic(GeoOrigin origin, Vec2 position)
+class ROS2.Net.Simulation.ImuSensor : SimSensor
+  ctor(String name=imu, Double rateHz=100)
+  Double GyroNoiseStdDev { get; set; }
+  Double AccelNoiseStdDev { get; set; }
+  Double GyroBiasWalk { get; set; }
+  Double OrientationNoiseStdDev { get; set; }
+  Double Yaw { get; }
+  Double AngularVelocityZ { get; }
+  ValueTuple<Double,Double,Double> LinearAcceleration { get; }
+  Double GyroBias { get; }
+class ROS2.Net.Simulation.LidarSensor : SimSensor
+  ctor(String name=lidar, Int32 beams=360, Double angleMin=-3.141592653589793, Double angleMax=3.141592653589793, Double rangeMin=0.12, Double rangeMax=3.5, Double rateHz=10, Double noiseStdDev=0.01)
+  Int32 Beams { get; }
+  Double AngleMin { get; }
+  Double AngleMax { get; }
+  Double AngleIncrement { get; }
+  Boolean IsFullCircle { get; }
+  Double RangeMin { get; }
+  Double RangeMax { get; }
+  Double NoiseStdDev { get; set; }
+  Double DropoutProbability { get; set; }
+  Single[] Ranges { get; }
+  Vec2[] HitPoints { get; }
+  Pose2D LastOrigin { get; }
+class ROS2.Net.Simulation.ObstacleDefinition
+  ctor()
+  String Type { get; set; }
+  String Name { get; set; }
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Width { get; set; }
+  Double Depth { get; set; }
+  Double Radius { get; set; }
+  Double Height { get; set; }
+  Double Yaw { get; set; }
+  Double X1 { get; set; }
+  Double Y1 { get; set; }
+  Double X2 { get; set; }
+  Double Y2 { get; set; }
+  Double Thickness { get; set; }
+  List<Double[]> Points { get; set; }
+  String Color { get; set; }
+  Boolean Dynamic { get; set; }
+  Double Mass { get; set; }
+  String Tag { get; set; }
+  SimObstacle Create(String fallbackName)
+class ROS2.Net.Simulation.ObstacleSnapshot
+  ctor(String Name, ShapeKind Kind, Vec2 Center, Double Rotation, Vec2 Size, Double Radius, IReadOnlyList<Vec2> Vertices, Double Height, SimColor Color, Boolean IsDynamic, String Tag)
+  String Name { get; set; }
+  ShapeKind Kind { get; set; }
+  Vec2 Center { get; set; }
+  Double Rotation { get; set; }
+  Vec2 Size { get; set; }
+  Double Radius { get; set; }
+  IReadOnlyList<Vec2> Vertices { get; set; }
+  Double Height { get; set; }
+  SimColor Color { get; set; }
+  Boolean IsDynamic { get; set; }
+  String Tag { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ObstacleSnapshot other)
+  ObstacleSnapshot <Clone>$()
+  Void Deconstruct(String& Name, ShapeKind& Kind, Vec2& Center, Double& Rotation, Vec2& Size, Double& Radius, IReadOnlyList`1& Vertices, Double& Height, SimColor& Color, Boolean& IsDynamic, String& Tag)
+class ROS2.Net.Simulation.OmniRobot : SimRobot
+  ctor(String name, Pose2D pose, RobotParameters parameters=null)
+struct ROS2.Net.Simulation.PenSegment
+  ctor(Vec2 From, Vec2 To, SimColor Color, Int32 Width)
+  Vec2 From { get; set; }
+  Vec2 To { get; set; }
+  SimColor Color { get; set; }
+  Int32 Width { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(PenSegment other)
+  Void Deconstruct(Vec2& From, Vec2& To, SimColor& Color, Int32& Width)
+class ROS2.Net.Simulation.PlaceDefinition
+  ctor()
+  String Name { get; set; }
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Yaw { get; set; }
+  Pose2D ToPose()
+struct ROS2.Net.Simulation.Pose2D
+  ctor(Double X, Double Y, Double Theta)
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Theta { get; set; }
+  Vec2 Position { get; }
+  Vec2 TransformPoint(Vec2 local)
+  Vec2 InverseTransformPoint(Vec2 world)
+  Pose2D Compose(Pose2D local)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Pose2D other)
+  Void Deconstruct(Double& X, Double& Y, Double& Theta)
+class ROS2.Net.Simulation.RangeSensor : SimSensor
+  ctor(String name, Pose2D mount, Double fieldOfView=0.5, Double minRange=0.02, Double maxRange=4, Double rateHz=20)
+  Double FieldOfView { get; }
+  Double MinRange { get; }
+  Double MaxRange { get; }
+  Double NoiseStdDev { get; set; }
+  Double Range { get; }
+  Int32 Rays { get; set; }
+class ROS2.Net.Simulation.RobotDefinition
+  ctor()
+  String Name { get; set; }
+  String Type { get; set; }
+  String Preset { get; set; }
+  String Namespace { get; set; }
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Yaw { get; set; }
+  RobotSensorOptions Sensors { get; set; }
+  SimRobot Create()
+class ROS2.Net.Simulation.RobotFactory
+  static SimRobot Create(RobotKind kind, String name, Pose2D pose, RobotParameters parameters=null, RobotSensorOptions sensors=null)
+  static Void Equip(SimRobot robot, RobotSensorOptions o)
+  static RobotKind ParseKind(String text)
+  static RobotParameters Preset(String name)
+enum ROS2.Net.Simulation.RobotKind
+  DiffDrive, Ackermann, Omni
+class ROS2.Net.Simulation.RobotParameters
+  ctor()
+  Double Radius { get; set; }
+  Double Length { get; set; }
+  Double Width { get; set; }
+  Double Height { get; set; }
+  Double MaxLinearSpeed { get; set; }
+  Double MaxAngularSpeed { get; set; }
+  Double MaxLinearAcceleration { get; set; }
+  Double MaxAngularAcceleration { get; set; }
+  Double WheelRadius { get; set; }
+  Double WheelSeparation { get; set; }
+  Double Wheelbase { get; set; }
+  Double MaxSteeringAngle { get; set; }
+  Double WheelSlip { get; set; }
+  Double EncoderNoise { get; set; }
+  Double CommandTimeout { get; set; }
+  SimColor Color { get; set; }
+  static RobotParameters TurtleBot3Burger()
+  static RobotParameters TurtleBot3Waffle()
+  static RobotParameters Car()
+  static RobotParameters OmniBase()
+class ROS2.Net.Simulation.RobotSensorOptions
+  ctor()
+  Boolean Lidar { get; set; }
+  Int32 LidarBeams { get; set; }
+  Double LidarRange { get; set; }
+  Boolean Imu { get; set; }
+  Boolean Gps { get; set; }
+  Boolean Battery { get; set; }
+  Boolean Sonar { get; set; }
+  Boolean Camera { get; set; }
+  String Arm { get; set; }
+class ROS2.Net.Simulation.RobotSnapshot
+  ctor(String Name, String Namespace, RobotKind Kind, Pose2D Pose, Pose2D OdomPose, Double LinearVelocity, Double LateralVelocity, Double AngularVelocity, Double Radius, Double Length, Double Width, Double Height, SimColor Color, Boolean Bumper, Double BatteryPercentage, Double SteeringAngle, Nullable<Pose2D> LaserOrigin, IReadOnlyList<Vec2> LaserHits, IReadOnlyList<Vec2> Trail, IReadOnlyList<String> JointNames, IReadOnlyList<Double> JointPositions, IReadOnlyList<Double> ArmLinkLengths)
+  String Name { get; set; }
+  String Namespace { get; set; }
+  RobotKind Kind { get; set; }
+  Pose2D Pose { get; set; }
+  Pose2D OdomPose { get; set; }
+  Double LinearVelocity { get; set; }
+  Double LateralVelocity { get; set; }
+  Double AngularVelocity { get; set; }
+  Double Radius { get; set; }
+  Double Length { get; set; }
+  Double Width { get; set; }
+  Double Height { get; set; }
+  SimColor Color { get; set; }
+  Boolean Bumper { get; set; }
+  Double BatteryPercentage { get; set; }
+  Double SteeringAngle { get; set; }
+  Nullable<Pose2D> LaserOrigin { get; set; }
+  IReadOnlyList<Vec2> LaserHits { get; set; }
+  IReadOnlyList<Vec2> Trail { get; set; }
+  IReadOnlyList<String> JointNames { get; set; }
+  IReadOnlyList<Double> JointPositions { get; set; }
+  IReadOnlyList<Double> ArmLinkLengths { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(RobotSnapshot other)
+  RobotSnapshot <Clone>$()
+  Void Deconstruct(String& Name, String& Namespace, RobotKind& Kind, Pose2D& Pose, Pose2D& OdomPose, Double& LinearVelocity, Double& LateralVelocity, Double& AngularVelocity, Double& Radius, Double& Length, Double& Width, Double& Height, SimColor& Color, Boolean& Bumper, Double& BatteryPercentage, Double& SteeringAngle, Nullable`1& LaserOrigin, IReadOnlyList`1& LaserHits, IReadOnlyList`1& Trail, IReadOnlyList`1& JointNames, IReadOnlyList`1& JointPositions, IReadOnlyList`1& ArmLinkLengths)
+enum ROS2.Net.Simulation.ScenarioKind
+  Empty, Warehouse, Office, Maze, CorridorLoop, AgricultureRows
+class ROS2.Net.Simulation.Scenarios
+  static IReadOnlyList<ScenarioKind> All { get; }
+  static SimWorld Create(ScenarioKind kind, Int32 robots=0, RobotKind robotKind=DiffDrive, UInt64 seed=42, RobotSensorOptions sensors=null)
+  static ScenarioKind Parse(String name)
+  static WorldDefinition Definition(ScenarioKind kind, UInt64 seed=42)
+  static WorldDefinition Empty(Double size=20, UInt64 seed=42)
+  static WorldDefinition Warehouse(UInt64 seed=42)
+  static WorldDefinition Office(UInt64 seed=42)
+  static WorldDefinition Maze(UInt64 seed=42, Int32 cols=8, Int32 rows=6, Double cell=1.5)
+  static WorldDefinition CorridorLoop(UInt64 seed=42)
+  static WorldDefinition AgricultureRows(UInt64 seed=42)
+enum ROS2.Net.Simulation.ShapeKind
+  Box, Cylinder, Polygon, Wall
+class ROS2.Net.Simulation.SimArm
+  ctor(IReadOnlyList<String> jointNames, Double maxJointVelocity=1, IReadOnlyList<Double> linkLengths=null)
+  String[] JointNames { get; }
+  Double[] Positions { get; }
+  Double[] Targets { get; }
+  Double[] LinkLengths { get; }
+  Double MaxJointVelocity { get; set; }
+  static SimArm TwoDof()
+  static SimArm SixDof()
+  Void SetTargets(ReadOnlySpan<Double> targets)
+struct ROS2.Net.Simulation.SimColor
+  ctor(Byte R, Byte G, Byte B)
+  Byte R { get; set; }
+  Byte G { get; set; }
+  Byte B { get; set; }
+  static SimColor Gray { get; }
+  static SimColor Wall { get; }
+  static SimColor Shelf { get; }
+  static SimColor Floor { get; }
+  static SimColor Crop { get; }
+  static SimColor Robot { get; }
+  static SimColor Crate { get; }
+  static SimColor Parse(String hex)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(SimColor other)
+  Void Deconstruct(Byte& R, Byte& G, Byte& B)
+class ROS2.Net.Simulation.SimObstacle
+  String Name { get; }
+  ShapeKind Kind { get; }
+  Vec2 Center { get; }
+  Double Rotation { get; }
+  Vec2 HalfExtents { get; }
+  Double Radius { get; }
+  Double Height { get; set; }
+  SimColor Color { get; set; }
+  Boolean IsDynamic { get; set; }
+  Double Mass { get; set; }
+  String Tag { get; set; }
+  ReadOnlySpan<Vec2> Vertices { get; }
+  Bounds2D Bounds { get; }
+  Int32 Version { get; }
+  Boolean IsCircle { get; }
+  static SimObstacle Box(String name, Double x, Double y, Double width, Double depth, Double rotation=0, Double height=1, Nullable<SimColor> color=null, Boolean dynamic=False, Double mass=5, String tag=)
+  static SimObstacle Cylinder(String name, Double x, Double y, Double radius, Double height=1, Nullable<SimColor> color=null, Boolean dynamic=False, String tag=)
+  static SimObstacle Wall(String name, Vec2 a, Vec2 b, Double thickness=0.1, Double height=1.2, Nullable<SimColor> color=null)
+  static SimObstacle Polygon(String name, IReadOnlyList<Vec2> points, Double height=1, Nullable<SimColor> color=null, String tag=)
+  Void Place(Vec2 center, Double rotation)
+  Boolean Contains(Vec2 p, Double inflate=0)
+  Double RayIntersect(Vec2 origin, Vec2 dir, Double maxRange)
+  Double Penetration(Vec2 center, Double radius, Vec2& pushDirection)
+  Double DistanceToBoundary(Vec2 p, Vec2& closest)
+  String ToString()
+class ROS2.Net.Simulation.SimRandom
+  ctor(UInt64 seed)
+  Void Reseed(UInt64 seed)
+  UInt64 NextUInt64()
+  Double NextDouble()
+  Double Uniform(Double min, Double max)
+  Double NextGaussian()
+  Double Gaussian(Double stdDev)
+class ROS2.Net.Simulation.SimRobot
+  String Name { get; }
+  String Namespace { get; set; }
+  String FramePrefix { get; }
+  RobotKind Kind { get; }
+  RobotParameters Parameters { get; }
+  Pose2D Pose { get; }
+  Pose2D StartPose { get; set; }
+  Pose2D OdomPose { get; }
+  Double LinearVelocity { get; }
+  Double LateralVelocity { get; }
+  Double AngularVelocity { get; }
+  Double OdomLinearVelocity { get; }
+  Double OdomLateralVelocity { get; }
+  Double OdomAngularVelocity { get; }
+  Vec2 LinearAcceleration { get; }
+  Boolean Bumper { get; }
+  Int32 CollisionCount { get; }
+  Double LeftWheelPosition { get; }
+  Double RightWheelPosition { get; }
+  Double SteeringAngle { get; }
+  SimArm Arm { get; set; }
+  IReadOnlyList<SimSensor> Sensors { get; }
+  LidarSensor Lidar { get; }
+  ImuSensor Imu { get; }
+  GpsSensor Gps { get; }
+  BatterySensor Battery { get; }
+  CameraSensor Camera { get; }
+  IEnumerable<RangeSensor> RangeSensors { get; }
+  Double Odometer { get; }
+  T AddSensor<T>(T sensor)
+  Void RemoveSensor(SimSensor sensor)
+  Void SetCommand(Double linearX, Double linearY, Double angularZ, Double worldTime)
+  Void Stop()
+  Vec2[] CopyTrail()
+  Void Teleport(Pose2D pose)
+  String ToString()
+class ROS2.Net.Simulation.SimSensor
+  String Name { get; }
+  String FrameSuffix { get; }
+  Pose2D Mount { get; set; }
+  Double MountHeight { get; set; }
+  Double RateHz { get; set; }
+  Boolean Enabled { get; set; }
+  Int64 Sequence { get; }
+  Double LastUpdateTime { get; }
+  Pose2D WorldPose(SimRobot robot)
+class ROS2.Net.Simulation.SimulationNode : Node
+  ctor(Ros2Context context, SimWorld world, SimulationNodeOptions options=null, String name=simulator, NodeOptions nodeOptions=null)
+  SimWorld World { get; }
+  SimulationNodeOptions SimOptions { get; }
+  RosTime SimTime { get; }
+  Void PublishMap()
+  Void Start()
+  Task StopAsync()
+  Task RunAsync(CancellationToken cancellationToken=null)
+  Void PublishStaticTransforms()
+class ROS2.Net.Simulation.SimulationNodeOptions
+  ctor()
+  Boolean RunWorld { get; set; }
+  Boolean PublishClock { get; set; }
+  Double ClockRateHz { get; set; }
+  Double OdomRateHz { get; set; }
+  Double JointStateRateHz { get; set; }
+  Double GroundTruthRateHz { get; set; }
+  Boolean PublishTf { get; set; }
+  Boolean PublishMapToOdom { get; set; }
+  Boolean PublishMap { get; set; }
+  Double MapResolution { get; set; }
+  String MapFrame { get; set; }
+class ROS2.Net.Simulation.SimWorld
+  ctor(SimWorldOptions options=null)
+  String Name { get; set; }
+  Bounds2D Bounds { get; set; }
+  UInt64 Seed { get; set; }
+  Double StepSize { get; }
+  Double Friction { get; set; }
+  GeoOrigin GeoOrigin { get; set; }
+  SimColor FloorColor { get; set; }
+  Double Time { get; }
+  Int64 StepCount { get; }
+  SimRandom Random { get; }
+  Boolean Paused { get; set; }
+  Double RealTimeFactor { get; set; }
+  Object SyncRoot { get; }
+  List<ValueTuple<String,Pose2D>> SpawnPoints { get; }
+  Dictionary<String,Pose2D> Waypoints { get; }
+  IReadOnlyList<SimRobot> Robots { get; }
+  IReadOnlyList<SimObstacle> StaticObstacles { get; }
+  IReadOnlyList<SimObstacle> DynamicObstacles { get; }
+  SimObstacle AddObstacle(SimObstacle obstacle)
+  Boolean RemoveObstacle(SimObstacle obstacle)
+  T AddRobot<T>(T robot)
+  Boolean RemoveRobot(String name)
+  SimRobot GetRobot(String name)
+  Void Step()
+  Void Step(Int32 steps)
+  Void StepFor(Double seconds)
+  Void Reset()
+  Task RunAsync(CancellationToken cancellationToken)
+  Double RayCast(Vec2 origin, Double angle, Double maxRange, SimRobot ignore=null)
+  Boolean IsOccupied(Vec2 p, Double inflate=0, Boolean includeDynamic=True)
+  SimColor SampleColor(Vec2 p, SimRobot ignore=null)
+  OccupancyGrid ToOccupancyGrid(Double resolution=0.05, String frameId=map, Boolean includeDynamic=False)
+  WorldSnapshot Snapshot()
+  event Action<SimWorld> Stepped
+  event Action<SimWorld> WasReset
+  event Action<SimRobot,Boolean> RobotsChanged
+class ROS2.Net.Simulation.SimWorldOptions
+  ctor()
+  String Name { get; set; }
+  Bounds2D Bounds { get; set; }
+  UInt64 Seed { get; set; }
+  Double StepSize { get; set; }
+  Double Friction { get; set; }
+  GeoOrigin GeoOrigin { get; set; }
+  SimColor FloorColor { get; set; }
+  Double IndexCellSize { get; set; }
+class ROS2.Net.Simulation.Turtle
+  String Name { get; }
+  Pose2D Pose { get; }
+  Double LinearVelocity { get; }
+  Double AngularVelocity { get; }
+  SimColor PenColor { get; }
+  Int32 PenWidth { get; }
+  Boolean PenOff { get; }
+class ROS2.Net.Simulation.TurtlesimNode : Node
+  ctor(Ros2Context context, TurtleWorld world=null, String name=turtlesim, NodeOptions options=null)
+  TurtleWorld World { get; }
+  Void Start()
+  Task RunAsync(CancellationToken cancellationToken=null)
+  Void Tick()
+class ROS2.Net.Simulation.TurtleSnapshot
+  ctor(Double Time, SimColor Background, IReadOnlyList<TurtleState> Turtles, IReadOnlyList<PenSegment> Segments)
+  Double Time { get; set; }
+  SimColor Background { get; set; }
+  IReadOnlyList<TurtleState> Turtles { get; set; }
+  IReadOnlyList<PenSegment> Segments { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(TurtleSnapshot other)
+  TurtleSnapshot <Clone>$()
+  Void Deconstruct(Double& Time, SimColor& Background, IReadOnlyList`1& Turtles, IReadOnlyList`1& Segments)
+class ROS2.Net.Simulation.TurtleState
+  ctor(String Name, Pose2D Pose, Double LinearVelocity, Double AngularVelocity, SimColor PenColor, Boolean PenOff)
+  String Name { get; set; }
+  Pose2D Pose { get; set; }
+  Double LinearVelocity { get; set; }
+  Double AngularVelocity { get; set; }
+  SimColor PenColor { get; set; }
+  Boolean PenOff { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(TurtleState other)
+  TurtleState <Clone>$()
+  Void Deconstruct(String& Name, Pose2D& Pose, Double& LinearVelocity, Double& AngularVelocity, SimColor& PenColor, Boolean& PenOff)
+class ROS2.Net.Simulation.TurtleWorld
+  ctor()
+  SimColor Background { get; set; }
+  Double Time { get; }
+  Double StepSize { get; set; }
+  Object SyncRoot { get; }
+  IReadOnlyList<Turtle> Turtles { get; }
+  field static SimColor DefaultBackground
+  field static Double Size
+  Turtle Get(String name)
+  Turtle Spawn(String name, Double x, Double y, Double theta)
+  Boolean Kill(String name)
+  String NextName()
+  Void Command(String name, Double linear, Double angular)
+  Void Teleport(String name, Pose2D pose)
+  Void SetPen(String name, SimColor color, Int32 width, Boolean off)
+  Void Clear()
+  Void Reset()
+  Void Step()
+  SimColor ColorAt(Vec2 p)
+  TurtleSnapshot Snapshot()
+struct ROS2.Net.Simulation.Vec2
+  ctor(Double X, Double Y)
+  Double X { get; set; }
+  Double Y { get; set; }
+  static Vec2 Zero { get; }
+  Double Length { get; }
+  Double LengthSquared { get; }
+  static Double Dot(Vec2 a, Vec2 b)
+  static Double Cross(Vec2 a, Vec2 b)
+  Vec2 Rotate(Double angle)
+  Vec2 Normalized()
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Vec2 other)
+  Void Deconstruct(Double& X, Double& Y)
+class ROS2.Net.Simulation.WorldDefinition
+  ctor()
+  String Name { get; set; }
+  Double[] Bounds { get; set; }
+  UInt64 Seed { get; set; }
+  Double Friction { get; set; }
+  String FloorColor { get; set; }
+  Double[] GeoOrigin { get; set; }
+  List<ObstacleDefinition> Obstacles { get; set; }
+  List<RobotDefinition> Robots { get; set; }
+  List<PlaceDefinition> SpawnPoints { get; set; }
+  List<PlaceDefinition> Waypoints { get; set; }
+  static WorldDefinition FromJson(String json)
+  static WorldDefinition FromYaml(String yaml)
+  static WorldDefinition FromFile(String path)
+  String ToJson()
+  String ToYaml()
+  SimWorld Build(SimWorldOptions options=null)
+class ROS2.Net.Simulation.WorldSnapshot
+  ctor(String Name, Double Time, Int64 Step, Bounds2D Bounds, SimColor FloorColor, IReadOnlyList<ObstacleSnapshot> StaticObstacles, IReadOnlyList<ObstacleSnapshot> DynamicObstacles, IReadOnlyList<RobotSnapshot> Robots, Boolean Paused, Double RealTimeFactor)
+  String Name { get; set; }
+  Double Time { get; set; }
+  Int64 Step { get; set; }
+  Bounds2D Bounds { get; set; }
+  SimColor FloorColor { get; set; }
+  IReadOnlyList<ObstacleSnapshot> StaticObstacles { get; set; }
+  IReadOnlyList<ObstacleSnapshot> DynamicObstacles { get; set; }
+  IReadOnlyList<RobotSnapshot> Robots { get; set; }
+  Boolean Paused { get; set; }
+  Double RealTimeFactor { get; set; }
+  IEnumerable<ObstacleSnapshot> Obstacles { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(WorldSnapshot other)
+  WorldSnapshot <Clone>$()
+  Void Deconstruct(String& Name, Double& Time, Int64& Step, Bounds2D& Bounds, SimColor& FloorColor, IReadOnlyList`1& StaticObstacles, IReadOnlyList`1& DynamicObstacles, IReadOnlyList`1& Robots, Boolean& Paused, Double& RealTimeFactor)

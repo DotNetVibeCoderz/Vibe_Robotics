@@ -1,0 +1,22 @@
+bin/
+obj/
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+artifacts/
+TestResults/
+native/**/target/
+*.nupkg
+*.snupkg
+appsettings.Local.json
+.env
+# Recorded bags from samples and manual testing.
+*.mcap
+
+# ROS2AppGen settings hold API keys; only App.config.template is committed.
+apps/ROS2.Net.AppGen/App.config
+
+# ROS2AppGen stores LLM/Tavily API keys in its App.config next to the executable and in the project folder copy.
+apps/ROS2.Net.AppGen/App.config

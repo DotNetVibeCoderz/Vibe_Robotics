@@ -1,0 +1,80 @@
+/* ROS2.Net.Blazor design tokens. Override any variable on :root or a container.
+   Dark is the default; add data-theme="light" on <html> (or any ancestor) for light. */
+:root {
+  --rn-bg: #0F1020;
+  --rn-surface: #15172C;
+  --rn-surface-2: #1C1F3A;
+  --rn-line: #2A2E52;
+  --rn-ink: #E9EAF7;
+  --rn-muted: #8D92B9;
+  --rn-violet: #7C4DFF;
+  --rn-cyan: #00D1FF;
+  --rn-ok: #3DDC97;
+  --rn-warn: #FFB547;
+  --rn-danger: #FF5C7A;
+  --rn-grad: linear-gradient(135deg, var(--rn-violet), var(--rn-cyan));
+  --rn-radius: 10px;
+  --rn-font: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --rn-mono: "JetBrains Mono", "Cascadia Code", "Cascadia Mono", Consolas, ui-monospace, monospace;
+  --rn-map-free: #1A1D38;
+  --rn-map-occupied: #E9EAF7;
+  --rn-map-unknown: #101226;
+}
+
+[data-theme="light"] {
+  --rn-bg: #F4F5FB;
+  --rn-surface: #FFFFFF;
+  --rn-surface-2: #EEF0F8;
+  --rn-line: #D9DCEC;
+  --rn-ink: #14162B;
+  --rn-muted: #5E6387;
+  --rn-violet: #6A3BF0;
+  --rn-cyan: #0094C2;
+  --rn-map-free: #F7F8FC;
+  --rn-map-occupied: #22253F;
+  --rn-map-unknown: #DDE0EE;
+}
+
+.rn-card {
+  background: var(--rn-surface);
+  border: 1px solid var(--rn-line);
+  border-radius: var(--rn-radius);
+  color: var(--rn-ink);
+  font-family: var(--rn-font);
+}
+
+.rn-mono { font-family: var(--rn-mono); }
+
+.rn-btn {
+  font: 500 13px/1 var(--rn-font);
+  color: var(--rn-ink);
+  background: var(--rn-surface-2);
+  border: 1px solid var(--rn-line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.rn-btn:hover { border-color: var(--rn-violet); }
+.rn-btn:focus-visible, .rn-input:focus-visible { outline: 2px solid var(--rn-cyan); outline-offset: 2px; }
+.rn-btn:disabled { opacity: .45; cursor: default; }
+.rn-btn.primary { background: var(--rn-grad); border-color: transparent; color: #fff; }
+
+.rn-input {
+  font: 13px var(--rn-mono);
+  color: var(--rn-ink);
+  background: var(--rn-bg);
+  border: 1px solid var(--rn-line);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+.rn-badge {
+  display: inline-block;
+  font: 600 10px/1 var(--rn-mono);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: var(--rn-surface-2);
+  color: var(--rn-muted);
+}

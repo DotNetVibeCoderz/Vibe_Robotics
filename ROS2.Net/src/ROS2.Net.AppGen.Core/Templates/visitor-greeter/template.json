@@ -1,0 +1,15 @@
+{
+  "name": "Reception visitor greeter",
+  "category": "Office",
+  "description": "A reception robot watches the entrance with its LiDAR, greets new visitors on a speech topic and counts them per hour.",
+  "appKind": "console",
+  "tags": [
+    "office",
+    "lidar",
+    "people-detection",
+    "hri"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

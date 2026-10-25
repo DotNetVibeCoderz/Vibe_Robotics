@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageId>ROS2.Net.Templates</PackageId>
+    <Title>ROS2.Net project templates</Title>
+    <Description>dotnet new templates for ROS2.Net: ros2net-node, ros2net-lifecycle, ros2net-interfaces, ros2net-blazor and ros2net-avalonia. Made by Gravicode Studios, led by Kang Fadhil.</Description>
+    <PackageTags>$(PackageTags);dotnet-new;templates</PackageTags>
+    <IsPackable>true</IsPackable>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <NoWarn>$(NoWarn);NU5128;NU5110;NU5111</NoWarn>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- The package only carries files; nothing to compile. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**" />
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+</Project>

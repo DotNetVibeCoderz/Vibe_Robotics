@@ -1,0 +1,222 @@
+class ROS2.Net.Control.AckermannSteeringController : MobileBaseControllerBase
+  ctor()
+  DiffDriveOdometry Odometry { get; }
+  InterfaceConfiguration CommandInterfaceConfiguration { get; }
+  InterfaceConfiguration StateInterfaceConfiguration { get; }
+  static Double SteeringFor(Double linear, Double angular, Double wheelbase)
+  ControllerReturn Update(RosTime time, RosDuration period)
+class ROS2.Net.Control.CommandInterface : InterfaceHandle
+  ctor(String prefixName, String interfaceName, InterfaceSlot slot)
+  Double Value { get; set; }
+class ROS2.Net.Control.ControllerBase
+  String Name { get; }
+  String TypeName { get; }
+  ControllerLifecycle Lifecycle { get; }
+  Node Node { get; }
+  Int32 UpdateRate { get; }
+  InterfaceConfiguration CommandInterfaceConfiguration { get; }
+  InterfaceConfiguration StateInterfaceConfiguration { get; }
+  ControllerReturn Update(RosTime time, RosDuration period)
+  Void Dispose()
+enum ROS2.Net.Control.ControllerLifecycle
+  Unconfigured, Inactive, Active, Finalized
+class ROS2.Net.Control.ControllerManager : Node
+  ctor(Ros2Context context, ResourceManager resources, String name=controller_manager, NodeOptions options=null)
+  ResourceManager Resources { get; }
+  Int32 UpdateRate { get; }
+  IReadOnlyList<ControllerBase> Controllers { get; }
+  Int64 CycleCount { get; }
+  Int64 OverrunCount { get; }
+  Boolean IsRunning { get; }
+  IReadOnlyCollection<String> ControllerTypes { get; }
+  Void RegisterControllerType(String typeName, Func<ControllerBase> factory)
+  ControllerBase GetController(String name)
+  ControllerBase LoadController(String name, String typeName=null)
+  T LoadController<T>(T controller, String name, IEnumerable<Parameter> parameters=null)
+  Boolean ConfigureController(String name)
+  ControllerBase Spawn(String name, String typeName=null)
+  T Spawn<T>(T controller, String name, IEnumerable<Parameter> parameters=null)
+  Boolean SwitchController(IReadOnlyList<String> activate, IReadOnlyList<String> deactivate, SwitchStrictness strictness=Strict)
+  Boolean UnloadController(String name)
+  Void Update(RosTime time, RosDuration period)
+  Void Start()
+  Void Stop()
+enum ROS2.Net.Control.ControllerReturn
+  Ok, Error
+class ROS2.Net.Control.DiffDriveController : MobileBaseControllerBase
+  ctor()
+  DiffDriveOdometry Odometry { get; }
+  InterfaceConfiguration CommandInterfaceConfiguration { get; }
+  InterfaceConfiguration StateInterfaceConfiguration { get; }
+  ControllerReturn Update(RosTime time, RosDuration period)
+class ROS2.Net.Control.DiffDriveOdometry
+  ctor(Double wheelSeparation, Double leftWheelRadius, Double rightWheelRadius)
+  Double WheelSeparation { get; set; }
+  Double LeftWheelRadius { get; set; }
+  Double RightWheelRadius { get; set; }
+  Double X { get; }
+  Double Y { get; }
+  Double Heading { get; }
+  Double Linear { get; }
+  Double Angular { get; }
+  Void Reset(Double x=0, Double y=0, Double heading=0)
+  Void UpdateFromPositions(Double leftPosition, Double rightPosition, Double dt)
+  Void UpdateOpenLoop(Double linear, Double angular, Double dt)
+  Void Integrate(Double ds, Double dtheta, Double dt)
+class ROS2.Net.Control.ForwardCommandController : ControllerBase
+  ctor(String interfaceName=null)
+  InterfaceConfiguration CommandInterfaceConfiguration { get; }
+  InterfaceConfiguration StateInterfaceConfiguration { get; }
+  Void SetCommand(Double[] values)
+  ControllerReturn Update(RosTime time, RosDuration period)
+class ROS2.Net.Control.GenericSystem : HardwareComponent
+  ctor(String name, IReadOnlyList<String> joints, IReadOnlyList<String> commandInterfaces=null, IReadOnlyList<Double> initialPositions=null)
+  Double TimeConstant { get; set; }
+  Double PositionStateOffset { get; set; }
+  HardwareReturn Read(RosTime time, RosDuration period)
+  HardwareReturn Write(RosTime time, RosDuration period)
+class ROS2.Net.Control.GripperActionController : ControllerBase
+  ctor()
+  InterfaceConfiguration CommandInterfaceConfiguration { get; }
+  InterfaceConfiguration StateInterfaceConfiguration { get; }
+  Double Position { get; }
+  Task<GripperCommandResult> CommandAsync(Double position, Double maxEffort=0)
+  ControllerReturn Update(RosTime time, RosDuration period)
+class ROS2.Net.Control.HardwareComponent
+  String Name { get; }
+  HardwareKind Kind { get; }
+  HardwareState State { get; }
+  IReadOnlyList<StateInterface> StateInterfaces { get; }
+  IReadOnlyList<CommandInterface> CommandInterfaces { get; }
+  CallbackReturn Configure()
+  CallbackReturn Activate()
+  CallbackReturn Deactivate()
+  HardwareReturn Read(RosTime time, RosDuration period)
+  HardwareReturn Write(RosTime time, RosDuration period)
+class ROS2.Net.Control.HardwareInterfaceNames
+  field static String Position
+  field static String Velocity
+  field static String Acceleration
+  field static String Effort
+enum ROS2.Net.Control.HardwareKind
+  System, Actuator, Sensor
+enum ROS2.Net.Control.HardwareReturn
+  Ok, Error
+enum ROS2.Net.Control.HardwareState
+  Unconfigured, Inactive, Active, Finalized
+interface ROS2.Net.Control.IHardwareInterface
+  String Name { get; }
+  HardwareKind Kind { get; }
+  HardwareState State { get; }
+  IReadOnlyList<StateInterface> StateInterfaces { get; }
+  IReadOnlyList<CommandInterface> CommandInterfaces { get; }
+  CallbackReturn Configure()
+  CallbackReturn Activate()
+  CallbackReturn Deactivate()
+  HardwareReturn Read(RosTime time, RosDuration period)
+  HardwareReturn Write(RosTime time, RosDuration period)
+class ROS2.Net.Control.InterfaceClaimException : InvalidOperationException
+  ctor(String message)
+class ROS2.Net.Control.InterfaceConfiguration
+  ctor(InterfaceConfigurationType Type, IReadOnlyList<String> Names)
+  InterfaceConfigurationType Type { get; set; }
+  IReadOnlyList<String> Names { get; set; }
+  static InterfaceConfiguration None { get; }
+  static InterfaceConfiguration All { get; }
+  static InterfaceConfiguration Individual(IEnumerable<String> names)
+  static InterfaceConfiguration Individual(String[] names)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(InterfaceConfiguration other)
+  InterfaceConfiguration <Clone>$()
+  Void Deconstruct(InterfaceConfigurationType& Type, IReadOnlyList`1& Names)
+enum ROS2.Net.Control.InterfaceConfigurationType
+  All, Individual, None
+class ROS2.Net.Control.InterfaceHandle
+  String PrefixName { get; }
+  String InterfaceName { get; }
+  String Name { get; }
+  String ToString()
+class ROS2.Net.Control.InterfaceSlot
+  ctor()
+  field Double Value
+class ROS2.Net.Control.JointStateBroadcaster : ControllerBase
+  ctor()
+  InterfaceConfiguration CommandInterfaceConfiguration { get; }
+  InterfaceConfiguration StateInterfaceConfiguration { get; }
+  ControllerReturn Update(RosTime time, RosDuration period)
+class ROS2.Net.Control.JointTrajectoryController : ControllerBase
+  ctor()
+  IReadOnlyList<String> Joints { get; }
+  Boolean IsExecuting { get; }
+  InterfaceConfiguration CommandInterfaceConfiguration { get; }
+  InterfaceConfiguration StateInterfaceConfiguration { get; }
+  ControllerReturn Update(RosTime time, RosDuration period)
+  Task<ValueTuple<Int32,String>> ExecuteAsync(JointTrajectory trajectory, CancellationToken cancellationToken=null)
+class ROS2.Net.Control.MobileBaseControllerBase : ControllerBase
+  SpeedLimiter LinearLimiter { get; }
+  SpeedLimiter AngularLimiter { get; }
+  Void SetCommand(Double linear, Double angular)
+class ROS2.Net.Control.PidController
+  ctor(Double p=0, Double i=0, Double d=0)
+  Double P { get; set; }
+  Double I { get; set; }
+  Double D { get; set; }
+  Double IntegralMax { get; set; }
+  Double IntegralMin { get; set; }
+  Double OutputMax { get; set; }
+  Double OutputMin { get; set; }
+  Boolean DerivativeOnMeasurement { get; set; }
+  Double DerivativeFilterTime { get; set; }
+  Double IntegralTerm { get; }
+  Double Output { get; }
+  Void Reset()
+  Double Compute(Double setpoint, Double measurement, Double dt)
+  Double ComputeFromError(Double error, Double dt)
+class ROS2.Net.Control.RealtimeBuffer`1
+  ctor()
+  Void Write(T value)
+  T Read()
+  T Take()
+class ROS2.Net.Control.ResourceManager
+  ctor()
+  IReadOnlyList<IHardwareInterface> Hardware { get; }
+  IEnumerable<StateInterface> StateInterfaces { get; }
+  IEnumerable<CommandInterface> CommandInterfaces { get; }
+  Void Add(IHardwareInterface hardware, Boolean activate=True)
+  Boolean HasStateInterface(String name)
+  Boolean HasCommandInterface(String name)
+  StateInterface GetStateInterface(String name)
+  Boolean IsClaimed(String commandInterface)
+  String ClaimedBy(String commandInterface)
+  IReadOnlyList<CommandInterface> Claim(String owner, IEnumerable<String> names)
+  Void Release(String owner)
+  Boolean ReadAll(RosTime time, RosDuration period)
+  Boolean WriteAll(RosTime time, RosDuration period)
+class ROS2.Net.Control.SampledTrajectory
+  ctor(Double[] times, Double[][] positions, Double[][] velocities, Double[][] accelerations)
+  Int32 JointCount { get; }
+  Double Duration { get; }
+  Int32 PointCount { get; }
+  Double[] FinalPositions { get; }
+  static SampledTrajectory FromMessage(JointTrajectory traj, IReadOnlyList<String> controllerJoints, Double[] currentPositions, Double[] currentVelocities)
+  Void Sample(Double t, Double[] position, Double[] velocity, Double[] acceleration)
+class ROS2.Net.Control.SimulatedDiffDriveHardware : HardwareComponent
+  ctor(String name=DiffBot, String leftJoint=left_wheel_joint, String rightJoint=right_wheel_joint)
+  String LeftJoint { get; }
+  String RightJoint { get; }
+  Double MaxWheelSpeed { get; set; }
+  HardwareReturn Read(RosTime time, RosDuration period)
+  HardwareReturn Write(RosTime time, RosDuration period)
+class ROS2.Net.Control.SpeedLimiter
+  ctor(Double maxVelocity=∞, Double maxAcceleration=∞)
+  Double MaxVelocity { get; set; }
+  Double MinVelocity { get; set; }
+  Double MaxAcceleration { get; set; }
+  Double Limit(Double command, Double previous, Double dt)
+class ROS2.Net.Control.StateInterface : InterfaceHandle
+  ctor(String prefixName, String interfaceName, InterfaceSlot slot)
+  Double Value { get; }
+enum ROS2.Net.Control.SwitchStrictness
+  BestEffort, Strict

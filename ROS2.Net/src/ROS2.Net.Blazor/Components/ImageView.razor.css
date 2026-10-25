@@ -1,0 +1,4 @@
+.imgview { margin: 0; overflow: hidden; display: flex; flex-direction: column; }
+img { width: 100%; object-fit: contain; background: var(--rn-bg); image-rendering: pixelated; display: block; }
+.empty { display: grid; place-items: center; color: var(--rn-muted); font-size: 13px; }
+figcaption { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 11px; color: var(--rn-muted); border-top: 1px solid var(--rn-line); }

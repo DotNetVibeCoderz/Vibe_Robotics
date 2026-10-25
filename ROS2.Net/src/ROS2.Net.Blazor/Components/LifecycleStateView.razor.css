@@ -1,0 +1,9 @@
+.lifecycle { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.machine { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.state { padding: 12px 16px; border-radius: 8px; border: 1px solid var(--rn-line); background: var(--rn-surface-2); color: var(--rn-muted); font: 600 13px var(--rn-font); transition: all .2s; }
+.state.current { color: #fff; background: var(--rn-grad); border-color: transparent; box-shadow: 0 6px 24px -8px var(--rn-violet); }
+.state.pending { border-style: dashed; border-color: var(--rn-cyan); }
+.arrow { color: var(--rn-muted); }
+.status { font-size: 12px; color: var(--rn-muted); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (prefers-reduced-motion: reduce) { .state { transition: none; } }

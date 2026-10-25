@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ROS2.Net.Core" Version="ROS2NET_VERSION" />
+    <PackageReference Include="ROS2.Net.Msgs" Version="ROS2NET_VERSION" />
+    <PackageReference Include="ROS2.Net.Hosting" Version="ROS2NET_VERSION" />
+    <PackageReference Include="ROS2.Net.Rmw.Rtps" Version="ROS2NET_VERSION" />
+    <PackageReference Include="ROS2.Net.Rmw.Rosbridge" Version="ROS2NET_VERSION" />
+  </ItemGroup>
+
+</Project>

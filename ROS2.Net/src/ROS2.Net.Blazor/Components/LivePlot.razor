@@ -1,0 +1,189 @@
+@inherits RosComponentBase
+@using System.Text.Json
+@using ROS2.Net.Serialization
+
+<div class="plot rn-card" style="height:@(Height)px">
+    <div class="legend">
+        @foreach (var s in _series.Values)
+        {
+            <span><i style="background:@s.Color"></i><span class="rn-mono">@s.Name</span> <b class="rn-mono">@(s.Last?.ToString("0.###", CultureInfo.InvariantCulture) ?? "—")</b></span>
+        }
+    </div>
+    <svg viewBox="0 0 600 200" preserveAspectRatio="none">
+        @for (var i = 0; i <= 4; i++)
+        {
+            <line x1="0" x2="600" y1="@(i * 50)" y2="@(i * 50)" class="grid" />
+        }
+        @foreach (var s in _series.Values)
+        {
+            <polyline points="@s.Points" stroke="@s.Color" class="line" />
+        }
+    </svg>
+    <div class="axis rn-mono">
+        <span>@_max.ToString("0.##", CultureInfo.InvariantCulture)</span>
+        <span>@WindowSeconds s window</span>
+        <span>@_min.ToString("0.##", CultureInfo.InvariantCulture)</span>
+    </div>
+</div>
+
+@code {
+    private static readonly string[] s_palette = ["#7C4DFF", "#00D1FF", "#3DDC97", "#FFB547", "#FF5C7A", "#B39DFF"];
+
+    private sealed class Series(string name, string color)
+    {
+        public string Name { get; } = name;
+        public string Color { get; } = color;
+        public Queue<(double T, double V)> Samples { get; } = new();
+        public string Points { get; set; } = string.Empty;
+        public double? Last { get; set; }
+    }
+
+    private readonly Dictionary<string, Series> _series = new(StringComparer.Ordinal);
+    private readonly object _gate = new();
+    private double _min, _max = 1;
+    private DynamicMessageType? _dynamic;
+
+    /// <summary>Topic to plot numeric fields from (any registered type).</summary>
+    [Parameter] public string? Topic { get; set; }
+
+    /// <summary>Field paths into the message, e.g. <c>twist.twist.linear.x</c>, <c>data</c>, <c>ranges[0]</c>.</summary>
+    [Parameter] public IReadOnlyList<string> Fields { get; set; } = [];
+
+    [Parameter] public double WindowSeconds { get; set; } = 10;
+
+    [Parameter] public int Height { get; set; } = 220;
+
+    /// <summary>Fixed y range; null auto-scales.</summary>
+    [Parameter] public (double Min, double Max)? Range { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(Topic) || Fields.Count == 0)
+        {
+            return;
+        }
+
+        // Resolve the type from the graph once a publisher appears.
+        Every(TimeSpan.FromMilliseconds(500), _ =>
+        {
+            if (_dynamic is not null)
+            {
+                Redraw();
+                return Task.CompletedTask;
+            }
+
+            var type = Node.GetTopicNamesAndTypes().FirstOrDefault(t => t.Name == Node.ResolveTopicName(Topic))?.Types.FirstOrDefault();
+            if (type is not null && RosTypeRegistry.TryGetMessage(type, out var info) && DynamicMessageType.TryFromRegistry(type, out var dyn))
+            {
+                _dynamic = dyn;
+                SubscribeSerialized(Topic, info, (cdr, _) =>
+                {
+                    using var doc = JsonDocument.Parse(dyn.ToJson(cdr));
+                    foreach (var f in Fields)
+                    {
+                        if (Resolve(doc.RootElement, f) is { } v)
+                        {
+                            Push(f, v);
+                        }
+                    }
+                }, QosProfile.SensorData);
+            }
+
+            return Task.CompletedTask;
+        });
+    }
+
+    /// <summary>Adds a sample to a series (created on first use).</summary>
+    public void Push(string series, double value)
+    {
+        var now = Environment.TickCount64 / 1000.0;
+        lock (_gate)
+        {
+            if (!_series.TryGetValue(series, out var s))
+            {
+                _series[series] = s = new Series(series, s_palette[_series.Count % s_palette.Length]);
+            }
+
+            s.Samples.Enqueue((now, value));
+            s.Last = value;
+            while (s.Samples.Count > 0 && now - s.Samples.Peek().T > WindowSeconds)
+            {
+                s.Samples.Dequeue();
+            }
+        }
+
+        RequestRender();
+    }
+
+    protected override bool ShouldRender()
+    {
+        Redraw();
+        return true;
+    }
+
+    private void Redraw()
+    {
+        var now = Environment.TickCount64 / 1000.0;
+        lock (_gate)
+        {
+            var all = _series.Values.SelectMany(s => s.Samples).Select(p => p.V).ToList();
+            if (Range is { } r)
+            {
+                (_min, _max) = r;
+            }
+            else if (all.Count > 0)
+            {
+                _min = all.Min();
+                _max = all.Max();
+                var pad = Math.Max(1e-3, (_max - _min) * 0.1);
+                _min -= pad;
+                _max += pad;
+            }
+
+            var span = Math.Max(1e-9, _max - _min);
+            foreach (var s in _series.Values)
+            {
+                s.Points = string.Join(' ', s.Samples.Select(p =>
+                    $"{Svg.F(600 - ((now - p.T) / WindowSeconds * 600))},{Svg.F(200 - ((p.V - _min) / span * 200))}"));
+            }
+        }
+    }
+
+    private static double? Resolve(JsonElement e, string path)
+    {
+        foreach (var part in path.Split('.'))
+        {
+            var name = part;
+            int? index = null;
+            var b = part.IndexOf('[');
+            if (b > 0 && part.EndsWith(']') && int.TryParse(part[(b + 1)..^1], out var ix))
+            {
+                name = part[..b];
+                index = ix;
+            }
+
+            if (e.ValueKind != JsonValueKind.Object || !e.TryGetProperty(name, out e))
+            {
+                return null;
+            }
+
+            if (index is { } i)
+            {
+                if (e.ValueKind != JsonValueKind.Array || i >= e.GetArrayLength())
+                {
+                    return null;
+                }
+
+                e = e[i];
+            }
+        }
+
+        return e.ValueKind switch
+        {
+            JsonValueKind.Number => e.GetDouble(),
+            JsonValueKind.True => 1,
+            JsonValueKind.False => 0,
+            _ => null,
+        };
+    }
+}

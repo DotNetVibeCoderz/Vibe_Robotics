@@ -1,0 +1,15 @@
+{
+  "name": "Turtle art studio",
+  "category": "Entertainment",
+  "description": "Draws generative art (a rosette of colored stars) with turtlesim pens, teleports and velocity commands, then prints a summary.",
+  "appKind": "console",
+  "tags": [
+    "turtlesim",
+    "art",
+    "beginner",
+    "services"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

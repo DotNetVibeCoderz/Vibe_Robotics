@@ -1,0 +1,13 @@
+{
+  "name": "Gas leak sensor network",
+  "category": "Disaster & Safety",
+  "description": "Six gas sensor nodes publish ppm readings; a safety monitor aggregates them, estimates the leak source by weighted centroid and raises staged alarms with /diagnostics.",
+  "appKind": "console",
+  "tags": [
+    "safety",
+    "sensor-network",
+    "iot",
+    "diagnostics"
+  ],
+  "packages": []
+}

@@ -1,0 +1,170 @@
+@inherits RosComponentBase
+@using System.Numerics
+@using ROS2.Net.Msgs.SensorMsgs
+@using ROS2.Net.Perception
+@using PointCloud = ROS2.Net.Perception.PointCloud
+
+<div class="cloud rn-card" style="height:@(Height)px">
+    <svg viewBox="@_viewBox" preserveAspectRatio="xMidYMid meet">
+        <path d="@_grid" class="grid" />
+        @foreach (var layer in _layers)
+        {
+            <path d="@layer.Path" fill="@layer.Color" opacity="@Svg.F(layer.Opacity)" />
+        }
+    </svg>
+    <div class="meta rn-mono">
+        <span>@_title</span>
+        <span>@_shown / @_total pts · @(Projection == CloudProjection.Top ? "top (x–y)" : Projection == CloudProjection.Front ? "front (x–z)" : "side (y–z)")</span>
+    </div>
+</div>
+
+@code {
+    private readonly List<(string Path, string Color, double Opacity)> _layers = [];
+    private string _viewBox = "-5 -5 10 10";
+    private string _grid = string.Empty;
+    private int _shown, _total;
+    private string _title = "cloud";
+    private static readonly string[] s_ramp = ["#5B3FD9", "#7C4DFF", "#5C7BFF", "#2EA8FF", "#00D1FF", "#5FF2E0"];
+
+    /// <summary>PointCloud2 topic to follow. Ignored when <see cref="Cloud"/> or <see cref="Layers"/> is set.</summary>
+    [Parameter] public string? Topic { get; set; }
+
+    /// <summary>A cloud to draw, colored by height.</summary>
+    [Parameter] public PointCloud? Cloud { get; set; }
+
+    /// <summary>Several clouds with explicit colors (e.g. plane inliers vs clusters).</summary>
+    [Parameter] public IReadOnlyList<CloudLayer>? Layers { get; set; }
+
+    [Parameter] public CloudProjection Projection { get; set; } = CloudProjection.Top;
+
+    /// <summary>Points drawn per layer (uniformly subsampled beyond this).</summary>
+    [Parameter] public int MaxPoints { get; set; } = 6000;
+
+    [Parameter] public double PointSize { get; set; } = 0.03;
+
+    [Parameter] public int Height { get; set; } = 360;
+
+    [Parameter] public string? Title { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Cloud is null && Layers is null && !string.IsNullOrEmpty(Topic))
+        {
+            Subscribe<PointCloud2>(Topic, m => Build(null, PointCloud2Reader.ToPointCloud(m, skipNonFinite: true)), QosProfile.SensorData);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Layers is not null)
+        {
+            Build(Layers, null);
+        }
+        else if (Cloud is not null)
+        {
+            Build(null, Cloud);
+        }
+    }
+
+    private (float U, float V) Project(Vector3 p) => Projection switch
+    {
+        CloudProjection.Front => (p.X, -p.Z),
+        CloudProjection.Side => (p.Y, -p.Z),
+        _ => (-p.Y, -p.X), // x forward drawn up, y left drawn left
+    };
+
+    private void Build(IReadOnlyList<CloudLayer>? layers, PointCloud? single)
+    {
+        _layers.Clear();
+        _title = Title ?? Topic ?? "cloud";
+        var all = layers ?? [];
+        float minU = float.MaxValue, minV = float.MaxValue, maxU = float.MinValue, maxV = float.MinValue;
+        var total = 0;
+        var shown = 0;
+
+        void Bounds(PointCloud c)
+        {
+            for (var i = 0; i < c.Count; i++)
+            {
+                var (u, v) = Project(c[i]);
+                if (!float.IsFinite(u) || !float.IsFinite(v)) continue;
+                minU = Math.Min(minU, u); maxU = Math.Max(maxU, u);
+                minV = Math.Min(minV, v); maxV = Math.Max(maxV, v);
+            }
+        }
+
+        if (single is not null) Bounds(single);
+        foreach (var l in all) Bounds(l.Cloud);
+        if (minU > maxU)
+        {
+            _viewBox = "-5 -5 10 10";
+            _shown = _total = 0;
+            return;
+        }
+
+        var pad = Math.Max(0.2f, Math.Max(maxU - minU, maxV - minV) * 0.06f);
+        _viewBox = $"{Svg.F(minU - pad)} {Svg.F(minV - pad)} {Svg.F(maxU - minU + (2 * pad))} {Svg.F(maxV - minV + (2 * pad))}";
+        _grid = GridPath(minU - pad, minV - pad, maxU + pad, maxV + pad);
+
+        if (single is not null)
+        {
+            // Bucket by height so each color is one path element.
+            var buckets = new System.Text.StringBuilder[s_ramp.Length];
+            for (var b = 0; b < buckets.Length; b++) buckets[b] = new System.Text.StringBuilder();
+            float minZ = float.MaxValue, maxZ = float.MinValue;
+            for (var i = 0; i < single.Count; i++) { var z = single[i].Z; if (float.IsFinite(z)) { minZ = Math.Min(minZ, z); maxZ = Math.Max(maxZ, z); } }
+            var stride = Math.Max(1, single.Count / Math.Max(1, MaxPoints));
+            for (var i = 0; i < single.Count; i += stride)
+            {
+                var p = single[i];
+                var (u, v) = Project(p);
+                if (!float.IsFinite(u) || !float.IsFinite(v)) continue;
+                var t = maxZ > minZ ? (p.Z - minZ) / (maxZ - minZ) : 0.5f;
+                Dot(buckets[Math.Clamp((int)(t * (s_ramp.Length - 1) + 0.5f), 0, s_ramp.Length - 1)], u, v);
+                shown++;
+            }
+
+            total += single.Count;
+            for (var b = 0; b < buckets.Length; b++)
+            {
+                if (buckets[b].Length > 0) _layers.Add((buckets[b].ToString(), s_ramp[b], 0.95));
+            }
+        }
+
+        foreach (var l in all)
+        {
+            var sb = new System.Text.StringBuilder();
+            var stride = Math.Max(1, l.Cloud.Count / Math.Max(1, MaxPoints));
+            for (var i = 0; i < l.Cloud.Count; i += stride)
+            {
+                var (u, v) = Project(l.Cloud[i]);
+                if (!float.IsFinite(u) || !float.IsFinite(v)) continue;
+                Dot(sb, u, v);
+                shown++;
+            }
+
+            total += l.Cloud.Count;
+            _layers.Add((sb.ToString(), l.Color, l.Opacity));
+        }
+
+        _shown = shown;
+        _total = total;
+    }
+
+    private void Dot(System.Text.StringBuilder sb, float u, float v)
+    {
+        var s = PointSize;
+        sb.Append('M').Append(Svg.F(u - (s / 2))).Append(' ').Append(Svg.F(v - (s / 2)))
+          .Append('h').Append(Svg.F(s)).Append('v').Append(Svg.F(s)).Append('h').Append(Svg.F(-s)).Append('Z');
+    }
+
+    private static string GridPath(double x0, double y0, double x1, double y1)
+    {
+        var span = Math.Max(x1 - x0, y1 - y0);
+        var step = span > 20 ? 5 : span > 6 ? 1 : 0.5;
+        var sb = new System.Text.StringBuilder();
+        for (var x = Math.Ceiling(x0 / step) * step; x <= x1; x += step) sb.Append($"M{Svg.F(x)} {Svg.F(y0)}V{Svg.F(y1)}");
+        for (var y = Math.Ceiling(y0 / step) * step; y <= y1; y += step) sb.Append($"M{Svg.F(x0)} {Svg.F(y)}H{Svg.F(x1)}");
+        return sb.ToString();
+    }
+}

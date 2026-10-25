@@ -1,0 +1,128 @@
+@page "/commander"
+@inherits GalleryPage
+@using ROS2.Net.AI.Llm
+
+<PageTitle>Language commander · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="commander" Code="@Code">
+    <div class="grid two">
+        <SimView Height="500" />
+        <div class="stack">
+            <div class="panel stack">
+                <h3>@T("Command", "Perintah")</h3>
+                <form class="row" @onsubmit="SendAsync">
+                    <input class="rn-input command" style="flex:1" @bind="_text" placeholder="@T("e.g. rotate 90 degrees then move forward 1 meter", "mis. putar 90 derajat lalu maju 1 meter")" aria-label="Command" />
+                    <button class="rn-btn primary" type="submit" disabled="@_busy">@T("Send", "Kirim")</button>
+                </form>
+                <div class="row">
+                    @foreach (var s in s_examples)
+                    {
+                        <button class="rn-btn" @onclick="() => Use(s)">@s</button>
+                    }
+                </div>
+                <p class="note">@T("Runs offline with a rule-based model (English and Indonesian). Point it at Ollama, llama.cpp or any OpenAI-compatible endpoint with OpenAICompatibleChatModel. A safety limiter clamps speed to 0.3 m/s and distance to 5 m.",
+                                   "Berjalan offline dengan model berbasis aturan (Inggris dan Indonesia). Arahkan ke Ollama, llama.cpp, atau endpoint yang kompatibel dengan OpenAI lewat OpenAICompatibleChatModel. Pembatas keselamatan membatasi kecepatan 0,3 m/dtk dan jarak 5 m.")</p>
+            </div>
+            <div class="panel stack">
+                <h3>@T("Tool calls & feedback", "Pemanggilan tool & umpan balik")</h3>
+                <ul class="feed">
+                    @foreach (var f in _feedback)
+                    {
+                        <li>@f</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private static readonly string[] s_examples = ["move forward 1 meter", "turn left 90 degrees", "putar kanan 45 derajat", "maju 2 meter", "stop"];
+    private NaturalLanguageCommanderNode? _commander;
+    private IDisposable? _hold;
+    private readonly LinkedList<string> _feedback = new();
+    private string _text = "";
+    private bool _busy;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _hold = Runtime.HoldAutopilot();
+        var options = new CommanderOptions();
+        foreach (var (name, pose) in Runtime.World.Waypoints)
+        {
+            options.Waypoints[name] = (pose.X, pose.Y, pose.Theta);
+        }
+
+        _commander = new NaturalLanguageCommanderNode(Runtime.Context, new RuleBasedChatModel(), options, $"nl_commander_{Random.Shared.Next(1000, 9999)}");
+        _commander.Feedback += f =>
+        {
+            lock (_feedback)
+            {
+                _feedback.AddFirst($"{DateTime.Now:HH:mm:ss} {f}");
+                if (_feedback.Count > 30)
+                {
+                    _feedback.RemoveLast();
+                }
+            }
+
+            RequestRender();
+        };
+    }
+
+    private void Use(string text) => _text = text;
+
+    private async Task SendAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_text))
+        {
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            var lines = await _commander!.HandleCommandAsync(_text, Disposing);
+            lock (_feedback)
+            {
+                foreach (var l in lines)
+                {
+                    _feedback.AddFirst($"{DateTime.Now:HH:mm:ss} → {l}");
+                }
+            }
+        }
+        catch (Exception ex) when (ex is ObjectDisposedException or OperationCanceledException)
+        {
+            // The page was closed while the robot was still moving.
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    protected override async ValueTask DisposeCoreAsync()
+    {
+        _commander?.Dispose();
+        _hold?.Dispose();
+        await base.DisposeCoreAsync();
+    }
+
+    private const string Code = """
+        using ROS2.Net.AI.Llm;
+
+        IChatModel model = new OpenAICompatibleChatModel(new()   // Ollama by default; key from env vars
+        {
+            Endpoint = "http://localhost:11434/v1",
+            Model = "llama3.2",
+        });
+        // Offline alternative: new RuleBasedChatModel()
+
+        using var commander = new NaturalLanguageCommanderNode(context, model, new CommanderOptions
+        {
+            Safety = new SafetyLimiter { MaxLinearSpeed = 0.3, MaxDistance = 5 },
+        });
+        // Publish std_msgs/String on /nl_command, or call directly:
+        await commander.HandleCommandAsync("rotate 90 degrees then move forward 1 meter");
+        """;
+}

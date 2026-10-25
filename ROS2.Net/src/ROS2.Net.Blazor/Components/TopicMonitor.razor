@@ -1,0 +1,104 @@
+@inherits RosComponentBase
+@using System.Collections.Concurrent
+@using ROS2.Net.Rmw
+
+<div class="monitor rn-card">
+    <table>
+        <thead>
+            <tr><th>Topic</th><th>Type</th><th class="n">Pub</th><th class="n">Sub</th><th class="n">Rate</th><th class="n">Bandwidth</th></tr>
+        </thead>
+        <tbody>
+            @if (_rows.Count == 0)
+            {
+                <tr><td colspan="6" class="empty">No topics yet. Start a node that publishes, and it appears here.</td></tr>
+            }
+            @foreach (var r in _rows)
+            {
+                <tr @key="r.Name" class="@(r.Hz > 0 ? "live" : "")">
+                    <td class="rn-mono topic"><span class="dot"></span>@r.Name</td>
+                    <td class="rn-mono type">@r.Type</td>
+                    <td class="n">@r.Publishers</td>
+                    <td class="n">@r.Subscribers</td>
+                    <td class="n rn-mono">@(r.Hz > 0 ? r.Hz.ToString("0.0", CultureInfo.InvariantCulture) + " Hz" : "—")</td>
+                    <td class="n rn-mono">@Bandwidth(r.BytesPerSecond)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private readonly ConcurrentDictionary<string, Counter> _counters = new(StringComparer.Ordinal);
+    private List<Row> _rows = [];
+    private long _lastTicks = Environment.TickCount64;
+
+    private sealed class Counter
+    {
+        public long Messages;
+        public long Bytes;
+        public SerializedSubscription? Subscription;
+    }
+
+    private sealed record Row(string Name, string Type, int Publishers, int Subscribers, double Hz, double BytesPerSecond);
+
+    /// <summary>Show hidden topics (e.g. <c>/_action/...</c>).</summary>
+    [Parameter] public bool IncludeHidden { get; set; }
+
+    /// <summary>Topics never measured (subscribing to everything has a cost).</summary>
+    [Parameter] public IReadOnlyCollection<string> Exclude { get; set; } = ["/rosout", "/parameter_events"];
+
+    /// <summary>Measure rate and bandwidth by subscribing to each topic.</summary>
+    [Parameter] public bool Measure { get; set; } = true;
+
+    [Parameter] public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(1);
+
+    protected override void OnInitialized() => Every(Interval, _ =>
+    {
+        Refresh();
+        return Task.CompletedTask;
+    });
+
+    private void Refresh()
+    {
+        var now = Environment.TickCount64;
+        var seconds = Math.Max(0.001, (now - _lastTicks) / 1000.0);
+        _lastTicks = now;
+        var endpoints = Context.Rmw.Graph.GetEndpoints();
+        var rows = new List<Row>();
+        foreach (var t in Node.GetTopicNamesAndTypes(IncludeHidden))
+        {
+            var type = t.Types.FirstOrDefault() ?? "?";
+            // Our own measuring subscriptions are not interesting to count.
+            var pubs = endpoints.Count(e => e.Kind == EndpointKind.Publisher && e.Name == t.Name);
+            var subs = endpoints.Count(e => e.Kind == EndpointKind.Subscription && e.Name == t.Name && e.NodeName != Node.Name);
+            double hz = 0, bw = 0;
+            if (Measure && !Exclude.Contains(t.Name) && pubs > 0)
+            {
+                var c = _counters.GetOrAdd(t.Name, _ => new Counter());
+                if (c.Subscription is null && RosTypeRegistry.TryGetMessage(type, out var info))
+                {
+                    c.Subscription = SubscribeSerialized(t.Name, info, (cdr, _) =>
+                    {
+                        Interlocked.Increment(ref c.Messages);
+                        Interlocked.Add(ref c.Bytes, cdr.Length);
+                    }, QosProfile.SensorData);
+                }
+
+                hz = Interlocked.Exchange(ref c.Messages, 0) / seconds;
+                bw = Interlocked.Exchange(ref c.Bytes, 0) / seconds;
+            }
+
+            rows.Add(new Row(t.Name, type, pubs, subs, hz, bw));
+        }
+
+        _rows = rows;
+    }
+
+    private static string Bandwidth(double bps) => bps switch
+    {
+        <= 0 => "—",
+        < 1024 => $"{bps:0} B/s",
+        < 1024 * 1024 => $"{bps / 1024:0.0} KB/s",
+        _ => $"{bps / (1024 * 1024):0.00} MB/s",
+    };
+}

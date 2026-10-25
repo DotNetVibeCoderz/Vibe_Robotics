@@ -1,0 +1,5 @@
+# A list of parameter names to get.
+string[] names
+---
+# List of values in the same order as names.
+ParameterValue[] values

@@ -1,0 +1,16 @@
+{
+  "name": "Search & rescue SLAM explorer",
+  "category": "Disaster & Safety",
+  "description": "A rescue robot explores an unknown collapsed corridor with wall following while online graph SLAM builds the map (with loop closure) and saves it in map_server format.",
+  "appKind": "console",
+  "tags": [
+    "slam",
+    "mapping",
+    "rescue",
+    "exploration"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation",
+    "ROS2.Net.Navigation"
+  ]
+}

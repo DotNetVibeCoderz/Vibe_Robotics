@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <title>ROS2.Net Gallery</title>
+    <meta name="description" content="Live ROS 2 demos in .NET — made by Gravicode Studios, led by Kang Fadhil." />
+    <link rel="icon" type="image/png" href="icon.png" />
+    <link rel="stylesheet" href="@Assets["_content/ROS2.Net.Blazor/ros2net.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["ROS2.Net.Gallery.Web.styles.css"]" />
+    <ImportMap />
+    <HeadOutlet @rendermode="RenderModeServer" />
+    <script>
+        window.rnTheme = {
+            set: t => { document.documentElement.dataset.theme = t; try { localStorage.setItem('rn-theme', t); } catch { } },
+            get: () => { try { return localStorage.getItem('rn-theme') || 'dark'; } catch { return 'dark'; } }
+        };
+        window.rnRect = el => { const r = el.getBoundingClientRect(); return { width: r.width, height: r.height }; };
+        document.documentElement.dataset.theme = window.rnTheme.get();
+    </script>
+</head>
+<body>
+    <Routes @rendermode="RenderModeServer" />
+    <script src="_framework/blazor.web.js"></script>
+</body>
+</html>
+
+@code {
+    // Live demos subscribe to topics on initialization; prerendering would run them twice.
+    private static readonly IComponentRenderMode RenderModeServer = new InteractiveServerRenderMode(prerender: false);
+}

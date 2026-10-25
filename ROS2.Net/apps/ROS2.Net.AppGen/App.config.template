@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ROS2.Net App Generator settings. Edit them from Settings in the app. API keys may be written as env:VARIABLE_NAME. -->
+<configuration>
+  <appSettings>
+    <add key="AppGen.Profiles" value="[{&quot;Name&quot;:&quot;Claude Sonnet&quot;,&quot;Provider&quot;:&quot;Claude&quot;,&quot;Model&quot;:&quot;claude-sonnet-5-5&quot;,&quot;ApiKey&quot;:&quot;&quot;,&quot;Endpoint&quot;:&quot;&quot;,&quot;Temperature&quot;:0.2,&quot;MaxTokens&quot;:16000,&quot;SupportsVision&quot;:true,&quot;ExtraHeaders&quot;:&quot;&quot;},{&quot;Name&quot;:&quot;OpenAI GPT-5 mini&quot;,&quot;Provider&quot;:&quot;OpenAI&quot;,&quot;Model&quot;:&quot;gpt-5-mini&quot;,&quot;ApiKey&quot;:&quot;&quot;,&quot;Endpoint&quot;:&quot;&quot;,&quot;Temperature&quot;:1,&quot;MaxTokens&quot;:0,&quot;SupportsVision&quot;:true,&quot;ExtraHeaders&quot;:&quot;&quot;},{&quot;Name&quot;:&quot;Azure OpenAI&quot;,&quot;Provider&quot;:&quot;AzureOpenAI&quot;,&quot;Model&quot;:&quot;gpt-5-mini&quot;,&quot;ApiKey&quot;:&quot;&quot;,&quot;Endpoint&quot;:&quot;https://\u003Cresource\u003E.openai.azure.com/&quot;,&quot;Temperature&quot;:1,&quot;MaxTokens&quot;:0,&quot;SupportsVision&quot;:true,&quot;ExtraHeaders&quot;:&quot;&quot;},{&quot;Name&quot;:&quot;Gemini Flash&quot;,&quot;Provider&quot;:&quot;Gemini&quot;,&quot;Model&quot;:&quot;gemini-2.5-flash&quot;,&quot;ApiKey&quot;:&quot;&quot;,&quot;Endpoint&quot;:&quot;&quot;,&quot;Temperature&quot;:0.2,&quot;MaxTokens&quot;:0,&quot;SupportsVision&quot;:true,&quot;ExtraHeaders&quot;:&quot;&quot;},{&quot;Name&quot;:&quot;Ollama (local)&quot;,&quot;Provider&quot;:&quot;Ollama&quot;,&quot;Model&quot;:&quot;llama3.2&quot;,&quot;ApiKey&quot;:&quot;&quot;,&quot;Endpoint&quot;:&quot;http://localhost:11434&quot;,&quot;Temperature&quot;:0.2,&quot;MaxTokens&quot;:0,&quot;SupportsVision&quot;:false,&quot;ExtraHeaders&quot;:&quot;&quot;},{&quot;Name&quot;:&quot;DeepSeek&quot;,&quot;Provider&quot;:&quot;DeepSeek&quot;,&quot;Model&quot;:&quot;deepseek-v4-flash&quot;,&quot;ApiKey&quot;:&quot;&quot;,&quot;Endpoint&quot;:&quot;https://api.deepseek.com&quot;,&quot;Temperature&quot;:0.2,&quot;MaxTokens&quot;:0,&quot;SupportsVision&quot;:false,&quot;ExtraHeaders&quot;:&quot;&quot;}]" />
+    <add key="AppGen.ActiveProfile" value="Claude Sonnet" />
+    <add key="AppGen.SystemPrompt" value="" />
+    <add key="AppGen.TavilyApiKey" value="" />
+    <add key="AppGen.ProjectsFolder" value="" />
+    <add key="AppGen.PackageSource" value="" />
+    <add key="AppGen.Ros2NetVersion" value="0.1.0" />
+    <add key="AppGen.RecentProjects" value="[]" />
+    <add key="AppGen.ShowLineNumbers" value="true" />
+    <add key="AppGen.EditorFontSize" value="13" />
+    <add key="AppGen.WordWrap" value="false" />
+    <add key="AppGen.Theme" value="Dark" />
+    <add key="AppGen.ChatPanelWidth" value="420" />
+    <add key="AppGen.ChatPanelVisible" value="true" />
+    <add key="AppGen.ExplorerWidth" value="260" />
+    <add key="AppGen.LogsPanelVisible" value="true" />
+    <add key="AppGen.AllowAutoBuild" value="true" />
+    <add key="AppGen.MaxToolRounds" value="24" />
+  </appSettings>
+</configuration>

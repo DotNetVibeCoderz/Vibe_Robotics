@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Rmw.Rosbridge</RootNamespace>
+    <Description>ROS2.Net middleware over the rosbridge v2 WebSocket protocol: reach any ROS 2 graph through rosbridge_server, from desktop, server or browser-hosted .NET, with no DDS stack required.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Integration.Tests" />
+  </ItemGroup>
+
+</Project>

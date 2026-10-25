@@ -1,0 +1,29 @@
+@using System.Text
+@using System.Text.RegularExpressions
+
+<pre class="code"><code>@((MarkupString)Highlight(Source))</code></pre>
+
+@code {
+    private static readonly Regex s_tokens = new(
+        """(?<c>//[^\n]*)|(?<s>\$?"(?:[^"\\\n]|\\.)*")|(?<k>\b(?:var|new|await|async|using|return|public|private|static|sealed|class|record|if|else|for|foreach|in|while|true|false|null|void|double|int|long|string|bool|this|base|override|readonly)\b)|(?<t>\b[A-Z][A-Za-z0-9]*(?=[<(.\s]))""",
+        RegexOptions.Compiled);
+
+    [Parameter, EditorRequired] public string Source { get; set; } = "";
+
+    /// <summary>Minimal C# highlighting: comments, strings, keywords and type-like identifiers.</summary>
+    internal static string Highlight(string source)
+    {
+        var sb = new StringBuilder(source.Length * 2);
+        var last = 0;
+        foreach (Match m in s_tokens.Matches(source))
+        {
+            sb.Append(System.Net.WebUtility.HtmlEncode(source[last..m.Index]));
+            var cls = m.Groups["c"].Success ? "c" : m.Groups["s"].Success ? "s" : m.Groups["k"].Success ? "k" : "t";
+            sb.Append("<span class=\"").Append(cls).Append("\">").Append(System.Net.WebUtility.HtmlEncode(m.Value)).Append("</span>");
+            last = m.Index + m.Length;
+        }
+
+        sb.Append(System.Net.WebUtility.HtmlEncode(source[last..]));
+        return sb.ToString();
+    }
+}

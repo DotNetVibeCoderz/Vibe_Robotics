@@ -1,0 +1,107 @@
+@inherits RosComponentBase
+@using ROS2.Net.Msgs.LifecycleMsgs
+
+<div class="lifecycle rn-card">
+    <div class="machine">
+        @foreach (var s in s_primary)
+        {
+            <div class="state @(s.Id == _current ? "current" : "") @(s.Id == _transitional ? "pending" : "")">
+                <span class="label">@s.Label</span>
+            </div>
+            @if (s.Id != 4)
+            {
+                <span class="arrow" aria-hidden="true">→</span>
+            }
+        }
+    </div>
+    <div class="status rn-mono">
+        @TargetNode · @(_label ?? "unknown")@(_error is not null ? " · " + _error : "")
+    </div>
+    <div class="actions">
+        @foreach (var t in _available)
+        {
+            <button class="rn-btn @(t.Transition.Label is "activate" or "configure" ? "primary" : "")" disabled="@_busy" @onclick="() => TriggerAsync(t.Transition.Id)">@t.Transition.Label</button>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly (byte Id, string Label)[] s_primary = [(1, "Unconfigured"), (2, "Inactive"), (3, "Active"), (4, "Finalized")];
+
+    private ServiceClient<GetStateRequest, GetStateResponse>? _get;
+    private ServiceClient<ChangeStateRequest, ChangeStateResponse>? _change;
+    private ServiceClient<GetAvailableTransitionsRequest, GetAvailableTransitionsResponse>? _transitions;
+    private byte _current;
+    private byte _transitional;
+    private string? _label;
+    private string? _error;
+    private bool _busy;
+    private TransitionDescription[] _available = [];
+
+    /// <summary>Fully qualified name of a lifecycle node, e.g. <c>/lc_talker</c>.</summary>
+    [Parameter, EditorRequired] public string TargetNode { get; set; } = "/";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _get = Node.CreateClient<GetStateRequest, GetStateResponse>(TargetNode + "/get_state");
+        _change = Node.CreateClient<ChangeStateRequest, ChangeStateResponse>(TargetNode + "/change_state");
+        _transitions = Node.CreateClient<GetAvailableTransitionsRequest, GetAvailableTransitionsResponse>(TargetNode + "/get_available_transitions");
+        Subscribe<TransitionEvent>(TargetNode + "/transition_event", e =>
+        {
+            var id = e.GoalState.Id;
+            if (id is >= 1 and <= 4)
+            {
+                _current = id;
+                _transitional = 0;
+                _label = e.GoalState.Label;
+            }
+            else
+            {
+                _transitional = id;
+                _label = e.GoalState.Label;
+            }
+        });
+        await RefreshAsync();
+    }
+
+    private async Task RefreshAsync()
+    {
+        try
+        {
+            if (!await _get!.WaitForServiceAsync(TimeSpan.FromSeconds(3), Disposing))
+            {
+                _error = "node not found";
+                return;
+            }
+
+            var state = await _get.CallAsync(new GetStateRequest(), TimeSpan.FromSeconds(3), Disposing);
+            _current = state.CurrentState.Id;
+            _label = state.CurrentState.Label;
+            _available = (await _transitions!.CallAsync(new GetAvailableTransitionsRequest(), TimeSpan.FromSeconds(3), Disposing)).AvailableTransitions;
+            _error = null;
+        }
+        catch (Exception ex) when (ex is TimeoutException or OperationCanceledException)
+        {
+            _error = "no response";
+        }
+    }
+
+    private async Task TriggerAsync(byte transition)
+    {
+        _busy = true;
+        try
+        {
+            var res = await _change!.CallAsync(new ChangeStateRequest { Transition = new Transition { Id = transition } }, TimeSpan.FromSeconds(10), Disposing);
+            _error = res.Success ? null : "transition failed";
+            await RefreshAsync();
+        }
+        catch (Exception ex) when (ex is TimeoutException or OperationCanceledException)
+        {
+            _error = "no response";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+}

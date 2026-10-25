@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>ros2net</ToolCommandName>
+    <PackageId>ROS2.Net.Cli</PackageId>
+    <AssemblyName>ros2net</AssemblyName>
+    <RootNamespace>ROS2.Net.Cli</RootNamespace>
+    <Description>ros2net: the ROS2.Net command-line tool. topic/node/service/action/param/interface/bag/security/doctor commands that mirror the ros2 CLI, without a ROS 2 installation (RTPS, rosbridge or in-process middleware).</Description>
+    <PackageTags>$(PackageTags);cli;dotnet-tool</PackageTags>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Rosidl\ROS2.Net.Rosidl.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Rmw.Rtps\ROS2.Net.Rmw.Rtps.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Rmw.Rosbridge\ROS2.Net.Rmw.Rosbridge.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Bag\ROS2.Net.Bag.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Security\ROS2.Net.Security.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Native\ROS2.Net.Native.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Cli.Tests" />
+  </ItemGroup>
+
+</Project>

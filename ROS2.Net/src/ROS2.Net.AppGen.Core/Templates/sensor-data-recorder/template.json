@@ -1,0 +1,16 @@
+{
+  "name": "Sensor data recorder & exporter",
+  "category": "Science",
+  "description": "Records a simulated robot's IMU, odometry and LiDAR to a rosbag2 (MCAP) bag, prints `ros2 bag info`-style statistics and exports CSV/JSONL datasets.",
+  "appKind": "console",
+  "tags": [
+    "rosbag2",
+    "dataset",
+    "mcap",
+    "csv"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation",
+    "ROS2.Net.Bag"
+  ]
+}

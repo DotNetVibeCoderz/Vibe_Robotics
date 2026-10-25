@@ -1,0 +1,16 @@
+{
+  "name": "Document courier (desktop)",
+  "category": "Office",
+  "description": "Desktop app: pick an office room and a courier robot plans and drives there with the Nav2-style stack; watch it live on the simulator view.",
+  "appKind": "avalonia",
+  "tags": [
+    "navigation",
+    "desktop",
+    "office",
+    "delivery"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation",
+    "ROS2.Net.Navigation"
+  ]
+}

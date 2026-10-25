@@ -1,0 +1,92 @@
+@inherits RosComponentBase
+@using ROS2.Net.Msgs.SensorMsgs
+
+<div class="scan rn-card" style="height:@(Height)px">
+    <svg viewBox="@($"{Svg.F(-MaxRange)} {Svg.F(-MaxRange)} {Svg.F(2 * MaxRange)} {Svg.F(2 * MaxRange)}")" preserveAspectRatio="xMidYMid meet">
+        @for (var r = 1; r <= Math.Floor(MaxRange); r++)
+        {
+            <g>
+                <circle r="@r" class="ring" />
+                <text x="@Svg.F(r * 0.7071 + 0.05)" y="@Svg.F(-r * 0.7071)" class="ring-label">@r m</text>
+            </g>
+        }
+        <line x1="@Svg.F(-MaxRange)" y1="0" x2="@Svg.F(MaxRange)" y2="0" class="axis" />
+        <line x1="0" y1="@Svg.F(-MaxRange)" x2="0" y2="@Svg.F(MaxRange)" class="axis" />
+        @if (_area.Length > 0)
+        {
+            <path d="@_area" class="area" />
+            <path d="@_points" class="hit" />
+        }
+        <path d="M 0.22 0 L -0.12 0.12 L -0.06 0 L -0.12 -0.12 Z" class="robot" transform="rotate(-90)" />
+    </svg>
+    <div class="meta rn-mono">
+        <span>@(Topic ?? "scan")</span>
+        <span>@_count beams · @_hits hits · min @_min.ToString("0.00", CultureInfo.InvariantCulture) m</span>
+    </div>
+</div>
+
+@code {
+    private string _area = string.Empty;
+    private string _points = string.Empty;
+    private int _count;
+    private int _hits;
+    private double _min;
+
+    /// <summary>LaserScan topic to follow. Ignored when <see cref="Scan"/> is set.</summary>
+    [Parameter] public string? Topic { get; set; }
+
+    [Parameter] public LaserScan? Scan { get; set; }
+
+    /// <summary>Display radius (m).</summary>
+    [Parameter] public double MaxRange { get; set; } = 4;
+
+    [Parameter] public int Height { get; set; } = 320;
+
+    protected override void OnInitialized()
+    {
+        if (Scan is null && !string.IsNullOrEmpty(Topic))
+        {
+            Subscribe<LaserScan>(Topic, Update, QosProfile.SensorData);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Scan is not null)
+        {
+            Update(Scan);
+        }
+    }
+
+    private void Update(LaserScan scan)
+    {
+        // Robot frame x forward is drawn up the screen: screen (sx, sy) = (-y, -x).
+        var area = new System.Text.StringBuilder(scan.Ranges.Length * 14);
+        var pts = new System.Text.StringBuilder(scan.Ranges.Length * 24);
+        var hits = 0;
+        var min = double.PositiveInfinity;
+        for (var i = 0; i < scan.Ranges.Length; i++)
+        {
+            double r = scan.Ranges[i];
+            var valid = double.IsFinite(r) && r >= scan.RangeMin && r <= scan.RangeMax;
+            var shown = valid ? Math.Min(r, MaxRange) : Math.Min(scan.RangeMax, MaxRange);
+            var a = scan.AngleMin + (i * scan.AngleIncrement);
+            var sx = -Math.Sin(a) * shown;
+            var sy = -Math.Cos(a) * shown;
+            area.Append(i == 0 ? "M " : " L ").Append(Svg.F(sx)).Append(' ').Append(Svg.F(sy));
+            if (valid)
+            {
+                hits++;
+                min = Math.Min(min, r);
+                pts.Append("M ").Append(Svg.F(sx - 0.025)).Append(' ').Append(Svg.F(sy - 0.025)).Append(" h 0.05 v 0.05 h -0.05 Z ");
+            }
+        }
+
+        area.Append(" Z");
+        _area = area.ToString();
+        _points = pts.ToString();
+        _count = scan.Ranges.Length;
+        _hits = hits;
+        _min = double.IsFinite(min) ? min : 0;
+    }
+}

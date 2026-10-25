@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <NoWarn>$(NoWarn);NU5128;RS2008</NoWarn>
+    <Description>Roslyn source generator for ROS2.Net: add .msg/.srv/.action files to a project (as &lt;RosInterface Include="..." /&gt; or under a &lt;package&gt;/msg folder) and get strongly typed, CDR-serializable C# messages at compile time.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The parser and emitter are compiled into the generator: analyzers cannot load project references at runtime. -->
+    <Compile Include="..\ROS2.Net.Rosidl\*.cs" LinkBase="Rosidl" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="build\ROS2.Net.Rosidl.Generator.props" Pack="true" PackagePath="build" />
+    <None Include="build\ROS2.Net.Rosidl.Generator.props" Pack="true" PackagePath="buildTransitive" />
+  </ItemGroup>
+
+</Project>

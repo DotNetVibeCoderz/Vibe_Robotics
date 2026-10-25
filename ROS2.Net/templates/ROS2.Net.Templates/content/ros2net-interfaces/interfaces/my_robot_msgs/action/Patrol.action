@@ -1,0 +1,8 @@
+# Patrol a list of named waypoints.
+string[] waypoints
+uint32 laps 1
+---
+uint32 waypoints_visited
+---
+string current_waypoint
+float32 progress

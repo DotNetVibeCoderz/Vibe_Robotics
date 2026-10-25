@@ -1,0 +1,128 @@
+class ROS2.Net.Tf2.ConnectivityException : TransformException
+  ctor(String message)
+class ROS2.Net.Tf2.ExtrapolationException : TransformException
+  ctor(String message)
+class ROS2.Net.Tf2.InvalidTransformArgumentException : TransformException
+  ctor(String message)
+class ROS2.Net.Tf2.LookupException : TransformException
+  ctor(String message)
+struct ROS2.Net.Tf2.Quaterniond
+  ctor(Double X, Double Y, Double Z, Double W)
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Z { get; set; }
+  Double W { get; set; }
+  static Quaterniond Identity { get; }
+  Double Norm { get; }
+  Double Yaw { get; }
+  Quaterniond Normalized()
+  Quaterniond Inverse()
+  Vector3d Rotate(Vector3d v)
+  static Double Dot(Quaterniond a, Quaterniond b)
+  static Quaterniond Slerp(Quaterniond a, Quaterniond b, Double t)
+  static Quaterniond FromRpy(Double roll, Double pitch, Double yaw)
+  static Quaterniond FromYaw(Double yaw)
+  ValueTuple<Double,Double,Double> ToRpy()
+  static Quaterniond FromAxisAngle(Vector3d axis, Double angle)
+  ValueTuple<Vector3d,Double> ToAxisAngle()
+  static Double AngleBetween(Quaterniond a, Quaterniond b)
+  Quaternion ToMsg()
+  static Quaterniond FromMsg(Quaternion q)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Quaterniond other)
+  Void Deconstruct(Double& X, Double& Y, Double& Z, Double& W)
+class ROS2.Net.Tf2.StaticTransformBroadcaster
+  ctor(Node node, String topic=/tf_static)
+  IReadOnlyCollection<TransformStamped> Transforms { get; }
+  Void SendTransform(TransformStamped transform)
+  Void SendTransforms(IEnumerable<TransformStamped> transforms)
+  Void SendTransform(String parent, String child, Transform3d transform)
+  Void Dispose()
+class ROS2.Net.Tf2.TfBuffer
+  ctor(Nullable<TimeSpan> cacheTime=null)
+  TimeSpan CacheTime { get; }
+  IReadOnlyList<String> FrameNames { get; }
+  Boolean SetTransform(TransformStamped transform, String authority=default_authority, Boolean isStatic=False)
+  Boolean SetTransform(String parent, String child, Transform3d transform, RosTime stamp, Boolean isStatic=False, String authority=default_authority)
+  Void Clear()
+  TransformStamped LookupTransform(String targetFrame, String sourceFrame, RosTime time)
+  TransformStamped LookupTransform(String targetFrame, RosTime targetTime, String sourceFrame, RosTime sourceTime, String fixedFrame)
+  Transform3d LookupTransform3d(String targetFrame, String sourceFrame, RosTime time)
+  Boolean TryLookupTransform(String targetFrame, String sourceFrame, RosTime time, Transform3d& transform, String& error)
+  Boolean CanTransform(String targetFrame, String sourceFrame, RosTime time)
+  Boolean CanTransform(String targetFrame, RosTime targetTime, String sourceFrame, RosTime sourceTime, String fixedFrame)
+  Task<TransformStamped> WaitForTransformAsync(String targetFrame, String sourceFrame, RosTime time, TimeSpan timeout, CancellationToken cancellationToken=null)
+  PoseStamped TransformPose(PoseStamped pose, String targetFrame, Nullable<TimeSpan> timeout=null)
+  PointStamped TransformPoint(PointStamped point, String targetFrame, Nullable<TimeSpan> timeout=null)
+  Vector3Stamped TransformVector(Vector3Stamped vector, String targetFrame, Nullable<TimeSpan> timeout=null)
+  Boolean FrameExists(String frame)
+  String GetParent(String frame, RosTime time=null)
+  String AllFramesAsString()
+  String AllFramesAsYaml(Nullable<RosTime> now=null)
+  String ToMermaid()
+  String ToDot()
+  event Action<TransformStamped> TransformAdded
+struct ROS2.Net.Tf2.Transform3d
+  ctor(Vector3d Translation, Quaterniond Rotation)
+  Vector3d Translation { get; set; }
+  Quaterniond Rotation { get; set; }
+  static Transform3d Identity { get; }
+  Transform3d Inverse()
+  Vector3d TransformPoint(Vector3d p)
+  Vector3d TransformVector(Vector3d v)
+  static Transform3d Interpolate(Transform3d a, Transform3d b, Double t)
+  Transform ToMsg()
+  Pose ToPoseMsg()
+  static Transform3d FromMsg(Transform t)
+  static Transform3d FromMsg(Pose p)
+  static Transform3d From2D(Double x, Double y, Double yaw)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Transform3d other)
+  Void Deconstruct(Vector3d& Translation, Quaterniond& Rotation)
+class ROS2.Net.Tf2.TransformBroadcaster
+  ctor(Node node, String topic=/tf, Nullable<QosProfile> qos=null)
+  Void SendTransform(TransformStamped transform)
+  Void SendTransforms(IEnumerable<TransformStamped> transforms)
+  Void SendTransform(String parent, String child, Transform3d transform, RosTime stamp)
+  Void Dispose()
+class ROS2.Net.Tf2.TransformException : Exception
+  ctor(String message)
+class ROS2.Net.Tf2.TransformListener
+  ctor(TfBuffer buffer, Node node, String tfTopic=/tf, String tfStaticTopic=/tf_static)
+  static QosProfile DynamicQos { get; }
+  static QosProfile StaticQos { get; }
+  TfBuffer Buffer { get; }
+  Node Node { get; }
+  Int64 ReceivedCount { get; }
+  Void Dispose()
+class ROS2.Net.Tf2.TransformTimeoutException : TransformException
+  ctor(String message)
+struct ROS2.Net.Tf2.Vector3d
+  ctor(Double X, Double Y, Double Z)
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Z { get; set; }
+  static Vector3d Zero { get; }
+  static Vector3d UnitX { get; }
+  static Vector3d UnitY { get; }
+  static Vector3d UnitZ { get; }
+  Double Length { get; }
+  Double LengthSquared { get; }
+  Vector3d Normalized()
+  static Double Dot(Vector3d a, Vector3d b)
+  static Vector3d Cross(Vector3d a, Vector3d b)
+  static Vector3d Lerp(Vector3d a, Vector3d b, Double t)
+  static Double Distance(Vector3d a, Vector3d b)
+  Vector3 ToVector3Msg()
+  Point ToPointMsg()
+  static Vector3d FromMsg(Vector3 v)
+  static Vector3d FromMsg(Point p)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Vector3d other)
+  Void Deconstruct(Double& X, Double& Y, Double& Z)

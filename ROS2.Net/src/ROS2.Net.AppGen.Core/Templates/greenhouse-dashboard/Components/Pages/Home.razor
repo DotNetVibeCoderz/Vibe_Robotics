@@ -1,0 +1,13 @@
+@page "/"
+
+<PageTitle>{{ProjectName}}</PageTitle>
+
+<h1>Greenhouse</h1>
+<p class="muted">Live climate telemetry. Sensors publish sensor_msgs on /greenhouse/*; the vent controller logs to /rosout.</p>
+
+<section class="grid">
+    <div class="card"><h2>Temperature (°C)</h2><LivePlot Topic="/greenhouse/temperature" Fields="@(["temperature"])" /></div>
+    <div class="card"><h2>Relative humidity</h2><LivePlot Topic="/greenhouse/humidity" Fields="@(["relative_humidity"])" /></div>
+    <div class="card"><h2>Light (lux)</h2><LivePlot Topic="/greenhouse/light" Fields="@(["illuminance"])" /></div>
+    <div class="card"><h2>Alerts</h2><LogConsole /></div>
+</section>

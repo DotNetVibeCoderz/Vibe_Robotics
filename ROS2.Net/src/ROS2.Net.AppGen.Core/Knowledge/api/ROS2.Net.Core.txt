@@ -1,0 +1,992 @@
+class ROS2.Net.ActionClient`3
+  String ActionName { get; }
+  Boolean IsServerReady { get; }
+  Nullable<TimeSpan> ServiceTimeout { get; set; }
+  Task<Boolean> WaitForServerAsync(Nullable<TimeSpan> timeout=null, CancellationToken cancellationToken=null)
+  Task<ClientGoalHandle<TGoal,TResult,TFeedback>> SendGoalAsync(TGoal goal, Action<TFeedback> feedback=null, CancellationToken cancellationToken=null)
+  Task<ActionResult<TResult>> SendGoalAndWaitAsync(TGoal goal, Action<TFeedback> feedback=null, CancellationToken cancellationToken=null)
+  Task<Int32> CancelAllGoalsAsync(CancellationToken cancellationToken=null)
+  Void Dispose()
+class ROS2.Net.ActionResult`1
+  ctor(GoalStatus Status, TResult Result)
+  GoalStatus Status { get; set; }
+  TResult Result { get; set; }
+  Boolean Succeeded { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ActionResult<TResult> other)
+  ActionResult<TResult> <Clone>$()
+  Void Deconstruct(GoalStatus& Status, TResult& Result)
+class ROS2.Net.ActionServer`3
+  String ActionName { get; }
+  IReadOnlyList<ServerGoalHandle<TGoal,TResult,TFeedback>> ActiveGoals { get; }
+  Void Dispose()
+class ROS2.Net.ActionServerOptions`3
+  ctor()
+  Func<Guid,TGoal,GoalResponse> GoalCallback { get; set; }
+  Func<ServerGoalHandle<TGoal,TResult,TFeedback>,CancelResponse> CancelCallback { get; set; }
+  TimeSpan ResultTimeout { get; set; }
+  CallbackGroup CallbackGroup { get; set; }
+class ROS2.Net.ActionTypeInfo
+  ctor(String Name, MessageTypeInfo Goal, MessageTypeInfo Result, MessageTypeInfo Feedback)
+  String Name { get; set; }
+  MessageTypeInfo Goal { get; set; }
+  MessageTypeInfo Result { get; set; }
+  MessageTypeInfo Feedback { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ActionTypeInfo other)
+  ActionTypeInfo <Clone>$()
+  Void Deconstruct(String& Name, MessageTypeInfo& Goal, MessageTypeInfo& Result, MessageTypeInfo& Feedback)
+class ROS2.Net.CallbackGroup
+  CallbackGroupType Type { get; }
+enum ROS2.Net.CallbackGroupType
+  MutuallyExclusive, Reentrant
+enum ROS2.Net.CallbackReturn
+  Success, Failure, Error
+enum ROS2.Net.CancelResponse
+  Accept, Reject
+class ROS2.Net.ClientGoalHandle`3
+  Guid GoalId { get; }
+  TGoal Goal { get; }
+  RosTime AcceptedAt { get; }
+  GoalStatus Status { get; }
+  Task<ActionResult<TResult>> GetResultAsync(CancellationToken cancellationToken=null)
+  Task<Boolean> CancelAsync(CancellationToken cancellationToken=null)
+  event Action<GoalStatus> StatusChanged
+  event Action<TFeedback> FeedbackReceived
+enum ROS2.Net.ClockType
+  RosTime, SystemTime, SteadyTime
+class ROS2.Net.ComponentContainer : Node
+  ctor(Ros2Context context, String name=ComponentManager, NodeOptions options=null)
+  IReadOnlyList<LoadedComponent> Components { get; }
+  Void RegisterAssembly(Assembly assembly)
+  LoadedComponent Load(Type componentType, NodeOptions options=null)
+  LoadedComponent Load<TComponent>(NodeOptions options=null)
+  LoadedComponent Load(String package, String pluginName, NodeOptions options=null)
+  Boolean Unload(UInt64 uniqueId)
+enum ROS2.Net.DurabilityPolicy
+  SystemDefault, TransientLocal, Volatile
+class ROS2.Net.Executor
+  IReadOnlyList<Node> Nodes { get; }
+  Boolean IsSpinning { get; }
+  Void AddNode(Node node)
+  Void RemoveNode(Node node)
+  Task SpinAsync(CancellationToken cancellationToken=null)
+  Void Spin(CancellationToken cancellationToken=null)
+  ValueTask<Boolean> SpinOnceAsync(TimeSpan timeout, CancellationToken cancellationToken=null)
+  ValueTask<Int32> SpinSomeAsync()
+  Task<Boolean> SpinUntilCompleteAsync(Task task, Nullable<TimeSpan> timeout=null, CancellationToken cancellationToken=null)
+  Void Dispose()
+  event Action<Waitable,Exception> CallbackFaulted
+class ROS2.Net.FloatingPointRange
+  ctor(Double From, Double To, Double Step=0)
+  Double From { get; set; }
+  Double To { get; set; }
+  Double Step { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(FloatingPointRange other)
+  FloatingPointRange <Clone>$()
+  Void Deconstruct(Double& From, Double& To, Double& Step)
+class ROS2.Net.GoalRejectedException : InvalidOperationException
+  ctor(String action)
+enum ROS2.Net.GoalResponse
+  Accept, Reject
+enum ROS2.Net.GoalStatus
+  Unknown, Accepted, Executing, Canceling, Succeeded, Canceled, Aborted
+class ROS2.Net.GuardCondition : Waitable
+  Void Trigger()
+enum ROS2.Net.HistoryPolicy
+  SystemDefault, KeepLast, KeepAll
+interface ROS2.Net.ILifecycleManaged
+  Void OnActivate()
+  Void OnDeactivate()
+class ROS2.Net.IntegerRange
+  ctor(Int64 From, Int64 To, UInt64 Step=0)
+  Int64 From { get; set; }
+  Int64 To { get; set; }
+  UInt64 Step { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(IntegerRange other)
+  IntegerRange <Clone>$()
+  Void Deconstruct(Int64& From, Int64& To, UInt64& Step)
+class ROS2.Net.InvalidParameterTypeException : ParameterException
+  ctor(String message)
+class ROS2.Net.InvalidParameterValueException : ParameterException
+  ctor(String message)
+class ROS2.Net.InvalidRosNameException : ArgumentException
+  ctor(String message)
+interface ROS2.Net.IRosActionGoal`3
+  static String ActionTypeName { get; }
+interface ROS2.Net.IRosMessage
+  String RosTypeName { get; }
+  Void Serialize(CdrWriter writer)
+  Void Deserialize(CdrReader& reader)
+  Void WriteJson(Utf8JsonWriter writer)
+  Void ReadJson(JsonElement element)
+  IRosMessage CloneMessage()
+interface ROS2.Net.IRosMessage`1
+  static String TypeName { get; }
+  static String DdsTypeName { get; }
+  static String Definition { get; }
+  static IReadOnlyList<String> Dependencies { get; }
+interface ROS2.Net.IRosServiceRequest`2
+  static String ServiceTypeName { get; }
+class ROS2.Net.LifecycleNode : Node
+  ctor(Ros2Context context, String name, NodeOptions options=null)
+  LifecycleState CurrentState { get; }
+  Func<LifecycleState,ValueTask<CallbackReturn>> ConfigureHandler { get; set; }
+  Func<LifecycleState,ValueTask<CallbackReturn>> ActivateHandler { get; set; }
+  Func<LifecycleState,ValueTask<CallbackReturn>> DeactivateHandler { get; set; }
+  Func<LifecycleState,ValueTask<CallbackReturn>> CleanupHandler { get; set; }
+  Func<LifecycleState,ValueTask<CallbackReturn>> ShutdownHandler { get; set; }
+  Func<LifecycleState,ValueTask<CallbackReturn>> ErrorHandler { get; set; }
+  LifecyclePublisher<T> CreateLifecyclePublisher<T>(String topic, Nullable<QosProfile> qos=null)
+  ValueTask<LifecycleState> ConfigureAsync(CancellationToken ct=null)
+  ValueTask<LifecycleState> ActivateAsync(CancellationToken ct=null)
+  ValueTask<LifecycleState> DeactivateAsync(CancellationToken ct=null)
+  ValueTask<LifecycleState> CleanupAsync(CancellationToken ct=null)
+  ValueTask<LifecycleState> ShutdownAsync(CancellationToken ct=null)
+  ValueTask<LifecycleState> TriggerTransitionAsync(LifecycleTransition transition, CancellationToken cancellationToken=null)
+  static IReadOnlyList<LifecycleTransition> AvailableTransitions(LifecycleState state)
+  static String Label(LifecycleState s)
+  static String Label(LifecycleTransition t)
+  event Action<LifecycleState,LifecycleState> StateChanged
+class ROS2.Net.LifecyclePublisher`1 : Publisher<T>
+  Boolean IsActivated { get; }
+  Void OnActivate()
+  Void OnDeactivate()
+  Void Publish(T message)
+enum ROS2.Net.LifecycleState
+  Unknown, Unconfigured, Inactive, Active, Finalized, Configuring, CleaningUp, ShuttingDown, Activating, Deactivating, ErrorProcessing
+enum ROS2.Net.LifecycleTransition
+  Configure, Cleanup, Activate, Deactivate, UnconfiguredShutdown, InactiveShutdown, ActiveShutdown
+enum ROS2.Net.LivelinessPolicy
+  SystemDefault, Automatic, ManualByTopic
+class ROS2.Net.LoadedComponent
+  ctor(UInt64 UniqueId, String FullNodeName, String PluginName, Node Node)
+  UInt64 UniqueId { get; set; }
+  String FullNodeName { get; set; }
+  String PluginName { get; set; }
+  Node Node { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(LoadedComponent other)
+  LoadedComponent <Clone>$()
+  Void Deconstruct(UInt64& UniqueId, String& FullNodeName, String& PluginName, Node& Node)
+class ROS2.Net.MessageTypeInfo
+  String Name { get; }
+  String DdsName { get; }
+  String Definition { get; }
+  IReadOnlyList<String> Dependencies { get; }
+  Type ClrType { get; }
+  Func<IRosMessage> Factory { get; }
+  static MessageTypeInfo Of<T>()
+  static MessageTypeInfo Create(String name, Type clrType, Func<IRosMessage> factory, String definition=, IReadOnlyList<String> dependencies=null)
+  static String ToDdsName(String rosName)
+  static String FromDdsName(String ddsName)
+  String ToString()
+class ROS2.Net.MultiThreadedExecutor : Executor
+  ctor(Int32 threadCount=0)
+  Int32 ThreadCount { get; }
+class ROS2.Net.Node
+  ctor(Ros2Context context, String name, NodeOptions options=null)
+  Ros2Context Context { get; }
+  NodeOptions Options { get; }
+  String Name { get; }
+  String Namespace { get; }
+  String FullyQualifiedName { get; }
+  NodeLogger Logger { get; }
+  RosClock Clock { get; }
+  CallbackGroup DefaultCallbackGroup { get; }
+  Boolean IsDisposed { get; }
+  Executor Executor { get; }
+  IReadOnlyList<Parameter> Parameters { get; }
+  IReadOnlyList<String> ParameterNames { get; }
+  IReadOnlyDictionary<String,ParameterValue> ParameterOverrides { get; }
+  String ResolveTopicName(String name, Boolean remap=True)
+  String ResolveServiceName(String name, Boolean remap=True)
+  Publisher<T> CreatePublisher<T>(String topic, Nullable<QosProfile> qos=null, PublisherOptions options=null)
+  Subscription<T> CreateSubscription<T>(String topic, Action<T> callback, Nullable<QosProfile> qos=null, SubscriptionOptions options=null, CallbackGroup group=null)
+  Subscription<T> CreateSubscription<T>(String topic, Action<T,MessageInfo> callback, Nullable<QosProfile> qos=null, SubscriptionOptions options=null, CallbackGroup group=null)
+  Subscription<T> CreateSubscription<T>(String topic, Func<T,ValueTask> callback, Nullable<QosProfile> qos=null, SubscriptionOptions options=null, CallbackGroup group=null)
+  Subscription<T> CreateSubscription<T>(String topic, Nullable<QosProfile> qos=null, SubscriptionOptions options=null)
+  SerializedPublisher CreateSerializedPublisher(String topic, MessageTypeInfo type, Nullable<QosProfile> qos=null)
+  SerializedSubscription CreateSerializedSubscription(String topic, MessageTypeInfo type, RmwSerializedHandler handler, Nullable<QosProfile> qos=null)
+  RosTimer CreateTimer(TimeSpan period, Action callback, CallbackGroup group=null, Boolean autostart=True)
+  RosTimer CreateTimer(TimeSpan period, Action<TimerInfo> callback, CallbackGroup group=null, Boolean autostart=True)
+  RosTimer CreateTimer(TimeSpan period, Func<ValueTask> callback, CallbackGroup group=null, Boolean autostart=True)
+  RosTimer CreateWallTimer(TimeSpan period, Action callback, CallbackGroup group=null, Boolean autostart=True)
+  GuardCondition CreateGuardCondition(Action callback, CallbackGroup group=null)
+  CallbackGroup CreateCallbackGroup(CallbackGroupType type)
+  ServiceServer<TRequest,TResponse> CreateService<TRequest,TResponse>(String name, Func<TRequest,TResponse> handler, Nullable<QosProfile> qos=null, CallbackGroup group=null)
+  ServiceServer<TRequest,TResponse> CreateService<TRequest,TResponse>(String name, Func<TRequest,CancellationToken,ValueTask<TResponse>> handler, Nullable<QosProfile> qos=null, CallbackGroup group=null)
+  ServiceClient<TRequest,TResponse> CreateClient<TRequest,TResponse>(String name, Nullable<QosProfile> qos=null)
+  ServiceServer<TRequest,TResponse> CreateServiceCore<TRequest,TResponse>(String name, ServiceTypeInfo type, Func<TRequest,RequestId,CancellationToken,ValueTask<TResponse>> handler, Nullable<QosProfile> qos=null, CallbackGroup group=null)
+  ServiceClient<TRequest,TResponse> CreateClientCore<TRequest,TResponse>(String name, ServiceTypeInfo type, Nullable<QosProfile> qos=null)
+  ActionServer<TGoal,TResult,TFeedback> CreateActionServer<TGoal,TResult,TFeedback>(String name, Func<ServerGoalHandle<TGoal,TResult,TFeedback>,CancellationToken,Task<TResult>> execute, ActionServerOptions<TGoal,TResult,TFeedback> options=null)
+  ActionClient<TGoal,TResult,TFeedback> CreateActionClient<TGoal,TResult,TFeedback>(String name)
+  ParameterValue DeclareParameter(String name, ParameterValue defaultValue, ParameterDescriptor descriptor=null, Boolean ignoreOverride=False)
+  T DeclareParameter<T>(String name, T defaultValue, String description=null, Boolean readOnly=False)
+  T DeclareParameter<T>(String name, T defaultValue, ParameterDescriptor descriptor)
+  Void UndeclareParameter(String name)
+  Boolean HasParameter(String name)
+  ParameterValue GetParameter(String name)
+  T GetParameter<T>(String name)
+  Boolean TryGetParameter(String name, ParameterValue& value)
+  T GetParameterOr<T>(String name, T fallback)
+  ParameterDescriptor DescribeParameter(String name)
+  SetParametersResult SetParameter(Parameter parameter)
+  SetParametersResult SetParameter(String name, Object value)
+  IReadOnlyList<SetParametersResult> SetParameters(IEnumerable<Parameter> parameters)
+  SetParametersResult SetParametersAtomically(IEnumerable<Parameter> parameters)
+  IDisposable AddOnSetParametersCallback(Func<IReadOnlyList<Parameter>,SetParametersResult> callback)
+  ValueTuple<IReadOnlyList<String>,IReadOnlyList<String>> ListParameters(IReadOnlyList<String> prefixes, UInt64 depth)
+  IReadOnlyList<NodeInfo> GetNodeNames()
+  IReadOnlyList<TopicInfo> GetTopicNamesAndTypes(Boolean includeHidden=False)
+  IReadOnlyList<TopicInfo> GetServiceNamesAndTypes(Boolean includeHidden=False)
+  IReadOnlyList<EndpointInfo> GetPublishersInfo(String topic)
+  IReadOnlyList<EndpointInfo> GetSubscriptionsInfo(String topic)
+  Int32 CountPublishers(String topic)
+  Int32 CountSubscribers(String topic)
+  IReadOnlyList<EndpointInfo> GetNodeEndpoints(String nodeName, String nodeNamespace)
+  Task<Boolean> WaitForGraphChangeAsync(TimeSpan timeout, CancellationToken cancellationToken=null)
+  Task SpinAsync(CancellationToken cancellationToken=null)
+  String ToString()
+  Void Dispose()
+  event Action<IReadOnlyList<ParameterChange>> ParametersChanged
+class ROS2.Net.NodeLogger
+  String Name { get; }
+  LogLevel MinimumLevel { get; set; }
+  IDisposable BeginScope<TState>(TState state)
+  Boolean IsEnabled(LogLevel logLevel)
+  Void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState,Exception,String> formatter)
+  static Byte ToRosLevel(LogLevel level)
+  static LogLevel FromRosLevel(Byte level)
+class ROS2.Net.NodeOptions
+  ctor()
+  String Namespace { get; set; }
+  List<RemapRule> Remappings { get; }
+  List<Parameter> ParameterOverrides { get; }
+  List<String> Arguments { get; }
+  Boolean UseGlobalArguments { get; set; }
+  Boolean StartParameterServices { get; set; }
+  Boolean StartParameterEventPublisher { get; set; }
+  Boolean EnableRosout { get; set; }
+  Boolean AllowUndeclaredParameters { get; set; }
+  Boolean AutomaticallyDeclareParametersFromOverrides { get; set; }
+  Nullable<Boolean> UseIntraProcessComms { get; set; }
+  QosProfile ParameterEventQos { get; set; }
+  NodeOptions WithNamespace(String ns)
+  NodeOptions WithParameter(String name, Object value)
+  NodeOptions WithRemap(String from, String to)
+class ROS2.Net.Parameter
+  ctor(String Name, ParameterValue Value)
+  ctor(String name, Object value)
+  String Name { get; set; }
+  ParameterValue Value { get; set; }
+  Parameter ToMsg()
+  static Parameter FromMsg(Parameter m)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Parameter other)
+  Parameter <Clone>$()
+  Void Deconstruct(String& Name, ParameterValue& Value)
+class ROS2.Net.ParameterAlreadyDeclaredException : ParameterException
+  ctor(String name)
+class ROS2.Net.ParameterChange
+  ctor(String Name, ParameterValue OldValue, ParameterValue NewValue)
+  String Name { get; set; }
+  ParameterValue OldValue { get; set; }
+  ParameterValue NewValue { get; set; }
+  Boolean IsNew { get; }
+  Boolean IsDeleted { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ParameterChange other)
+  ParameterChange <Clone>$()
+  Void Deconstruct(String& Name, ParameterValue& OldValue, ParameterValue& NewValue)
+class ROS2.Net.ParameterClient
+  ctor(Node node, String remoteNode)
+  String RemoteNode { get; }
+  TimeSpan Timeout { get; set; }
+  Task<Boolean> WaitForServiceAsync(Nullable<TimeSpan> timeout=null, CancellationToken cancellationToken=null)
+  Task<IReadOnlyList<Parameter>> GetAsync(IEnumerable<String> names, CancellationToken cancellationToken=null)
+  Task<ParameterValue> GetAsync(String name, CancellationToken cancellationToken=null)
+  Task<IReadOnlyList<SetParametersResult>> SetAsync(IEnumerable<Parameter> parameters, CancellationToken cancellationToken=null)
+  Task<SetParametersResult> SetAsync(String name, Object value, CancellationToken cancellationToken=null)
+  Task<SetParametersResult> SetAtomicallyAsync(IEnumerable<Parameter> parameters, CancellationToken cancellationToken=null)
+  Task<IReadOnlyList<String>> ListAsync(IEnumerable<String> prefixes=null, UInt64 depth=0, CancellationToken cancellationToken=null)
+  Task<IReadOnlyList<ParameterDescriptor>> DescribeAsync(IEnumerable<String> names, CancellationToken cancellationToken=null)
+  Task<IReadOnlyList<ParameterType>> GetTypesAsync(IEnumerable<String> names, CancellationToken cancellationToken=null)
+  Void Dispose()
+class ROS2.Net.ParameterDescriptor
+  ctor()
+  String Name { get; set; }
+  ParameterType Type { get; set; }
+  String Description { get; set; }
+  String AdditionalConstraints { get; set; }
+  Boolean ReadOnly { get; set; }
+  Boolean DynamicTyping { get; set; }
+  FloatingPointRange FloatingPointRange { get; set; }
+  IntegerRange IntegerRange { get; set; }
+  ParameterDescriptor ToMsg()
+  static ParameterDescriptor FromMsg(ParameterDescriptor m)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ParameterDescriptor other)
+  ParameterDescriptor <Clone>$()
+class ROS2.Net.ParameterException : InvalidOperationException
+  ctor(String message)
+class ROS2.Net.ParameterNotDeclaredException : ParameterException
+  ctor(String name)
+enum ROS2.Net.ParameterType
+  NotSet, Bool, Integer, Double, String, ByteArray, BoolArray, IntegerArray, DoubleArray, StringArray
+class ROS2.Net.ParameterValue
+  static ParameterValue NotSet { get; }
+  ParameterType Type { get; }
+  Boolean IsSet { get; }
+  Object Value { get; }
+  static ParameterValue From(Boolean v)
+  static ParameterValue From(Int64 v)
+  static ParameterValue From(Double v)
+  static ParameterValue From(String v)
+  static ParameterValue From(Byte[] v)
+  static ParameterValue From(Boolean[] v)
+  static ParameterValue From(Int64[] v)
+  static ParameterValue From(Double[] v)
+  static ParameterValue From(String[] v)
+  static ParameterValue FromObject(Object value)
+  Boolean AsBool()
+  Int64 AsInteger()
+  Double AsDouble()
+  String AsString()
+  Byte[] AsByteArray()
+  Boolean[] AsBoolArray()
+  Int64[] AsIntegerArray()
+  Double[] AsDoubleArray()
+  String[] AsStringArray()
+  T As<T>()
+  ParameterValue ToMsg()
+  static ParameterValue FromMsg(ParameterValue m)
+  static ParameterValue Parse(String text)
+  Boolean Equals(ParameterValue other)
+  Boolean Equals(Object obj)
+  Int32 GetHashCode()
+  String ToString()
+class ROS2.Net.ParameterYaml
+  static IReadOnlyList<Parameter> Load(String yaml, String fullyQualifiedNodeName)
+  static IReadOnlyList<Parameter> LoadFile(String path, String fullyQualifiedNodeName)
+  static IReadOnlyDictionary<String,IReadOnlyList<Parameter>> LoadAll(String yaml)
+  static String Dump(String fullyQualifiedNodeName, IEnumerable<Parameter> parameters)
+  static Boolean Matches(String pattern, String fqn)
+  static ParameterValue ParseScalar(String text)
+  static ParameterValue ParseScalarOrList(String text)
+class ROS2.Net.Publisher`1
+  Node Node { get; }
+  String TopicName { get; }
+  QosProfile Qos { get; }
+  Gid Gid { get; }
+  Int32 SubscriptionCount { get; }
+  Void Publish(T message)
+  Void AssertLiveliness()
+  Task<Boolean> WaitForSubscriptionsAsync(Int32 count=1, Nullable<TimeSpan> timeout=null, CancellationToken cancellationToken=null)
+  Void Dispose()
+  event Action<QosEvent> QosEventRaised
+class ROS2.Net.PublisherOptions
+  ctor()
+  Nullable<Boolean> UseIntraProcessComms { get; set; }
+  Action<QosEvent> EventCallback { get; set; }
+enum ROS2.Net.QosCompatibility
+  Compatible, Warning, Error
+struct ROS2.Net.QosEvent
+  ctor(QosEventKind Kind, Int32 TotalCount, Int32 TotalCountChange, Int32 CurrentCount=0, String Detail=null)
+  QosEventKind Kind { get; set; }
+  Int32 TotalCount { get; set; }
+  Int32 TotalCountChange { get; set; }
+  Int32 CurrentCount { get; set; }
+  String Detail { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(QosEvent other)
+  Void Deconstruct(QosEventKind& Kind, Int32& TotalCount, Int32& TotalCountChange, Int32& CurrentCount, String& Detail)
+enum ROS2.Net.QosEventKind
+  RequestedDeadlineMissed, OfferedDeadlineMissed, LivelinessChanged, LivelinessLost, RequestedIncompatibleQos, OfferedIncompatibleQos, MessageLost, Matched
+class ROS2.Net.QosMatching
+  static QosCompatibility Check(QosProfile offered, QosProfile requested, String& reason)
+  static Boolean IsCompatible(QosProfile offered, QosProfile requested)
+struct ROS2.Net.QosProfile
+  ctor(Int32 depth)
+  HistoryPolicy History { get; set; }
+  Int32 Depth { get; set; }
+  ReliabilityPolicy Reliability { get; set; }
+  DurabilityPolicy Durability { get; set; }
+  Nullable<TimeSpan> Deadline { get; set; }
+  Nullable<TimeSpan> Lifespan { get; set; }
+  LivelinessPolicy Liveliness { get; set; }
+  Nullable<TimeSpan> LivelinessLeaseDuration { get; set; }
+  Boolean AvoidRosNamespaceConventions { get; set; }
+  static QosProfile Default { get; }
+  static QosProfile SensorData { get; }
+  static QosProfile ServicesDefault { get; }
+  static QosProfile Parameters { get; }
+  static QosProfile ParameterEvents { get; }
+  static QosProfile Latched { get; }
+  static QosProfile Rosout { get; }
+  static QosProfile ActionStatus { get; }
+  static QosProfile SystemDefault { get; }
+  Int32 Capacity { get; }
+  QosProfile KeepLast(Int32 depth)
+  QosProfile KeepAll()
+  QosProfile AsReliable()
+  QosProfile AsBestEffort()
+  QosProfile AsTransientLocal()
+  QosProfile AsVolatile()
+  QosProfile WithDeadline(Nullable<TimeSpan> deadline)
+  QosProfile WithLifespan(Nullable<TimeSpan> lifespan)
+  QosProfile WithLiveliness(LivelinessPolicy policy, Nullable<TimeSpan> lease=null)
+  QosProfile Resolve()
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(QosProfile other)
+class ROS2.Net.Rate
+  ctor(Double hz, RosClock clock=null)
+  RosDuration Period { get; }
+  ValueTask<Boolean> SleepAsync(CancellationToken cancellationToken=null)
+  Void Reset()
+class ROS2.Net.RealtimeExecutor : Executor
+  ctor(Boolean busyWait=False, ThreadPriority priority=Highest)
+  Boolean BusyWait { get; }
+  ThreadPriority Priority { get; }
+enum ROS2.Net.ReliabilityPolicy
+  SystemDefault, Reliable, BestEffort
+class ROS2.Net.RemapRule
+  ctor(String From, String To, String NodeName=null)
+  String From { get; set; }
+  String To { get; set; }
+  String NodeName { get; set; }
+  static RemapRule Parse(String text)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(RemapRule other)
+  RemapRule <Clone>$()
+  Void Deconstruct(String& From, String& To, String& NodeName)
+class ROS2.Net.Rmw.EndpointInfo
+  ctor(String NodeName, String NodeNamespace, String Name, String TypeName, EndpointKind Kind, Gid Gid, QosProfile Qos)
+  String NodeName { get; set; }
+  String NodeNamespace { get; set; }
+  String Name { get; set; }
+  String TypeName { get; set; }
+  EndpointKind Kind { get; set; }
+  Gid Gid { get; set; }
+  QosProfile Qos { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(EndpointInfo other)
+  EndpointInfo <Clone>$()
+  Void Deconstruct(String& NodeName, String& NodeNamespace, String& Name, String& TypeName, EndpointKind& Kind, Gid& Gid, QosProfile& Qos)
+enum ROS2.Net.Rmw.EndpointKind
+  Publisher, Subscription, ServiceServer, ServiceClient
+struct ROS2.Net.Rmw.Gid
+  ctor(UInt64 High, UInt64 Low)
+  UInt64 High { get; set; }
+  UInt64 Low { get; set; }
+  static Gid Empty { get; }
+  static Gid Create(ReadOnlySpan<Byte> prefix12, UInt32 entityId)
+  static Gid FromBytes(ReadOnlySpan<Byte> bytes16)
+  static Gid NewRandom()
+  Void WriteTo(Span<Byte> destination)
+  Byte[] ToArray()
+  Boolean SameParticipant(Gid other)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Gid other)
+  Void Deconstruct(UInt64& High, UInt64& Low)
+class ROS2.Net.Rmw.InProcess.InProcessRmw
+  ctor(Int32 domainId=0, Boolean serializeMessages=False)
+  String Identifier { get; }
+  Boolean SupportsIgnoreLocalPublications { get; }
+  Boolean SerializeMessages { get; }
+  IRmwGraph Graph { get; }
+  IRmwNode CreateNode(String name, String namespace)
+  IReadOnlyList<NodeInfo> GetNodes()
+  IReadOnlyList<EndpointInfo> GetEndpoints()
+  ValueTask DisposeAsync()
+  event Action Changed
+class ROS2.Net.Rmw.InProcess.InProcessRmwFactory
+  ctor()
+  String Identifier { get; }
+  ValueTask<IRmwImplementation> CreateAsync(RmwContextOptions options, CancellationToken cancellationToken)
+interface ROS2.Net.Rmw.IRmwEndpoint
+  Gid Gid { get; }
+  Int32 MatchedCount { get; }
+  event Action<QosEvent> QosEventRaised
+interface ROS2.Net.Rmw.IRmwFactory
+  String Identifier { get; }
+  ValueTask<IRmwImplementation> CreateAsync(RmwContextOptions options, CancellationToken cancellationToken)
+interface ROS2.Net.Rmw.IRmwGraph
+  IReadOnlyList<NodeInfo> GetNodes()
+  IReadOnlyList<EndpointInfo> GetEndpoints()
+  event Action Changed
+interface ROS2.Net.Rmw.IRmwImplementation
+  String Identifier { get; }
+  Boolean SupportsIgnoreLocalPublications { get; }
+  IRmwGraph Graph { get; }
+  IRmwNode CreateNode(String name, String namespace)
+interface ROS2.Net.Rmw.IRmwNode
+  String Name { get; }
+  String Namespace { get; }
+  IRmwPublisher<T> CreatePublisher<T>(RmwTopicSpec spec)
+  IRmwSubscription CreateSubscription<T>(RmwTopicSpec spec, RmwMessageHandler<T> handler)
+  IRmwSerializedPublisher CreateSerializedPublisher(RmwTopicSpec spec)
+  IRmwSubscription CreateSerializedSubscription(RmwTopicSpec spec, RmwSerializedHandler handler)
+  IRmwServiceServer<TResponse> CreateServiceServer<TRequest,TResponse>(RmwServiceSpec spec, Action<RequestId,TRequest> onRequest)
+  IRmwServiceClient<TRequest> CreateServiceClient<TRequest,TResponse>(RmwServiceSpec spec, Action<Int64,TResponse> onResponse)
+interface ROS2.Net.Rmw.IRmwPublisher`1
+  Void Publish(T message)
+  Void AssertLiveliness()
+interface ROS2.Net.Rmw.IRmwSerializedPublisher
+  Void Publish(ReadOnlySpan<Byte> cdr)
+interface ROS2.Net.Rmw.IRmwServiceClient`1
+  Boolean IsServiceAvailable { get; }
+  Int64 SendRequest(TRequest request)
+interface ROS2.Net.Rmw.IRmwServiceServer`1
+  Void SendResponse(RequestId requestId, TResponse response)
+interface ROS2.Net.Rmw.IRmwSubscription
+struct ROS2.Net.Rmw.MessageInfo
+  ctor(RosTime SourceTimestamp, RosTime ReceivedTimestamp, Gid PublisherGid, Int64 SequenceNumber, Boolean FromIntraProcess=False)
+  RosTime SourceTimestamp { get; set; }
+  RosTime ReceivedTimestamp { get; set; }
+  Gid PublisherGid { get; set; }
+  Int64 SequenceNumber { get; set; }
+  Boolean FromIntraProcess { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(MessageInfo other)
+  Void Deconstruct(RosTime& SourceTimestamp, RosTime& ReceivedTimestamp, Gid& PublisherGid, Int64& SequenceNumber, Boolean& FromIntraProcess)
+class ROS2.Net.Rmw.NodeInfo
+  ctor(String Name, String Namespace, String Enclave=/)
+  String Name { get; set; }
+  String Namespace { get; set; }
+  String Enclave { get; set; }
+  String FullyQualifiedName { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(NodeInfo other)
+  NodeInfo <Clone>$()
+  Void Deconstruct(String& Name, String& Namespace, String& Enclave)
+struct ROS2.Net.Rmw.RequestId
+  ctor(Gid ClientGid, Int64 SequenceNumber)
+  Gid ClientGid { get; set; }
+  Int64 SequenceNumber { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(RequestId other)
+  Void Deconstruct(Gid& ClientGid, Int64& SequenceNumber)
+class ROS2.Net.Rmw.RmwContextOptions
+  ctor()
+  Int32 DomainId { get; set; }
+  String Enclave { get; set; }
+  Boolean LocalhostOnly { get; set; }
+  ILoggerFactory LoggerFactory { get; set; }
+  IReadOnlyDictionary<String,String> Settings { get; set; }
+class ROS2.Net.Rmw.RmwEndpointOptions
+  ctor()
+  static RmwEndpointOptions Default { get; }
+  Boolean IgnoreLocalPublications { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(RmwEndpointOptions other)
+  RmwEndpointOptions <Clone>$()
+class ROS2.Net.Rmw.RmwMessageHandler`1 : MulticastDelegate
+  ctor(Object object, IntPtr method)
+  Void Invoke(T message, MessageInfo info)
+  IAsyncResult BeginInvoke(T message, MessageInfo info, AsyncCallback callback, Object object)
+  Void EndInvoke(IAsyncResult result)
+class ROS2.Net.Rmw.RmwRegistry
+  static IReadOnlyList<String> Identifiers { get; }
+  static Void Register(IRmwFactory factory)
+  static Boolean TryGet(String identifier, IRmwFactory& factory)
+  static IRmwFactory GetDefault()
+class ROS2.Net.Rmw.RmwSerializedHandler : MulticastDelegate
+  ctor(Object object, IntPtr method)
+  Void Invoke(ReadOnlySpan<Byte> cdr, MessageInfo info)
+  IAsyncResult BeginInvoke(ReadOnlySpan<Byte> cdr, MessageInfo info, AsyncCallback callback, Object object)
+  Void EndInvoke(IAsyncResult result)
+class ROS2.Net.Rmw.RmwServiceSpec
+  ctor(String ServiceName, ServiceTypeInfo Type, QosProfile Qos)
+  String ServiceName { get; set; }
+  ServiceTypeInfo Type { get; set; }
+  QosProfile Qos { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(RmwServiceSpec other)
+  RmwServiceSpec <Clone>$()
+  Void Deconstruct(String& ServiceName, ServiceTypeInfo& Type, QosProfile& Qos)
+class ROS2.Net.Rmw.RmwTopicSpec
+  ctor(String TopicName, MessageTypeInfo Type, QosProfile Qos, RmwEndpointOptions Options)
+  String TopicName { get; set; }
+  MessageTypeInfo Type { get; set; }
+  QosProfile Qos { get; set; }
+  RmwEndpointOptions Options { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(RmwTopicSpec other)
+  RmwTopicSpec <Clone>$()
+  Void Deconstruct(String& TopicName, MessageTypeInfo& Type, QosProfile& Qos, RmwEndpointOptions& Options)
+class ROS2.Net.Rmw.TopicInfo
+  ctor(String Name, IReadOnlyList<String> Types)
+  String Name { get; set; }
+  IReadOnlyList<String> Types { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(TopicInfo other)
+  TopicInfo <Clone>$()
+  Void Deconstruct(String& Name, IReadOnlyList`1& Types)
+class ROS2.Net.Ros2Context
+  Ros2ContextOptions Options { get; }
+  IRmwImplementation Rmw { get; }
+  Int32 DomainId { get; }
+  ILoggerFactory LoggerFactory { get; }
+  RosArguments Arguments { get; }
+  Boolean UseIntraProcessComms { get; }
+  CancellationToken ShutdownToken { get; }
+  Boolean IsShutdown { get; }
+  IReadOnlyList<Node> Nodes { get; }
+  static Task<Ros2Context> CreateAsync(Ros2ContextOptions options=null, CancellationToken cancellationToken=null)
+  static Ros2Context Create(Ros2ContextOptions options=null)
+  Node CreateNode(String name, String namespace=null, NodeOptions options=null)
+  LifecycleNode CreateLifecycleNode(String name, String namespace=null, NodeOptions options=null)
+  Task SpinAsync(CancellationToken cancellationToken=null, Executor executor=null)
+  Void Shutdown(String reason=user request)
+  Task WaitForShutdownAsync(CancellationToken cancellationToken=null)
+  ValueTask DisposeAsync()
+  Void Dispose()
+  event Action<String> ShuttingDown
+class ROS2.Net.Ros2ContextOptions
+  ctor()
+  Nullable<Int32> DomainId { get; set; }
+  IRmwFactory Rmw { get; set; }
+  Dictionary<String,String> RmwSettings { get; }
+  Boolean UseIntraProcessComms { get; set; }
+  ILoggerFactory LoggerFactory { get; set; }
+  IEnumerable<String> Arguments { get; set; }
+  Nullable<Boolean> LocalhostOnly { get; set; }
+  String Enclave { get; set; }
+  Boolean HandleShutdownSignals { get; set; }
+class ROS2.Net.RosArguments
+  ctor()
+  static RosArguments Empty { get; }
+  List<RemapRule> Remappings { get; }
+  List<ValueTuple<String,Parameter>> Parameters { get; }
+  List<String> ParameterFiles { get; }
+  Nullable<LogLevel> LogLevel { get; set; }
+  Dictionary<String,LogLevel> LoggerLevels { get; }
+  String Enclave { get; set; }
+  List<String> UnparsedArguments { get; }
+  static RosArguments Parse(IEnumerable<String> args)
+  Dictionary<String,ParameterValue> ParametersFor(String nodeName, String fullyQualifiedName)
+class ROS2.Net.RosClock
+  ctor(ClockType type=RosTime)
+  ClockType Type { get; }
+  Boolean IsSimTimeActive { get; }
+  RosTime Now()
+  Void EnableSimTime()
+  Void DisableSimTime()
+  Void SetSimTime(RosTime time)
+  ValueTask WaitUntilAsync(RosTime target, CancellationToken cancellationToken)
+  event Action<RosTime,RosTime> TimeJumped
+class ROS2.Net.RosComponentAttribute : Attribute
+  ctor(String name=null)
+  String Name { get; }
+struct ROS2.Net.RosDuration
+  ctor(Int64 Nanoseconds)
+  Int64 Nanoseconds { get; set; }
+  static RosDuration Zero { get; }
+  Double TotalSeconds { get; }
+  static RosDuration FromSeconds(Double seconds)
+  static RosDuration FromMilliseconds(Double ms)
+  static RosDuration FromTimeSpan(TimeSpan span)
+  TimeSpan ToTimeSpan()
+  Duration ToMsg()
+  static RosDuration FromMsg(Duration msg)
+  Int32 CompareTo(RosDuration other)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(RosDuration other)
+  Void Deconstruct(Int64& Nanoseconds)
+class ROS2.Net.RosNames
+  static Void ValidateNodeName(String name)
+  static String NormalizeNamespace(String ns)
+  static String FullyQualifiedNodeName(String ns, String name)
+  static String ExpandTopicName(String name, String nodeName, String nodeNamespace)
+  static Void ValidateFullyQualifiedName(String name, String what=name)
+  static Boolean IsHidden(String name)
+  static String Remap(String expandedName, String originalName, String nodeName, String nodeNamespace, IReadOnlyList<RemapRule> rules)
+struct ROS2.Net.RosTime
+  ctor(Int64 Nanoseconds, ClockType Clock=RosTime)
+  Int64 Nanoseconds { get; set; }
+  ClockType Clock { get; set; }
+  static RosTime Zero { get; }
+  Double Seconds { get; }
+  Boolean IsZero { get; }
+  static RosTime Now()
+  static RosTime FromSeconds(Double seconds, ClockType clock=RosTime)
+  static RosTime FromDateTime(DateTime utc, ClockType clock=SystemTime)
+  DateTime ToDateTime()
+  Time ToMsg()
+  Void CopyTo(Time msg)
+  static RosTime FromMsg(Time msg, ClockType clock=RosTime)
+  Int32 CompareTo(RosTime other)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(RosTime other)
+  Void Deconstruct(Int64& Nanoseconds, ClockType& Clock)
+class ROS2.Net.RosTimer : Waitable
+  TimeSpan Period { get; set; }
+  Boolean IsCanceled { get; }
+  RosClock Clock { get; }
+  TimeSpan TimeUntilNextCall { get; }
+  Void Cancel()
+  Void Reset()
+class ROS2.Net.RosTypeRegistry
+  static IEnumerable<MessageTypeInfo> Messages { get; }
+  static IEnumerable<ServiceTypeInfo> Services { get; }
+  static IEnumerable<ActionTypeInfo> Actions { get; }
+  static Void RegisterMessage<T>()
+  static Void Register(MessageTypeInfo info)
+  static Void RegisterService<TRequest,TResponse>()
+  static Void RegisterAction<TGoal,TResult,TFeedback>()
+  static Boolean TryGetMessage(String name, MessageTypeInfo& info)
+  static Boolean TryGetMessage(Type clrType, MessageTypeInfo& info)
+  static Boolean TryGetService(String name, ServiceTypeInfo& info)
+  static Boolean TryGetAction(String name, ActionTypeInfo& info)
+  static IRosMessage CreateMessage(String name)
+  static Void EnsureLoaded(Assembly assembly)
+  static String GetFullDefinition(String name)
+  static String ShortName(String fullName)
+class ROS2.Net.Serialization.CdrArrays
+  static T[] Ensure<T>(T[] existing, Int32 length)
+  static T[] EnsureMessages<T>(T[] existing, Int32 length)
+  static T[] Copy<T>(T[] source)
+  static T[] CloneMessages<T>(T[] source)
+class ROS2.Net.Serialization.CdrException : Exception
+  ctor(String message)
+struct ROS2.Net.Serialization.CdrReader
+  ctor(ReadOnlySpan<Byte> data, Boolean hasEncapsulation=True)
+  ctor(ReadOnlySpan<Byte> data, Boolean bigEndian, Int32 origin)
+  Int32 Position { get; }
+  Int32 Remaining { get; }
+  Boolean IsBigEndian { get; }
+  Boolean ReadBool()
+  Byte ReadByte()
+  SByte ReadSByte()
+  Int16 ReadInt16()
+  UInt16 ReadUInt16()
+  Int32 ReadInt32()
+  UInt32 ReadUInt32()
+  Int64 ReadInt64()
+  UInt64 ReadUInt64()
+  Single ReadSingle()
+  Double ReadDouble()
+  String ReadString()
+  String ReadWString()
+  Int32 ReadSequenceLength(Int32 minElementSize)
+  T[] ReadArray<T>(T[] existing, Int32 length)
+  T[] ReadSequence<T>(T[] existing)
+  Void ReadBlock<T>(Span<T> destination)
+  ReadOnlySpan<Byte> ReadRaw(Int32 length)
+  Void Align(Int32 alignment)
+  static T Deserialize<T>(ReadOnlySpan<Byte> data, T reuse=null)
+class ROS2.Net.Serialization.CdrWriter
+  ctor(Int32 initialCapacity=256)
+  Int32 Length { get; }
+  ReadOnlySpan<Byte> WrittenSpan { get; }
+  ReadOnlyMemory<Byte> WrittenMemory { get; }
+  field static UInt16 CdrLittleEndian
+  Void Reset(Boolean writeEncapsulation=True)
+  Byte[] ToArray()
+  Void WriteBool(Boolean value)
+  Void WriteByte(Byte value)
+  Void WriteSByte(SByte value)
+  Void WriteInt16(Int16 value)
+  Void WriteUInt16(UInt16 value)
+  Void WriteInt32(Int32 value)
+  Void WriteUInt32(UInt32 value)
+  Void WriteInt64(Int64 value)
+  Void WriteUInt64(UInt64 value)
+  Void WriteSingle(Single value)
+  Void WriteDouble(Double value)
+  Void WriteString(String value)
+  Void WriteWString(String value)
+  Void WriteArray<T>(T[] values, Int32 length, String field)
+  Void WriteSequence<T>(T[] values, Int32 bound, String field)
+  Void WriteSequence<T>(ReadOnlySpan<T> values)
+  Void WriteSequenceLength(Int32 count, Int32 bound, String field)
+  Void CheckFixedLength(Int32 actual, Int32 expected, String field)
+  Void WriteRaw(ReadOnlySpan<Byte> bytes)
+  Void Align(Int32 alignment)
+  Void Dispose()
+  static Void SerializeWith<TState>(IRosMessage message, TState state, ReadOnlySpanAction<Byte,TState> consume)
+  static Byte[] Serialize(IRosMessage message)
+class ROS2.Net.Serialization.DynamicMessageType
+  String Name { get; }
+  MessageDef Root { get; }
+  static DynamicMessageType Parse(String typeName, String fullDefinition)
+  static Boolean TryFromRegistry(String typeName, DynamicMessageType& type)
+  String ToJson(ReadOnlySpan<Byte> cdr, Boolean indented=False)
+  Void WriteJson(ReadOnlySpan<Byte> cdr, Utf8JsonWriter writer)
+  Byte[] FromJson(JsonElement element)
+  Byte[] FromJson(String json)
+class ROS2.Net.Serialization.RosJson
+  static String ToJsonString(IRosMessage message, Boolean indented=False)
+  static Byte[] ToJsonBytes(IRosMessage message)
+  static T FromJson<T>(String json)
+  static Void Populate(IRosMessage message, JsonElement element)
+  static Void WriteFloat(Utf8JsonWriter writer, String name, Double value)
+  static Void WriteFloat(Utf8JsonWriter writer, String name, Single value)
+  static Void WriteBytes(Utf8JsonWriter writer, String name, Byte[] value)
+  static Void WriteArray(Utf8JsonWriter writer, String name, Boolean[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, SByte[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, Int16[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, UInt16[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, Int32[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, UInt32[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, Int64[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, UInt64[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, Single[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, Double[] values)
+  static Void WriteArray(Utf8JsonWriter writer, String name, String[] values)
+  static Void WriteMessages<T>(Utf8JsonWriter writer, String name, T[] values)
+  static Boolean ReadBool(JsonElement e)
+  static Byte ReadByte(JsonElement e)
+  static SByte ReadSByte(JsonElement e)
+  static Int16 ReadInt16(JsonElement e)
+  static UInt16 ReadUInt16(JsonElement e)
+  static Int32 ReadInt32(JsonElement e)
+  static UInt32 ReadUInt32(JsonElement e)
+  static Int64 ReadInt64(JsonElement e)
+  static UInt64 ReadUInt64(JsonElement e)
+  static Single ReadSingle(JsonElement e)
+  static Double ReadDouble(JsonElement e)
+  static String ReadString(JsonElement e)
+  static Byte[] ReadBytes(JsonElement e)
+  static T[] ReadArray<T>(JsonElement e, Func<JsonElement,T> read)
+  static T[] ReadMessages<T>(JsonElement e)
+class ROS2.Net.SerializedPublisher
+  String TopicName { get; }
+  MessageTypeInfo Type { get; }
+  Int32 SubscriptionCount { get; }
+  Void Publish(ReadOnlySpan<Byte> cdr)
+  Void Dispose()
+class ROS2.Net.SerializedSubscription
+  String TopicName { get; }
+  MessageTypeInfo Type { get; }
+  Int32 PublisherCount { get; }
+  Void Dispose()
+class ROS2.Net.ServerGoalHandle`3
+  Guid GoalId { get; }
+  TGoal Goal { get; }
+  RosTime AcceptedAt { get; }
+  GoalStatus Status { get; }
+  Boolean IsActive { get; }
+  Boolean IsCancelRequested { get; }
+  CancellationToken CancellationToken { get; }
+  Void PublishFeedback(TFeedback feedback)
+  Void Abort()
+  Void Canceled()
+class ROS2.Net.ServiceClient`2
+  String ServiceName { get; }
+  ServiceTypeInfo Type { get; }
+  Boolean IsServiceReady { get; }
+  Int32 PendingRequestCount { get; }
+  Task<Boolean> WaitForServiceAsync(Nullable<TimeSpan> timeout=null, CancellationToken cancellationToken=null)
+  Task<TResponse> CallAsync(TRequest request, Nullable<TimeSpan> timeout=null, CancellationToken cancellationToken=null)
+  Void Dispose()
+class ROS2.Net.ServiceNotAvailableException : InvalidOperationException
+  ctor(String service)
+class ROS2.Net.ServiceServer`2 : Waitable
+  String ServiceName { get; }
+  ServiceTypeInfo Type { get; }
+  Void SendResponse(RequestId requestId, TResponse response)
+class ROS2.Net.ServiceTimeoutException : TimeoutException
+  ctor(String service, TimeSpan timeout)
+class ROS2.Net.ServiceTypeInfo
+  ctor(String Name, MessageTypeInfo Request, MessageTypeInfo Response)
+  String Name { get; set; }
+  MessageTypeInfo Request { get; set; }
+  MessageTypeInfo Response { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ServiceTypeInfo other)
+  ServiceTypeInfo <Clone>$()
+  Void Deconstruct(String& Name, MessageTypeInfo& Request, MessageTypeInfo& Response)
+class ROS2.Net.SetParametersResult
+  ctor(Boolean Successful, String Reason=)
+  Boolean Successful { get; set; }
+  String Reason { get; set; }
+  static SetParametersResult Success { get; }
+  static SetParametersResult Failure(String reason)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(SetParametersResult other)
+  SetParametersResult <Clone>$()
+  Void Deconstruct(Boolean& Successful, String& Reason)
+class ROS2.Net.SingleThreadedExecutor : Executor
+  ctor()
+class ROS2.Net.Subscription`1 : Waitable
+  String TopicName { get; }
+  QosProfile Qos { get; }
+  Gid Gid { get; }
+  Int32 PublisherCount { get; }
+  Int64 ReceivedCount { get; }
+  IAsyncEnumerable<T> ReadAllAsync(CancellationToken cancellationToken=null)
+  ValueTask<T> TakeAsync(CancellationToken cancellationToken=null)
+  Boolean TryTake(T& message)
+  event Action<QosEvent> QosEventRaised
+class ROS2.Net.SubscriptionOptions
+  ctor()
+  Nullable<Boolean> UseIntraProcessComms { get; set; }
+  Boolean IgnoreLocalPublications { get; set; }
+  Func<IRosMessage,Boolean> ContentFilter { get; set; }
+  Action<QosEvent> EventCallback { get; set; }
+struct ROS2.Net.TimerInfo
+  ctor(RosTime ExpectedCallTime, RosTime ActualCallTime)
+  RosTime ExpectedCallTime { get; set; }
+  RosTime ActualCallTime { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(TimerInfo other)
+  Void Deconstruct(RosTime& ExpectedCallTime, RosTime& ActualCallTime)
+class ROS2.Net.Waitable
+  Node Node { get; }
+  CallbackGroup Group { get; }
+  Boolean IsDisposed { get; }
+  Void Dispose()

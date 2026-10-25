@@ -1,0 +1,17 @@
+@page "/"
+@using {{Namespace}}.Services
+@inject AppRuntime Runtime
+
+<PageTitle>{{ProjectName}}</PageTitle>
+
+<h1>Home robot</h1>
+<p class="muted">@AppTarget.Describe(). Drive with the joystick (or W A S D) and watch the sensors.</p>
+
+<section class="grid">
+    <div class="card"><h2>Map</h2><OccupancyGridView Topic="/map" /></div>
+    <div class="card"><h2>LiDAR</h2><LaserScanView Topic="@AppTarget.Topic("scan")" MaxRange="4" /></div>
+    @* SAFETY: joystick limits come from AppTarget (conservative for real robots). *@
+    <div class="card"><h2>Drive</h2><TeleopJoystick Topic="@AppTarget.Topic("cmd_vel")" MaxLinear="@AppTarget.MaxLinearSpeed" MaxAngular="@AppTarget.MaxAngularSpeed" /></div>
+    <div class="card"><h2>Battery</h2><BatteryGauge Topic="@AppTarget.Topic("battery_state")" /></div>
+    <div class="card"><h2>Speed</h2><LivePlot Topic="@AppTarget.Topic("odom")" Fields="@(["twist.twist.linear.x", "twist.twist.angular.z"])" /></div>
+</section>

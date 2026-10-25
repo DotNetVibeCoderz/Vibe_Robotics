@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net</RootNamespace>
+    <Description>ROS2.Net core: nodes, publishers, subscriptions, services, actions, parameters, lifecycle nodes, executors, QoS, time, CDR serialization and the middleware (RMW) abstraction, with an in-process zero-copy middleware built in.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Rosidl\ROS2.Net.Rosidl.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Rosidl.Generator\ROS2.Net.Rosidl.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Interfaces the runtime itself depends on: time, UUIDs, actions, parameters, lifecycle, logging, composition. -->
+    <AdditionalFiles Include="..\..\interfaces\core\**\*.msg;..\..\interfaces\core\**\*.srv;..\..\interfaces\core\**\*.action" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Tests" />
+    <InternalsVisibleTo Include="ROS2.Net.Rmw.Rtps" />
+    <InternalsVisibleTo Include="ROS2.Net.Rmw.Rosbridge" />
+  </ItemGroup>
+
+</Project>

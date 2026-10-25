@@ -1,0 +1,18 @@
+.sim { position: relative; overflow: hidden; background: var(--rn-bg); }
+.sim.bare { background: transparent; }
+svg { width: 100%; height: 100%; display: block; }
+.floor { fill: color-mix(in srgb, var(--rn-surface) 70%, var(--rn-bg)); }
+.gridline { stroke: var(--rn-line); stroke-width: 0.012; opacity: .7; }
+.obs { fill: color-mix(in srgb, var(--rn-muted) 40%, var(--rn-surface-2)); stroke: none; }
+.obs.wall { fill: var(--rn-ink); opacity: .82; }
+.obs.shelf { fill: color-mix(in srgb, var(--rn-violet) 28%, var(--rn-surface-2)); stroke: color-mix(in srgb, var(--rn-violet) 55%, transparent); stroke-width: 0.02; }
+.obs.crate { fill: color-mix(in srgb, var(--rn-warn) 55%, var(--rn-surface-2)); }
+.obs.dock { fill: color-mix(in srgb, var(--rn-ok) 35%, transparent); stroke: var(--rn-ok); stroke-width: 0.02; }
+.trail { fill: none; stroke: var(--rn-violet); stroke-width: 0.04; opacity: .55; stroke-linejoin: round; }
+.scan-area { fill: color-mix(in srgb, var(--rn-cyan) 11%, transparent); stroke: none; }
+.scan-hit { fill: var(--rn-cyan); }
+.robot { fill: var(--rn-violet); stroke: #fff; stroke-width: 0.03; filter: drop-shadow(0 0 0.12px var(--rn-violet)); }
+.robot.bump { fill: var(--rn-danger); }
+.robot-dir { fill: #fff; }
+.hud { position: absolute; left: 12px; bottom: 10px; display: flex; gap: 14px; font-size: 11px; color: var(--rn-muted); background: color-mix(in srgb, var(--rn-bg) 72%, transparent); padding: 4px 8px; border-radius: 5px; }
+.hud b { color: var(--rn-ink); font-weight: 500; }

@@ -1,0 +1,140 @@
+@inherits RosComponentBase
+
+<div class="params rn-card">
+    <header>
+        <span class="rn-mono target">@TargetNode</span>
+        <button class="rn-btn" @onclick="LoadAsync" disabled="@_busy">Reload</button>
+    </header>
+    @if (_error is not null)
+    {
+        <div class="error">@_error</div>
+    }
+    @if (_rows.Count == 0 && _error is null)
+    {
+        <div class="empty">@(_busy ? "Reading parameters…" : "This node has no parameters.")</div>
+    }
+    <div class="list">
+        @foreach (var r in _rows)
+        {
+            <div class="row" @key="r.Name">
+                <div class="name">
+                    <span class="rn-mono">@r.Name</span>
+                    <span class="rn-badge">@r.Descriptor.Type.ToString().ToLowerInvariant()</span>
+                    @if (r.Descriptor.ReadOnly)
+                    {
+                        <span class="rn-badge">read-only</span>
+                    }
+                    @if (r.Descriptor.Description.Length > 0)
+                    {
+                        <div class="desc">@r.Descriptor.Description@RangeText(r.Descriptor)</div>
+                    }
+                </div>
+                <div class="edit">
+                    @if (r.Descriptor.Type == ParameterType.Bool)
+                    {
+                        <label class="switch"><input type="checkbox" checked="@(r.Text == "true")" disabled="@r.Descriptor.ReadOnly"
+                                                     @onchange="e => ToggleAsync(r, e)" /><span></span></label>
+                    }
+                    else
+                    {
+                        <input class="rn-input" value="@r.Text" disabled="@r.Descriptor.ReadOnly" aria-label="@r.Name"
+                               @onchange="e => ApplyAsync(r, e.Value?.ToString() ?? string.Empty)" />
+                    }
+                </div>
+                @if (r.Message is not null)
+                {
+                    <div class="result @(r.Ok ? "ok" : "bad")">@r.Message</div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private sealed class RowState(string name, ParameterDescriptor descriptor, string text)
+    {
+        public string Name { get; } = name;
+        public ParameterDescriptor Descriptor { get; } = descriptor;
+        public string Text { get; set; } = text;
+        public string? Message { get; set; }
+        public bool Ok { get; set; }
+    }
+
+    private ParameterClient? _client;
+    private List<RowState> _rows = [];
+    private string? _error;
+    private bool _busy;
+
+    /// <summary>Fully qualified name of the node to edit, e.g. <c>/controller</c>.</summary>
+    [Parameter, EditorRequired] public string TargetNode { get; set; } = "/";
+
+    [Parameter] public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(3);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _client = new ParameterClient(Node, TargetNode) { Timeout = Timeout };
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            if (!await _client!.WaitForServiceAsync(Timeout, Disposing))
+            {
+                _error = $"{TargetNode} does not answer. Check the node is running and its parameter services are enabled.";
+                return;
+            }
+
+            var names = (await _client.ListAsync(cancellationToken: Disposing)).Order(StringComparer.Ordinal).ToList();
+            var descriptors = await _client.DescribeAsync(names, Disposing);
+            var values = await _client.GetAsync(names, Disposing);
+            _rows = names.Select((n, i) => new RowState(n, descriptors[i], Format(values[i].Value))).ToList();
+        }
+        catch (Exception ex) when (ex is TimeoutException or OperationCanceledException)
+        {
+            _error = $"Reading parameters of {TargetNode} timed out.";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private Task ToggleAsync(RowState row, ChangeEventArgs e) => ApplyAsync(row, e.Value is true ? "true" : "false");
+
+    private async Task ApplyAsync(RowState row, string text)
+    {
+        var value = ROS2.Net.ParameterValue.Parse(text);
+        if (row.Descriptor.Type == ParameterType.String)
+        {
+            value = ROS2.Net.ParameterValue.From(text);
+        }
+
+        var result = await _client!.SetAsync(row.Name, value, Disposing);
+        row.Ok = result.Successful;
+        row.Message = result.Successful ? "Saved" : result.Reason;
+        if (result.Successful)
+        {
+            row.Text = Format(value);
+        }
+    }
+
+    private static string Format(ROS2.Net.ParameterValue v) => v.Type switch
+    {
+        ParameterType.StringArray => "[" + string.Join(", ", v.AsStringArray()) + "]",
+        _ => v.ToString(),
+    };
+
+    private static string RangeText(ParameterDescriptor d) =>
+        d.FloatingPointRange is { } f ? string.Create(CultureInfo.InvariantCulture, $" · range {f.From}…{f.To}")
+        : d.IntegerRange is { } i ? $" · range {i.From}…{i.To}" : string.Empty;
+
+    protected override ValueTask DisposeCoreAsync()
+    {
+        _client?.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

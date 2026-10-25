@@ -1,0 +1,16 @@
+{
+  "name": "TF tree inspector",
+  "category": "Tools",
+  "description": "Listens to /tf and /tf_static from a simulated multi-robot system, prints the frame tree (text and Mermaid) and live transform lookups like tf2_echo.",
+  "appKind": "console",
+  "tags": [
+    "tools",
+    "tf2",
+    "frames",
+    "debugging"
+  ],
+  "packages": [
+    "ROS2.Net.Tf2",
+    "ROS2.Net.Simulation"
+  ]
+}

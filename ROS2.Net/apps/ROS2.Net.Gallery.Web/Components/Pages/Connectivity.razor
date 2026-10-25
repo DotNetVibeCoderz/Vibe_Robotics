@@ -1,0 +1,134 @@
+@page "/connectivity"
+@inherits GalleryPage
+@using ROS2.Net.Rmw
+@using ROS2.Net.Rmw.Rtps
+@using ROS2.Net.Rmw.Rosbridge
+
+<PageTitle>Connectivity · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="connectivity" Code="@Code">
+    <div class="stack">
+        <NodeGraph Height="440" />
+        <div class="grid two">
+            <TopicMonitor />
+            <div class="panel stack">
+                <h3>@T("Reach another ROS 2 graph", "Terhubung ke graf ROS 2 lain")</h3>
+                <p class="note">@T("The gallery runs in-process. Start a second context here on another middleware to see what it discovers on your network.",
+                                   "Galeri berjalan in-process. Jalankan context kedua di sini dengan middleware lain untuk melihat apa yang ditemukannya di jaringan Anda.")</p>
+                <div class="seg" role="group" aria-label="Middleware">
+                    <button class="@(_kind == "rtps" ? "on" : "")" @onclick="@(() => _kind = "rtps")">rtps</button>
+                    <button class="@(_kind == "rosbridge" ? "on" : "")" @onclick="@(() => _kind = "rosbridge")">rosbridge</button>
+                </div>
+                @if (_kind == "rtps")
+                {
+                    <label class="field">ROS_DOMAIN_ID <input class="rn-input" type="number" @bind="_domain" /></label>
+                }
+                else
+                {
+                    <label class="field">URL <input class="rn-input" @bind="_url" /></label>
+                }
+                <div class="row">
+                    <button class="rn-btn primary" @onclick="ConnectAsync" disabled="@(_busy || _remote is not null)">@T("Connect", "Hubungkan")</button>
+                    <button class="rn-btn" @onclick="DisconnectAsync" disabled="@(_remote is null)">@T("Disconnect", "Putuskan")</button>
+                </div>
+                <p class="note @(_error is null ? "" : "err")">@(_error ?? _remoteStatus)</p>
+                @if (_remoteNodes.Count > 0)
+                {
+                    <ul class="feed">
+                        @foreach (var n in _remoteNodes)
+                        {
+                            <li>@n</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private string _kind = "rtps";
+    private int _domain;
+    private string _url = "ws://localhost:9090";
+    private Ros2Context? _remote;
+    private bool _busy;
+    private string? _error;
+    private string _remoteStatus = "";
+    private List<string> _remoteNodes = [];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Every(TimeSpan.FromSeconds(1), _ =>
+        {
+            if (_remote is { } r)
+            {
+                _remoteNodes = r.Rmw.Graph.GetNodes().Select(n => n.FullyQualifiedName).Where(n => !n.Contains("gallery_probe")).Order().ToList();
+                var topics = r.Rmw.Graph.GetEndpoints().Select(e => e.Name).Distinct().Count();
+                _remoteStatus = $"{r.Rmw.Identifier}: {_remoteNodes.Count} {T("nodes", "node")}, {topics} topics";
+            }
+
+            return Task.CompletedTask;
+        });
+    }
+
+    private async Task ConnectAsync()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            var options = new Ros2ContextOptions { DomainId = _domain };
+            if (_kind == "rtps")
+            {
+                options.UseRtps();
+            }
+            else
+            {
+                options.UseRosbridge(_url);
+            }
+
+            _remote = await Ros2Context.CreateAsync(options, new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+            _remote.CreateNode("gallery_probe");
+            _remoteStatus = T("connected, discovering…", "terhubung, mencari…");
+        }
+        catch (Exception ex)
+        {
+            _error = $"{T("Could not connect", "Gagal terhubung")}: {ex.Message}";
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task DisconnectAsync()
+    {
+        if (_remote is { } r)
+        {
+            _remote = null;
+            _remoteNodes = [];
+            _remoteStatus = "";
+            await r.DisposeAsync();
+        }
+    }
+
+    protected override async ValueTask DisposeCoreAsync()
+    {
+        await DisconnectAsync();
+        await base.DisposeCoreAsync();
+    }
+
+    private const string Code = """
+        // Same application code, different middleware:
+        var inProcess = await Ros2Context.CreateAsync();                                    // default
+        var dds = await Ros2Context.CreateAsync(new Ros2ContextOptions { DomainId = 0 }.UseRtps());
+        var bridge = await Ros2Context.CreateAsync(new Ros2ContextOptions().UseRosbridge("ws://robot:9090"));
+
+        // Or from the environment: ROS2NET_RMW=rtps ROS_DOMAIN_ID=7 dotnet run
+
+        @* Blazor *@
+        <NodeGraph />
+        <TopicMonitor />
+        """;
+}

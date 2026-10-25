@@ -1,0 +1,658 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+
+namespace ROS2.Net.Rosidl;
+
+/// <summary>Options for <see cref="CSharpEmitter"/>.</summary>
+public sealed class EmitOptions
+{
+    /// <summary>Root namespace of generated packages. Changing it breaks cross-assembly references to the standard interfaces.</summary>
+    public string RootNamespace { get; set; } = Naming.DefaultRootNamespace;
+
+    /// <summary>Emit <c>[GeneratedCode]</c> and a file header.</summary>
+    public bool EmitHeader { get; set; } = true;
+}
+
+/// <summary>
+/// Generates C# source for ROS 2 interfaces. Generated types are plain mutable classes with
+/// allocation-aware CDR (XCDR1, little-endian) serialization, rosbridge-compatible JSON, deep clone,
+/// and static type metadata consumed by <c>ROS2.Net.Core</c>.
+/// </summary>
+public static class CSharpEmitter
+{
+    private const string Cdr = "global::ROS2.Net.Serialization";
+    private const string Json = "global::ROS2.Net.Serialization.RosJson";
+    private const string Tool = "ROS2.Net.Rosidl";
+
+    /// <summary>Emits a standalone message.</summary>
+    public static string EmitMessage(MessageDef message, EmitOptions? options = null)
+    {
+        options ??= new EmitOptions();
+        var sb = new StringBuilder();
+        BeginFile(sb, message.Package, options);
+        EmitStructure(sb, message, options, interfaces: null, extraStatics: null);
+        EndFile(sb);
+        return sb.ToString();
+    }
+
+    /// <summary>Emits a service: a static descriptor class plus request and response messages.</summary>
+    public static string EmitService(ServiceDef service, EmitOptions? options = null)
+    {
+        options ??= new EmitOptions();
+        var sb = new StringBuilder();
+        BeginFile(sb, service.Package, options);
+
+        var reqClass = Naming.ClassName(service.Request);
+        var resClass = Naming.ClassName(service.Response);
+
+        sb.AppendLine($"/// <summary>Descriptor of the <c>{Xml(service.FullName)}</c> service. Use <see cref=\"{reqClass}\"/> and <see cref=\"{resClass}\"/>.</summary>");
+        sb.AppendLine($"public static partial class {service.Name}");
+        sb.AppendLine("{");
+        sb.AppendLine($"    public const string TypeName = \"{service.FullName}\";");
+        sb.AppendLine($"    public const string Definition = {Verbatim(service.RawText)};");
+        sb.AppendLine("}");
+        sb.AppendLine();
+
+        var reqInterfaces = $"global::ROS2.Net.IRosServiceRequest<{reqClass}, {resClass}>";
+        var reqStatics = $"    public static string ServiceTypeName => \"{service.FullName}\";";
+        EmitStructure(sb, service.Request, options, reqInterfaces, reqStatics);
+        sb.AppendLine();
+        EmitStructure(sb, service.Response, options, interfaces: null, extraStatics: null);
+        EndFile(sb);
+        return sb.ToString();
+    }
+
+    /// <summary>Emits an action: a static descriptor class plus goal, result and feedback messages.</summary>
+    public static string EmitAction(ActionDef action, EmitOptions? options = null)
+    {
+        options ??= new EmitOptions();
+        var sb = new StringBuilder();
+        BeginFile(sb, action.Package, options);
+
+        var goal = Naming.ClassName(action.Goal);
+        var result = Naming.ClassName(action.Result);
+        var feedback = Naming.ClassName(action.Feedback);
+
+        sb.AppendLine($"/// <summary>Descriptor of the <c>{Xml(action.FullName)}</c> action.</summary>");
+        sb.AppendLine($"public static partial class {action.Name}");
+        sb.AppendLine("{");
+        sb.AppendLine($"    public const string TypeName = \"{action.FullName}\";");
+        sb.AppendLine($"    public const string Definition = {Verbatim(action.RawText)};");
+        sb.AppendLine("}");
+        sb.AppendLine();
+
+        var goalInterfaces = $"global::ROS2.Net.IRosActionGoal<{goal}, {result}, {feedback}>";
+        var goalStatics = $"    public static string ActionTypeName => \"{action.FullName}\";";
+        EmitStructure(sb, action.Goal, options, goalInterfaces, goalStatics);
+        sb.AppendLine();
+        EmitStructure(sb, action.Result, options, interfaces: null, extraStatics: null);
+        sb.AppendLine();
+        EmitStructure(sb, action.Feedback, options, interfaces: null, extraStatics: null);
+        EndFile(sb);
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Emits a module initializer that registers every generated type with
+    /// <c>ROS2.Net.RosTypeRegistry</c>, so tooling can resolve types by name at runtime.
+    /// </summary>
+    public static string EmitRegistration(
+        string assemblyName,
+        IEnumerable<MessageDef> messages,
+        IEnumerable<ServiceDef> services,
+        IEnumerable<ActionDef> actions,
+        EmitOptions? options = null)
+    {
+        options ??= new EmitOptions();
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated/>");
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine($"namespace {options.RootNamespace}.Registration;");
+        sb.AppendLine();
+        var cls = "RosTypes_" + new string(assemblyName.Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray());
+        sb.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"{Tool}\", \"1.0\")]");
+        sb.AppendLine($"internal static class {cls}");
+        sb.AppendLine("{");
+        sb.AppendLine("    [global::System.Runtime.CompilerServices.ModuleInitializer]");
+        sb.AppendLine("    internal static void Register()");
+        sb.AppendLine("    {");
+        foreach (var m in messages.OrderBy(m => m.FullName, StringComparer.Ordinal))
+        {
+            sb.AppendLine($"        global::ROS2.Net.RosTypeRegistry.RegisterMessage<{Ref(m, options)}>();");
+        }
+
+        foreach (var s in services.OrderBy(s => s.FullName, StringComparer.Ordinal))
+        {
+            sb.AppendLine($"        global::ROS2.Net.RosTypeRegistry.RegisterService<{Ref(s.Request, options)}, {Ref(s.Response, options)}>();");
+        }
+
+        foreach (var a in actions.OrderBy(a => a.FullName, StringComparer.Ordinal))
+        {
+            sb.AppendLine($"        global::ROS2.Net.RosTypeRegistry.RegisterAction<{Ref(a.Goal, options)}, {Ref(a.Result, options)}, {Ref(a.Feedback, options)}>();");
+        }
+
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+
+    private static string Ref(MessageDef m, EmitOptions o) =>
+        Naming.ComplexTypeReference(m.Package, Naming.ClassName(m), o.RootNamespace);
+
+    private static void BeginFile(StringBuilder sb, string package, EmitOptions options)
+    {
+        if (options.EmitHeader)
+        {
+            sb.AppendLine("// <auto-generated>");
+            sb.AppendLine("//     Generated by ROS2.Net.Rosidl from a ROS 2 interface definition. Do not edit.");
+            sb.AppendLine("// </auto-generated>");
+        }
+
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine("#pragma warning disable CS1591, CS0108, CS8618");
+        sb.AppendLine($"namespace {Naming.PackageNamespace(package, options.RootNamespace)};");
+        sb.AppendLine();
+    }
+
+    private static void EndFile(StringBuilder sb)
+    {
+        sb.AppendLine("#pragma warning restore CS1591, CS0108, CS8618");
+    }
+
+    private static void EmitStructure(StringBuilder sb, MessageDef def, EmitOptions options, string? interfaces, string? extraStatics)
+    {
+        var cls = Naming.ClassName(def);
+        var root = options.RootNamespace;
+        var props = def.Fields.Select(f => (Field: f, Prop: Naming.PropertyName(f, def))).ToList();
+
+        var summary = def.Comment ?? $"The <c>{def.FullName}</c> ROS 2 interface.";
+        WriteDoc(sb, "", summary, def.FullName);
+        sb.AppendLine($"[global::System.CodeDom.Compiler.GeneratedCode(\"{Tool}\", \"1.0\")]");
+        var bases = $"global::ROS2.Net.IRosMessage<{cls}>";
+        if (interfaces != null)
+        {
+            bases += ", " + interfaces;
+        }
+
+        sb.AppendLine($"public sealed partial class {cls} : {bases}");
+        sb.AppendLine("{");
+
+        // Constants.
+        foreach (var c in def.Constants)
+        {
+            sb.AppendLine($"    public const {CsElementType(c.Type, root)} {c.Name} = {Literal(c.Type.Primitive, c.Value)};");
+        }
+
+        if (def.Constants.Count > 0)
+        {
+            sb.AppendLine();
+        }
+
+        // Static metadata.
+        sb.AppendLine($"    public static string TypeName => \"{def.FullName}\";");
+        sb.AppendLine($"    public static string DdsTypeName => \"{def.DdsName}\";");
+        sb.AppendLine($"    public static string Definition => {Verbatim(def.RawText)};");
+        var deps = def.Dependencies.Select(d =>
+        {
+            var slash = d.IndexOf('/');
+            return "\"" + d.Substring(0, slash) + "/msg/" + d.Substring(slash + 1) + "\"";
+        }).ToList();
+        sb.AppendLine($"    public static global::System.Collections.Generic.IReadOnlyList<string> Dependencies {{ get; }} = {(deps.Count == 0 ? "global::System.Array.Empty<string>()" : "new string[] { " + string.Join(", ", deps) + " }")};");
+        if (extraStatics != null)
+        {
+            sb.AppendLine(extraStatics);
+        }
+
+        sb.AppendLine("    string global::ROS2.Net.IRosMessage.RosTypeName => TypeName;");
+        sb.AppendLine();
+
+        // Properties.
+        foreach (var (field, prop) in props)
+        {
+            if (field.Comment != null)
+            {
+                WriteDoc(sb, "    ", field.Comment, null);
+            }
+
+            sb.AppendLine($"    [global::System.Text.Json.Serialization.JsonPropertyName(\"{field.Name}\")]");
+            sb.AppendLine($"    public {CsType(field.Type, root)} {prop} {{ get; set; }} = {Initializer(field, root)};");
+            sb.AppendLine();
+        }
+
+        // Serialize.
+        sb.AppendLine($"    public void Serialize({Cdr}.CdrWriter writer)");
+        sb.AppendLine("    {");
+        if (props.Count == 0)
+        {
+            sb.AppendLine("        // Empty structures carry one placeholder byte on the wire (structure_needs_at_least_one_member).");
+            sb.AppendLine("        writer.WriteByte(0);");
+        }
+
+        foreach (var (field, prop) in props)
+        {
+            EmitSerializeField(sb, field, prop, root);
+        }
+
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        // Deserialize.
+        sb.AppendLine($"    public void Deserialize(ref {Cdr}.CdrReader reader)");
+        sb.AppendLine("    {");
+        if (props.Count == 0)
+        {
+            sb.AppendLine("        reader.ReadByte();");
+        }
+
+        foreach (var (field, prop) in props)
+        {
+            EmitDeserializeField(sb, field, prop, root);
+        }
+
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        // JSON.
+        sb.AppendLine("    public void WriteJson(global::System.Text.Json.Utf8JsonWriter writer)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        writer.WriteStartObject();");
+        foreach (var (field, prop) in props)
+        {
+            EmitWriteJsonField(sb, field, prop);
+        }
+
+        sb.AppendLine("        writer.WriteEndObject();");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        sb.AppendLine("    public void ReadJson(global::System.Text.Json.JsonElement element)");
+        sb.AppendLine("    {");
+        var i = 0;
+        foreach (var (field, prop) in props)
+        {
+            EmitReadJsonField(sb, field, prop, root, i++);
+        }
+
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        // Clone.
+        sb.AppendLine("    /// <summary>Returns a deep copy.</summary>");
+        sb.AppendLine($"    public {cls} Clone()");
+        sb.AppendLine("    {");
+        sb.AppendLine($"        var copy = new {cls}();");
+        foreach (var (field, prop) in props)
+        {
+            sb.AppendLine($"        copy.{prop} = {CloneExpression(field, prop)};");
+        }
+
+        sb.AppendLine("        return copy;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+        sb.AppendLine("    global::ROS2.Net.IRosMessage global::ROS2.Net.IRosMessage.CloneMessage() => Clone();");
+        sb.AppendLine();
+        sb.AppendLine($"    public override string ToString() => {Json}.ToJsonString(this);");
+        sb.AppendLine("}");
+    }
+
+    private static void EmitSerializeField(StringBuilder sb, FieldDef field, string prop, string root)
+    {
+        var t = field.Type;
+        var elem = CsElementType(t, root);
+        var bound = t.Array == ArrayKind.Bounded ? t.ArraySize : 0;
+        if (!t.IsArray)
+        {
+            sb.AppendLine(t.IsComplex
+                ? $"        {prop}.Serialize(writer);"
+                : $"        writer.Write{MethodSuffix(t.Primitive)}({prop});");
+            return;
+        }
+
+        if (t.IsFixedSizePrimitive)
+        {
+            sb.AppendLine(t.Array == ArrayKind.Fixed
+                ? $"        writer.WriteArray<{elem}>({prop}, {t.ArraySize}, \"{field.Name}\");"
+                : $"        writer.WriteSequence<{elem}>({prop}, {bound}, \"{field.Name}\");");
+            return;
+        }
+
+        var item = t.IsComplex ? "item.Serialize(writer);" : $"writer.Write{MethodSuffix(t.Primitive)}(item);";
+        sb.AppendLine("        {");
+        sb.AppendLine($"            var items = {prop} ?? global::System.Array.Empty<{elem}>();");
+        sb.AppendLine(t.Array == ArrayKind.Fixed
+            ? $"            writer.CheckFixedLength(items.Length, {t.ArraySize}, \"{field.Name}\");"
+            : $"            writer.WriteSequenceLength(items.Length, {bound}, \"{field.Name}\");");
+        sb.AppendLine($"            foreach (var item in items) {{ {item} }}");
+        sb.AppendLine("        }");
+    }
+
+    private static void EmitDeserializeField(StringBuilder sb, FieldDef field, string prop, string root)
+    {
+        var t = field.Type;
+        var elem = CsElementType(t, root);
+        if (!t.IsArray)
+        {
+            sb.AppendLine(t.IsComplex
+                ? $"        ({prop} ??= new {elem}()).Deserialize(ref reader);"
+                : $"        {prop} = reader.Read{MethodSuffix(t.Primitive)}();");
+            return;
+        }
+
+        if (t.IsFixedSizePrimitive)
+        {
+            sb.AppendLine(t.Array == ArrayKind.Fixed
+                ? $"        {prop} = reader.ReadArray<{elem}>({prop}, {t.ArraySize});"
+                : $"        {prop} = reader.ReadSequence<{elem}>({prop});");
+            return;
+        }
+
+        var count = t.Array == ArrayKind.Fixed
+            ? t.ArraySize.ToString(CultureInfo.InvariantCulture)
+            : $"reader.ReadSequenceLength({(t.IsComplex ? 1 : 4)})";
+        var ensure = t.IsComplex ? "EnsureMessages" : "Ensure";
+        var read = t.IsComplex ? "items[i].Deserialize(ref reader);" : $"items[i] = reader.Read{MethodSuffix(t.Primitive)}();";
+        sb.AppendLine("        {");
+        sb.AppendLine($"            var items = {Cdr}.CdrArrays.{ensure}({prop}, {count});");
+        sb.AppendLine($"            for (var i = 0; i < items.Length; i++) {{ {read} }}");
+        sb.AppendLine($"            {prop} = items;");
+        sb.AppendLine("        }");
+    }
+
+    private static void EmitWriteJsonField(StringBuilder sb, FieldDef field, string prop)
+    {
+        var t = field.Type;
+        var n = field.Name;
+        if (!t.IsArray)
+        {
+            if (t.IsComplex)
+            {
+                sb.AppendLine($"        writer.WritePropertyName(\"{n}\");");
+                sb.AppendLine($"        {prop}.WriteJson(writer);");
+                return;
+            }
+
+            sb.AppendLine(t.Primitive switch
+            {
+                PrimitiveKind.Bool => $"        writer.WriteBoolean(\"{n}\", {prop});",
+                PrimitiveKind.Float32 or PrimitiveKind.Float64 => $"        {Json}.WriteFloat(writer, \"{n}\", {prop});",
+                PrimitiveKind.String or PrimitiveKind.WString => $"        writer.WriteString(\"{n}\", {prop});",
+                _ => $"        writer.WriteNumber(\"{n}\", {prop});",
+            });
+            return;
+        }
+
+        if (t.IsComplex)
+        {
+            sb.AppendLine($"        {Json}.WriteMessages(writer, \"{n}\", {prop});");
+        }
+        else if (IsByteLike(t.Primitive))
+        {
+            sb.AppendLine($"        {Json}.WriteBytes(writer, \"{n}\", {prop});");
+        }
+        else
+        {
+            sb.AppendLine($"        {Json}.WriteArray(writer, \"{n}\", {prop});");
+        }
+    }
+
+    private static void EmitReadJsonField(StringBuilder sb, FieldDef field, string prop, string root, int index)
+    {
+        var t = field.Type;
+        var v = "p" + index.ToString(CultureInfo.InvariantCulture);
+        string assign;
+        if (!t.IsArray)
+        {
+            assign = t.IsComplex
+                ? $"({prop} ??= new {CsElementType(t, root)}()).ReadJson({v});"
+                : $"{prop} = {Json}.Read{JsonSuffix(t.Primitive)}({v});";
+        }
+        else if (t.IsComplex)
+        {
+            assign = $"{prop} = {Json}.ReadMessages<{CsElementType(t, root)}>({v});";
+        }
+        else if (IsByteLike(t.Primitive))
+        {
+            assign = $"{prop} = {Json}.ReadBytes({v});";
+        }
+        else
+        {
+            assign = $"{prop} = {Json}.ReadArray({v}, {Json}.Read{JsonSuffix(t.Primitive)});";
+        }
+
+        sb.AppendLine($"        if (element.TryGetProperty(\"{field.Name}\", out var {v})) {{ {assign} }}");
+    }
+
+    private static string CloneExpression(FieldDef field, string prop)
+    {
+        var t = field.Type;
+        if (!t.IsArray)
+        {
+            return t.IsComplex ? $"{prop}.Clone()" : prop;
+        }
+
+        return t.IsComplex
+            ? $"{Cdr}.CdrArrays.CloneMessages({prop})"
+            : $"{Cdr}.CdrArrays.Copy({prop})";
+    }
+
+    private static bool IsByteLike(PrimitiveKind k) => k is PrimitiveKind.UInt8 or PrimitiveKind.Byte or PrimitiveKind.Char;
+
+    /// <summary>The C# type of a field, including array decoration.</summary>
+    public static string CsType(FieldType t, string rootNamespace = Naming.DefaultRootNamespace) =>
+        CsElementType(t, rootNamespace) + (t.IsArray ? "[]" : string.Empty);
+
+    /// <summary>The C# type of a field's element.</summary>
+    public static string CsElementType(FieldType t, string rootNamespace = Naming.DefaultRootNamespace) => t.Primitive switch
+    {
+        PrimitiveKind.None => Naming.ComplexTypeReference(t.Package!, t.Name!, rootNamespace),
+        PrimitiveKind.Bool => "bool",
+        PrimitiveKind.Byte or PrimitiveKind.Char or PrimitiveKind.UInt8 => "byte",
+        PrimitiveKind.Int8 => "sbyte",
+        PrimitiveKind.Int16 => "short",
+        PrimitiveKind.UInt16 => "ushort",
+        PrimitiveKind.Int32 => "int",
+        PrimitiveKind.UInt32 => "uint",
+        PrimitiveKind.Int64 => "long",
+        PrimitiveKind.UInt64 => "ulong",
+        PrimitiveKind.Float32 => "float",
+        PrimitiveKind.Float64 => "double",
+        PrimitiveKind.String or PrimitiveKind.WString => "string",
+        _ => throw new ArgumentOutOfRangeException(nameof(t)),
+    };
+
+    private static string MethodSuffix(PrimitiveKind k) => k switch
+    {
+        PrimitiveKind.Bool => "Bool",
+        PrimitiveKind.Byte or PrimitiveKind.Char or PrimitiveKind.UInt8 => "Byte",
+        PrimitiveKind.Int8 => "SByte",
+        PrimitiveKind.Int16 => "Int16",
+        PrimitiveKind.UInt16 => "UInt16",
+        PrimitiveKind.Int32 => "Int32",
+        PrimitiveKind.UInt32 => "UInt32",
+        PrimitiveKind.Int64 => "Int64",
+        PrimitiveKind.UInt64 => "UInt64",
+        PrimitiveKind.Float32 => "Single",
+        PrimitiveKind.Float64 => "Double",
+        PrimitiveKind.String => "String",
+        PrimitiveKind.WString => "WString",
+        _ => throw new ArgumentOutOfRangeException(nameof(k)),
+    };
+
+    private static string JsonSuffix(PrimitiveKind k) => k switch
+    {
+        PrimitiveKind.WString => "String",
+        _ => MethodSuffix(k),
+    };
+
+    private static string Initializer(FieldDef field, string root)
+    {
+        var t = field.Type;
+        var elem = CsElementType(t, root);
+        if (field.DefaultValue is { Length: > 0 } dv)
+        {
+            if (!t.IsArray)
+            {
+                return Literal(t.Primitive, t.IsString ? RosidlParser.Unquote(dv) : dv);
+            }
+
+            var items = SplitArrayLiteral(dv).Select(x => Literal(t.Primitive, t.IsString ? RosidlParser.Unquote(x) : x));
+            return $"new {elem}[] {{ {string.Join(", ", items)} }}";
+        }
+
+        if (!t.IsArray)
+        {
+            return t.IsComplex ? $"new {elem}()" : t.IsString ? "string.Empty" : "default";
+        }
+
+        if (t.Array == ArrayKind.Fixed)
+        {
+            if (t.IsComplex)
+            {
+                return $"{Cdr}.CdrArrays.EnsureMessages<{elem}>(null, {t.ArraySize})";
+            }
+
+            return t.IsString
+                ? $"{Cdr}.CdrArrays.Ensure<string>(null, {t.ArraySize})"
+                : $"new {elem}[{t.ArraySize}]";
+        }
+
+        return $"global::System.Array.Empty<{elem}>()";
+    }
+
+    private static IEnumerable<string> SplitArrayLiteral(string text)
+    {
+        var s = text.Trim();
+        if (s.StartsWith("[", StringComparison.Ordinal) && s.EndsWith("]", StringComparison.Ordinal))
+        {
+            s = s.Substring(1, s.Length - 2);
+        }
+
+        var current = new StringBuilder();
+        var quote = '\0';
+        foreach (var c in s)
+        {
+            if (quote != '\0')
+            {
+                current.Append(c);
+                if (c == quote)
+                {
+                    quote = '\0';
+                }
+            }
+            else if (c == '"' || c == '\'')
+            {
+                quote = c;
+                current.Append(c);
+            }
+            else if (c == ',')
+            {
+                yield return current.ToString().Trim();
+                current.Clear();
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+
+        if (current.ToString().Trim().Length > 0)
+        {
+            yield return current.ToString().Trim();
+        }
+    }
+
+    /// <summary>Converts a raw ROS literal into a C# literal of the given primitive type.</summary>
+    public static string Literal(PrimitiveKind kind, string raw)
+    {
+        var v = raw.Trim();
+        var inv = CultureInfo.InvariantCulture;
+        switch (kind)
+        {
+            case PrimitiveKind.Bool:
+                return v is "true" or "True" or "1" ? "true" : "false";
+            case PrimitiveKind.String:
+            case PrimitiveKind.WString:
+                return CsString(v);
+            case PrimitiveKind.Float32:
+            case PrimitiveKind.Float64:
+            {
+                var d = double.Parse(v, NumberStyles.Float, inv);
+                var suffix = kind == PrimitiveKind.Float32 ? "f" : "d";
+                var typeName = kind == PrimitiveKind.Float32 ? "float" : "double";
+                if (double.IsPositiveInfinity(d))
+                {
+                    return typeName + ".PositiveInfinity";
+                }
+
+                if (double.IsNegativeInfinity(d))
+                {
+                    return typeName + ".NegativeInfinity";
+                }
+
+                if (double.IsNaN(d))
+                {
+                    return typeName + ".NaN";
+                }
+
+                var text = kind == PrimitiveKind.Float32
+                    ? ((float)d).ToString("R", inv)
+                    : d.ToString("R", inv);
+                return text + suffix;
+            }
+
+            case PrimitiveKind.UInt64:
+                return ulong.Parse(v, NumberStyles.Integer, inv).ToString(inv) + "UL";
+            case PrimitiveKind.Int64:
+                return long.Parse(v, NumberStyles.Integer, inv).ToString(inv) + "L";
+            case PrimitiveKind.UInt32:
+                return uint.Parse(v, NumberStyles.Integer, inv).ToString(inv) + "U";
+            case PrimitiveKind.Int32:
+                return int.Parse(v, NumberStyles.Integer, inv).ToString(inv);
+            default:
+                // 8/16-bit integers: parse wide, emit with an explicit cast so constants stay well-typed.
+                var n = long.Parse(v, NumberStyles.Integer, inv);
+                return $"({CsElementType(new FieldType { Primitive = kind })})({n.ToString(inv)})";
+        }
+    }
+
+    private static string CsString(string s)
+    {
+        var sb = new StringBuilder("\"");
+        foreach (var c in s)
+        {
+            switch (c)
+            {
+                case '"': sb.Append("\\\""); break;
+                case '\\': sb.Append("\\\\"); break;
+                case '\n': sb.Append("\\n"); break;
+                case '\r': sb.Append("\\r"); break;
+                case '\t': sb.Append("\\t"); break;
+                default: sb.Append(c); break;
+            }
+        }
+
+        return sb.Append('"').ToString();
+    }
+
+    private static string Verbatim(string s) => "@\"" + s.Replace("\r\n", "\n").Replace("\"", "\"\"") + "\"";
+
+    private static string Xml(string s) => s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
+
+    private static void WriteDoc(StringBuilder sb, string indent, string text, string? typeName)
+    {
+        sb.Append(indent).AppendLine("/// <summary>");
+        foreach (var line in text.Replace("\r\n", "\n").Split('\n'))
+        {
+            sb.Append(indent).Append("/// ").AppendLine(Xml(line.TrimEnd()));
+        }
+
+        sb.Append(indent).AppendLine("/// </summary>");
+        if (typeName != null)
+        {
+            sb.Append(indent).AppendLine($"/// <remarks>ROS 2 type: <c>{Xml(typeName)}</c>.</remarks>");
+        }
+    }
+}

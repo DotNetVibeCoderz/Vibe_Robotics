@@ -1,0 +1,3 @@
+---
+controller_manager_msgs/HardwareInterface[] command_interfaces
+controller_manager_msgs/HardwareInterface[] state_interfaces

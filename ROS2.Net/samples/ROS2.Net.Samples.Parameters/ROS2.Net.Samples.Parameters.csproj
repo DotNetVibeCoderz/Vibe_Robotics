@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\..\src\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+  </ItemGroup>
+
+</Project>

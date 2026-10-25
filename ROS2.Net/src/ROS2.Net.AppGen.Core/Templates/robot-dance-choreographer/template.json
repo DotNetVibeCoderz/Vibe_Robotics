@@ -1,0 +1,15 @@
+{
+  "name": "Robot dance choreographer",
+  "category": "Entertainment",
+  "description": "Choreographs synchronized dance moves for a troupe of simulated robots on a beat clock, publishing Twist commands per robot.",
+  "appKind": "console",
+  "tags": [
+    "fun",
+    "multi-robot",
+    "timing",
+    "show"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

@@ -1,0 +1,47 @@
+@page "/lidar"
+@inherits GalleryPage
+@using ROS2.Net.Msgs.NavMsgs
+
+<PageTitle>LiDAR & map · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="lidar" Code="@Code">
+    <div class="grid two">
+        <OccupancyGridView Topic="/map" RobotPose="@_pose" Height="470" />
+        <LaserScanView Topic="/scan" MaxRange="6" Height="470" />
+    </div>
+    <div class="grid three" style="margin-top:16px">
+        <ImageView Topic="/camera/image_raw" Height="180" />
+        <div class="panel" style="display:flex;gap:18px;align-items:center;justify-content:center">
+            <BatteryGauge Topic="/battery_state" Size="150" />
+        </div>
+        <LivePlot Topic="/imu" Fields="@(["angular_velocity.z", "linear_acceleration.x"])" Height="216" />
+    </div>
+</DemoFrame>
+
+@code {
+    private PlanarPose? _pose;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Every(TimeSpan.FromMilliseconds(100), _ =>
+        {
+            var p = Runtime.Robot.Pose;
+            _pose = new PlanarPose(p.X, p.Y, p.Theta);
+            return Task.CompletedTask;
+        });
+    }
+
+    private const string Code = """
+        <OccupancyGridView Topic="/map" RobotPose="@pose" />          @* nav_msgs/OccupancyGrid, latched *@
+        <LaserScanView Topic="/scan" MaxRange="6" />                  @* sensor_msgs/LaserScan *@
+        <ImageView Topic="/camera/image_raw" />                        @* sensor_msgs/Image *@
+        <BatteryGauge Topic="/battery_state" />                        @* sensor_msgs/BatteryState *@
+        <LivePlot Topic="/imu" Fields="@(["angular_velocity.z"])" />  @* any registered type *@
+
+        // Reading a scan in C#:
+        node.CreateSubscription<LaserScan>("/scan", scan =>
+            Console.WriteLine($"closest obstacle {scan.Ranges.Where(float.IsFinite).Min():0.00} m"),
+            QosProfile.SensorData);
+        """;
+}

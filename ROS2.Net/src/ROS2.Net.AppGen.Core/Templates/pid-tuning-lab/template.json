@@ -1,0 +1,15 @@
+{
+  "name": "PID tuning lab",
+  "category": "Education",
+  "description": "Compares PID gain sets on a simulated DC motor and prints rise time, overshoot, settling time and steady-state error \u2014 a control-engineering lab.",
+  "appKind": "console",
+  "tags": [
+    "control",
+    "pid",
+    "education",
+    "engineering"
+  ],
+  "packages": [
+    "ROS2.Net.Control"
+  ]
+}

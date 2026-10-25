@@ -1,0 +1,231 @@
+struct ROS2.Net.AI.Diagnostics.AnomalyResult
+  ctor(Boolean IsAnomaly, Double Score, Double Mean, Double StdDev, Double Value)
+  Boolean IsAnomaly { get; set; }
+  Double Score { get; set; }
+  Double Mean { get; set; }
+  Double StdDev { get; set; }
+  Double Value { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(AnomalyResult other)
+  Void Deconstruct(Boolean& IsAnomaly, Double& Score, Double& Mean, Double& StdDev, Double& Value)
+class ROS2.Net.AI.Diagnostics.EwmaAnomalyDetector
+  ctor(Double alpha=0.05, Double threshold=4, Int32 warmup=20)
+  Double Mean { get; }
+  Double StdDev { get; }
+  AnomalyResult Update(Double value)
+  Void Reset()
+interface ROS2.Net.AI.Diagnostics.IAnomalyDetector
+  AnomalyResult Update(Double value)
+  Void Reset()
+class ROS2.Net.AI.Diagnostics.RollingZScoreDetector
+  ctor(Int32 window=100, Double threshold=3)
+  AnomalyResult Update(Double value)
+  Void Reset()
+class ROS2.Net.AI.Diagnostics.TelemetryAnomalyMonitor`1
+  ctor(Node node, String topic, IEnumerable<ValueTuple<String,Func<T,Double>>> signals, Func<IAnomalyDetector> detectorFactory=null, String hardwareId=null, Nullable<QosProfile> qos=null)
+  String Topic { get; }
+  Void OnMessage(T message)
+  Void Dispose()
+  event Action<String,AnomalyResult> AnomalyDetected
+class ROS2.Net.AI.Gym.AgentFactory
+  static DqnAgent CreateDqn(IDiscreteEnvironment env, Int32[] hiddenSizes=null, Int32 totalSteps=50000, Nullable<Int32> seed=null)
+  static QTableAgent CreateQTable(IDiscreteEnvironment env, Int32 bins=5, Single learningRate=0.5, Single gamma=0.95, Nullable<Int32> seed=null)
+class ROS2.Net.AI.Gym.EpisodeStats
+  ctor(Int32 Episode, Single Return, Int32 Steps, Boolean Terminated)
+  Int32 Episode { get; set; }
+  Single Return { get; set; }
+  Int32 Steps { get; set; }
+  Boolean Terminated { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(EpisodeStats other)
+  EpisodeStats <Clone>$()
+  Void Deconstruct(Int32& Episode, Single& Return, Int32& Steps, Boolean& Terminated)
+class ROS2.Net.AI.Gym.NavigationObservation
+  static IReadOnlyList<String> DefaultActionLabels { get; }
+  static Int32 Size(Int32 sectors)
+  static Void Fill(Span<Single> destination, ReadOnlySpan<Single> ranges, Double angleMin, Double angleIncrement, Double rangeMax, Int32 sectors, Pose2D pose, Vec2 goal, Double maxGoalDistance)
+  static ValueTuple<Double,Double> DefaultAction(Int32 action, Double forwardSpeed, Double turnSpeed)
+class ROS2.Net.AI.Gym.PolicyRunnerNode : Node
+  ctor(Ros2Context context, Func<ReadOnlySpan<Single>,Int32> policy, PolicyRunnerOptions options=null, String name=policy_runner, NodeOptions nodeOptions=null)
+  Boolean GoalReached { get; }
+  Void SetGoal(Double x, Double y)
+class ROS2.Net.AI.Gym.PolicyRunnerOptions
+  ctor()
+  String ScanTopic { get; set; }
+  String OdomTopic { get; set; }
+  String GoalTopic { get; set; }
+  String CmdVelTopic { get; set; }
+  Int32 Sectors { get; set; }
+  Double LidarRange { get; set; }
+  Double MaxGoalDistance { get; set; }
+  Double ControlPeriod { get; set; }
+  Double ForwardSpeed { get; set; }
+  Double TurnSpeed { get; set; }
+  Double GoalTolerance { get; set; }
+class ROS2.Net.AI.Gym.RlTrainer
+  static IReadOnlyList<EpisodeStats> Train(IDiscreteEnvironment env, IDiscreteAgent agent, Int32 episodes, Action<EpisodeStats> onEpisode=null, Nullable<Int32> seed=null, CancellationToken cancellationToken=null)
+  static IReadOnlyList<EpisodeStats> Evaluate(IDiscreteEnvironment env, Func<ReadOnlySpan<Single>,Int32> policy, Int32 episodes, Nullable<Int32> seed=null)
+  static IReadOnlyList<EpisodeStats> Evaluate(IDiscreteEnvironment env, IDiscreteAgent agent, Int32 episodes, Nullable<Int32> seed=null)
+class ROS2.Net.AI.Gym.RobotGymEnv
+  ctor(RobotGymOptions options=null)
+  SimWorld World { get; }
+  SimRobot Robot { get; }
+  Vec2 Goal { get; }
+  String Name { get; }
+  Space ObservationSpace { get; }
+  DiscreteSpace ActionSpace { get; }
+  ReadOnlySpan<Single> Observation { get; }
+  Int32 ElapsedSteps { get; }
+  Int32 MaxEpisodeSteps { get; }
+  RobotGymOptions Options { get; }
+  Boolean ReachedGoal { get; }
+  Boolean Collided { get; }
+  Void Reset(Nullable<Int32> seed=null)
+  StepResult Step(Int32 action)
+class ROS2.Net.AI.Gym.RobotGymOptions
+  ctor()
+  ScenarioKind Scenario { get; set; }
+  Func<SimWorld> WorldFactory { get; set; }
+  RobotKind RobotKind { get; set; }
+  Int32 Sectors { get; set; }
+  Int32 LidarBeams { get; set; }
+  Double LidarRange { get; set; }
+  Int32 ActionCount { get; set; }
+  Double ControlPeriod { get; set; }
+  Int32 MaxEpisodeSteps { get; set; }
+  Double GoalTolerance { get; set; }
+  Double MinGoalDistance { get; set; }
+  Double MaxGoalDistance { get; set; }
+  Nullable<Pose2D> Start { get; set; }
+  Boolean RandomizeStartHeading { get; set; }
+  Nullable<Vec2> Goal { get; set; }
+  Double ForwardSpeed { get; set; }
+  Double TurnSpeed { get; set; }
+  Single GoalReward { get; set; }
+  Single CollisionPenalty { get; set; }
+  Single ProgressScale { get; set; }
+  Single StepPenalty { get; set; }
+  UInt64 Seed { get; set; }
+class ROS2.Net.AI.Llm.ChatMessage
+  ctor(String Role, String Content, IReadOnlyList<ToolCall> ToolCalls=null, String ToolCallId=null)
+  String Role { get; set; }
+  String Content { get; set; }
+  IReadOnlyList<ToolCall> ToolCalls { get; set; }
+  String ToolCallId { get; set; }
+  static ChatMessage System(String text)
+  static ChatMessage User(String text)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ChatMessage other)
+  ChatMessage <Clone>$()
+  Void Deconstruct(String& Role, String& Content, IReadOnlyList`1& ToolCalls, String& ToolCallId)
+class ROS2.Net.AI.Llm.ChatResult
+  ctor(String Content, IReadOnlyList<ToolCall> ToolCalls)
+  String Content { get; set; }
+  IReadOnlyList<ToolCall> ToolCalls { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ChatResult other)
+  ChatResult <Clone>$()
+  Void Deconstruct(String& Content, IReadOnlyList`1& ToolCalls)
+class ROS2.Net.AI.Llm.CommanderOptions
+  ctor()
+  String CommandTopic { get; set; }
+  String FeedbackTopic { get; set; }
+  String CmdVelTopic { get; set; }
+  String GoalTopic { get; set; }
+  String ScanTopic { get; set; }
+  String GoalFrame { get; set; }
+  Double DefaultSpeed { get; set; }
+  Double DefaultAngularSpeed { get; set; }
+  Double PublishRateHz { get; set; }
+  SafetyLimiter Safety { get; set; }
+  Dictionary<String,ValueTuple<Double,Double,Double>> Waypoints { get; set; }
+  String SystemPrompt { get; set; }
+interface ROS2.Net.AI.Llm.IChatModel
+  Task<ChatResult> CompleteAsync(IReadOnlyList<ChatMessage> messages, IReadOnlyList<ToolDefinition> tools, CancellationToken cancellationToken=null)
+class ROS2.Net.AI.Llm.NaturalLanguageCommanderNode : Node
+  ctor(Ros2Context context, IChatModel model, CommanderOptions options=null, String name=nl_commander, NodeOptions nodeOptions=null)
+  static IReadOnlyList<ToolDefinition> Tools { get; }
+  Task<IReadOnlyList<String>> HandleCommandAsync(String text, CancellationToken cancellationToken=null)
+  event Action<String> Feedback
+class ROS2.Net.AI.Llm.OpenAICompatibleChatModel
+  ctor(OpenAICompatibleOptions options=null, HttpClient http=null)
+  Task<ChatResult> CompleteAsync(IReadOnlyList<ChatMessage> messages, IReadOnlyList<ToolDefinition> tools, CancellationToken cancellationToken=null)
+  Void Dispose()
+class ROS2.Net.AI.Llm.OpenAICompatibleOptions
+  ctor()
+  String Endpoint { get; set; }
+  String Model { get; set; }
+  String ApiKey { get; set; }
+  Boolean UseAzureApiKeyHeader { get; set; }
+  String QueryString { get; set; }
+  Double Temperature { get; set; }
+  TimeSpan Timeout { get; set; }
+class ROS2.Net.AI.Llm.RuleBasedChatModel
+  ctor()
+  Task<ChatResult> CompleteAsync(IReadOnlyList<ChatMessage> messages, IReadOnlyList<ToolDefinition> tools, CancellationToken cancellationToken=null)
+class ROS2.Net.AI.Llm.SafetyLimiter
+  ctor()
+  Double MaxLinearSpeed { get; set; }
+  Double MaxAngularSpeed { get; set; }
+  Double MaxDistance { get; set; }
+  Double MaxRotationDegrees { get; set; }
+  Double StopDistance { get; set; }
+  Double ClampLinear(Double v)
+  Double ClampAngular(Double w)
+  Double ClampDistance(Double d)
+  Double ClampRotation(Double deg)
+class ROS2.Net.AI.Llm.ToolCall
+  ctor(String Id, String Name, String ArgumentsJson)
+  String Id { get; set; }
+  String Name { get; set; }
+  String ArgumentsJson { get; set; }
+  Double GetDouble(String name, Double fallback=0)
+  String GetString(String name)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ToolCall other)
+  ToolCall <Clone>$()
+  Void Deconstruct(String& Id, String& Name, String& ArgumentsJson)
+class ROS2.Net.AI.Llm.ToolDefinition
+  ctor(String Name, String Description, String ParametersJsonSchema)
+  String Name { get; set; }
+  String Description { get; set; }
+  String ParametersJsonSchema { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(ToolDefinition other)
+  ToolDefinition <Clone>$()
+  Void Deconstruct(String& Name, String& Description, String& ParametersJsonSchema)
+class ROS2.Net.AI.Onnx.InferenceNode`2 : Node
+  ctor(Ros2Context context, String name, String inputTopic, String outputTopic, Func<TIn,ValueTuple<Single[],Int32[]>> preprocess, Func<Single[],Int32[],Single[]> model, Func<Single[],TIn,TOut> postprocess, Nullable<QosProfile> inputQos=null)
+  Int64 ProcessedCount { get; }
+  TimeSpan LastInferenceTime { get; }
+  static InferenceNode<TIn,TOut> ForOnnx(Ros2Context context, String name, String inputTopic, String outputTopic, OnnxModelRunner runner, Func<TIn,ValueTuple<Single[],Int32[]>> preprocess, Func<Single[],TIn,TOut> postprocess)
+class ROS2.Net.AI.Onnx.OnnxModelRunner
+  ctor(String modelPath, SessionOptions options=null)
+  ctor(Byte[] model, SessionOptions options=null)
+  String InputName { get; }
+  String OutputName { get; }
+  IReadOnlyList<Int32> InputShape { get; }
+  IReadOnlyList<String> InputNames { get; }
+  IReadOnlyList<String> OutputNames { get; }
+  Single[] Run(ReadOnlySpan<Single> input, ReadOnlySpan<Int32> shape=null)
+  IReadOnlyDictionary<String,Single[]> Run(IReadOnlyDictionary<String,ValueTuple<Single[],Int32[]>> inputs)
+  Void Dispose()
+class ROS2.Net.AI.Onnx.OnnxPolicy
+  ctor(OnnxModelRunner runner)
+  OnnxModelRunner Runner { get; }
+  static OnnxPolicy Load(String modelPath)
+  Int32 SelectAction(ReadOnlySpan<Single> observation)
+  Single[] Act(ReadOnlySpan<Single> observation)
+  Void Dispose()

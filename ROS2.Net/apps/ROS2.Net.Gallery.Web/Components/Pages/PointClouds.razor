@@ -1,0 +1,130 @@
+@page "/pointcloud"
+@inherits GalleryPage
+@using System.Diagnostics
+@using ROS2.Net.Perception
+@using PointCloud = ROS2.Net.Perception.PointCloud
+
+<PageTitle>Point clouds · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="pointcloud" Code="@Code">
+    <div class="grid two">
+        <div class="grid halves">
+            <PointCloudView Cloud="_raw" Projection="CloudProjection.Front" Height="360" Title="@T("raw scan", "scan mentah")" />
+            <PointCloudView Layers="_layers" Projection="CloudProjection.Top" Height="360" Title="@T("segmented", "tersegmentasi")" />
+        </div>
+        <div class="panel stack">
+            <h3>@T("Pipeline", "Pipeline")</h3>
+            <label class="field">@T("Voxel leaf", "Ukuran voxel") <b>@_leaf.ToString("0.00", CultureInfo.InvariantCulture) m</b>
+                <input type="range" min="0.01" max="0.15" step="0.01" @bind="_leaf" @bind:event="onchange" @bind:after="Run" /></label>
+            <label class="field">@T("Cluster tolerance", "Toleransi cluster") <b>@_tolerance.ToString("0.00", CultureInfo.InvariantCulture) m</b>
+                <input type="range" min="0.04" max="0.3" step="0.01" @bind="_tolerance" @bind:event="onchange" @bind:after="Run" /></label>
+            <button class="rn-btn" @onclick="NewScene">@T("New scene", "Adegan baru")</button>
+            <dl class="kv">
+                <dt>@T("Input points", "Titik input")</dt><dd>@_raw.Count</dd>
+                <dt>@T("After voxel", "Setelah voxel")</dt><dd>@_afterVoxel</dd>
+                <dt>@T("After outlier removal", "Setelah hapus outlier")</dt><dd>@_afterSor</dd>
+                <dt>@T("Floor inliers", "Inlier lantai")</dt><dd>@_floor</dd>
+                <dt>@T("Objects found", "Objek ditemukan")</dt><dd>@_clusters</dd>
+                <dt>@T("Time", "Waktu")</dt><dd>@_ms ms</dd>
+                <dt>@T("Kernels", "Kernel")</dt><dd>@(ROS2.Net.Native.NativeLibraryInfo.UseNative ? "Rust (native)" : "managed")</dd>
+            </dl>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private static readonly string[] s_clusterColors = ["#00D1FF", "#3DDC97", "#FFB547", "#FF5C7A", "#B39DFF", "#5FF2E0", "#FFD86B"];
+    private PointCloud _raw = new();
+    private List<CloudLayer> _layers = [];
+    private double _leaf = 0.04, _tolerance = 0.12;
+    private int _afterVoxel, _afterSor, _floor, _clusters;
+    private double _ms;
+    private int _seed = 3;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        NewScene();
+    }
+
+    private void NewScene()
+    {
+        _raw = Scene(_seed++);
+        Run();
+    }
+
+    /// <summary>A synthetic depth-camera view: floor, a wall, and a few boxes and a ball, with noise and stray points.</summary>
+    private static PointCloud Scene(int seed)
+    {
+        var rng = new Random(seed);
+        double N() => (rng.NextDouble() - 0.5) * 0.02;
+        var c = new PointCloud();
+        for (var i = 0; i < 9000; i++) c.Add((float)(rng.NextDouble() * 4 - 2), (float)(rng.NextDouble() * 3), (float)N());
+        for (var i = 0; i < 3000; i++) c.Add((float)(rng.NextDouble() * 4 - 2), (float)(3 + N()), (float)(rng.NextDouble() * 1.4));
+        for (var b = 0; b < 4; b++)
+        {
+            double cx = rng.NextDouble() * 3 - 1.5, cy = 0.5 + rng.NextDouble() * 2, w = 0.2 + rng.NextDouble() * 0.3, h = 0.2 + rng.NextDouble() * 0.6;
+            for (var i = 0; i < 1600; i++)
+            {
+                var face = rng.Next(3);
+                double x = cx + (rng.NextDouble() - 0.5) * w, y = cy + (rng.NextDouble() - 0.5) * w, z = rng.NextDouble() * h;
+                if (face == 0) z = h;
+                else if (face == 1) x = cx + (rng.Next(2) == 0 ? -w / 2 : w / 2);
+                else y = cy - w / 2;
+                c.Add((float)(x + N()), (float)(y + N()), (float)(z + N()));
+            }
+        }
+
+        for (var i = 0; i < 1500; i++)
+        {
+            var t = rng.NextDouble() * Math.PI * 2;
+            var p = rng.NextDouble() * Math.PI;
+            c.Add((float)(1.2 + 0.18 * Math.Sin(p) * Math.Cos(t)), (float)(2.2 + 0.18 * Math.Sin(p) * Math.Sin(t)), (float)(0.18 + 0.18 * Math.Cos(p)));
+        }
+
+        for (var i = 0; i < 250; i++) c.Add((float)(rng.NextDouble() * 4 - 2), (float)(rng.NextDouble() * 3), (float)(rng.NextDouble() * 1.6));
+        return c;
+    }
+
+    private void Run()
+    {
+        var sw = Stopwatch.StartNew();
+        var voxel = Filters.VoxelGrid(_raw, (float)_leaf);
+        var clean = Filters.StatisticalOutlierRemoval(voxel, 12, 1.5);
+        var floor = Segmentation.SegmentPlane(clean, 0.03, 300);
+        var rest = clean.Select(floor.Outliers);
+        var wall = Segmentation.SegmentPlane(rest, 0.03, 300);
+        var objects = rest.Select(wall.Outliers);
+        var clusters = Segmentation.EuclideanClusters(objects, (float)_tolerance, 30);
+        _ms = Math.Round(sw.Elapsed.TotalMilliseconds, 1);
+
+        var layers = new List<CloudLayer>
+        {
+            new(clean.Select(floor.Inliers), "#5C5FA8", 0.55),
+            new(rest.Select(wall.Inliers), "#7C4DFF", 0.55),
+        };
+        for (var i = 0; i < clusters.Count; i++)
+        {
+            layers.Add(new CloudLayer(objects.Select(clusters[i]), s_clusterColors[i % s_clusterColors.Length]));
+        }
+
+        _layers = layers;
+        _afterVoxel = voxel.Count;
+        _afterSor = clean.Count;
+        _floor = floor.Inliers.Length;
+        _clusters = clusters.Count;
+    }
+
+    private const string Code = """
+        using ROS2.Net.Perception;
+
+        var cloud = PointCloud2Reader.ToPointCloud(msg, skipNonFinite: true);   // any PointField layout
+        var voxel = Filters.VoxelGrid(cloud, leafSize: 0.04f);                   // Rust kernel when available
+        var clean = Filters.StatisticalOutlierRemoval(voxel, meanK: 12, stdDevMultiplier: 1.5);
+        var floor = Segmentation.SegmentPlane(clean, distanceThreshold: 0.03);   // RANSAC
+        var objects = clean.Select(floor.Outliers);
+        var clusters = Segmentation.EuclideanClusters(objects, tolerance: 0.12f, minSize: 30);
+        foreach (var c in clusters)
+            Console.WriteLine(BoundingBoxes.ComputeAabb(objects, c));
+        """;
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Environmental anomaly lab",
+  "category": "Science",
+  "description": "Simulated lab sensors (temperature, humidity) publish over ROS 2; an EWMA anomaly detector flags spikes and drift and publishes diagnostics.",
+  "appKind": "console",
+  "tags": [
+    "sensors",
+    "anomaly-detection",
+    "diagnostics",
+    "ai"
+  ],
+  "packages": [
+    "ROS2.Net.AI"
+  ]
+}

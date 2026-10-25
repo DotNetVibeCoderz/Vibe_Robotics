@@ -1,0 +1,9 @@
+.battery { display: inline-block; }
+.track { fill: none; stroke: var(--rn-surface-2); stroke-width: 10; }
+.value { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dasharray .4s ease; }
+.value.high { stroke: var(--rn-ok); }
+.value.mid { stroke: var(--rn-warn); }
+.value.low { stroke: var(--rn-danger); }
+.pct { font: 700 24px var(--rn-font); fill: var(--rn-ink); text-anchor: middle; }
+.sub { font: 10px var(--rn-mono); fill: var(--rn-muted); text-anchor: middle; text-transform: uppercase; letter-spacing: .08em; }
+@media (prefers-reduced-motion: reduce) { .value { transition: none; } }

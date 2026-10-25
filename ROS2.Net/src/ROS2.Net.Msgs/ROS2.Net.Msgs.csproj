@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Msgs</RootNamespace>
+    <Description>Standard ROS 2 interfaces for ROS2.Net, generated from the upstream definitions: std_msgs, std_srvs, geometry_msgs, sensor_msgs, nav_msgs, tf2_msgs, visualization_msgs, trajectory_msgs, diagnostic_msgs, control_msgs, nav2_msgs, example_interfaces and turtlesim.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Rosidl.Generator\ROS2.Net.Rosidl.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="..\..\interfaces\standard\**\*.msg;..\..\interfaces\standard\**\*.srv;..\..\interfaces\standard\**\*.action" />
+  </ItemGroup>
+
+</Project>

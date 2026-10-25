@@ -1,0 +1,15 @@
+{
+  "name": "ROS topic inspector (desktop)",
+  "category": "Tools",
+  "description": "A desktop rqt-style inspector for a live ROS 2 network over DDS/RTPS: topic list with rates and bandwidth, node graph and /rosout console.",
+  "appKind": "avalonia",
+  "tags": [
+    "tools",
+    "introspection",
+    "rtps",
+    "debugging"
+  ],
+  "packages": [
+    "ROS2.Net.Rmw.Rtps"
+  ]
+}

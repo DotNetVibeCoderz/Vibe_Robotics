@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Perception</RootNamespace>
+    <Description>Perception for ROS2.Net: zero-copy PointCloud2 access, point cloud filters, normals, RANSAC/Euclidean segmentation, ICP registration, laser projection, image conversions and filters, PNG codec, camera models with distortion and rectification, depth-to-cloud, object detection hooks (vision_msgs), and ready-made processing nodes.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Native\ROS2.Net.Native.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Rosidl.Generator\ROS2.Net.Rosidl.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- vision_msgs 4.x subset, generated into ROS2.Net.Msgs.VisionMsgs. -->
+    <AdditionalFiles Include="interfaces\**\*.msg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Perception.Tests" />
+  </ItemGroup>
+
+</Project>

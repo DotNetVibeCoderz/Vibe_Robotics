@@ -1,0 +1,15 @@
+{
+  "name": "Smart home robot monitor (web)",
+  "category": "Housekeeping",
+  "description": "Blazor dashboard for a home robot in a simulated apartment: live map, LiDAR, battery and joystick teleop in the browser.",
+  "appKind": "blazor",
+  "tags": [
+    "web",
+    "dashboard",
+    "teleop",
+    "simulation"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Greenhouse sensor dashboard (web)",
+  "category": "Agriculture",
+  "description": "Blazor dashboard for a smart greenhouse: temperature, humidity and light sensors publish over ROS 2 and are plotted live with alerts in the log console.",
+  "appKind": "blazor",
+  "tags": [
+    "agriculture",
+    "iot",
+    "dashboard",
+    "web"
+  ],
+  "packages": []
+}

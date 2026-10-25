@@ -1,0 +1,145 @@
+@page "/navigation"
+@inherits GalleryPage
+@using ROS2.Net.Msgs.GeometryMsgs
+@using ROS2.Net.Msgs.Nav2Msgs
+
+<PageTitle>Navigation · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="navigation" Code="@Code">
+    <div class="grid two">
+        <OccupancyGridView Topic="/map" PathTopic="/plan" RobotPose="@_pose" Goal="@_goal" OnMapClick="GoToAsync" Height="520" />
+        <div class="stack">
+            <div class="panel stack">
+                <h3>@T("Goal", "Goal")</h3>
+                <p class="note">@T("Click anywhere free on the map, or pick a waypoint.", "Klik area kosong di peta, atau pilih waypoint.")</p>
+                <div class="row">
+                    @foreach (var (name, x, y) in s_presets)
+                    {
+                        <button class="rn-btn goal-preset" @onclick="() => GoToAsync(new PlanarPose(x, y))">@name</button>
+                    }
+                </div>
+                <button class="rn-btn" @onclick="CancelAsync" disabled="@(_handle is null)">@T("Cancel navigation", "Batalkan navigasi")</button>
+            </div>
+            <div class="panel">
+                <h3>NavigateToPose feedback</h3>
+                <dl class="kv">
+                    <dt>@T("Status", "Status")</dt><dd>@_status</dd>
+                    <dt>@T("Distance remaining", "Jarak tersisa")</dt><dd>@_remaining</dd>
+                    <dt>@T("Navigation time", "Waktu navigasi")</dt><dd>@_elapsed</dd>
+                    <dt>@T("Recoveries", "Pemulihan")</dt><dd>@_recoveries</dd>
+                </dl>
+            </div>
+            <div class="panel">
+                <h3>@T("Stack", "Stack")</h3>
+                <p class="note mono" style="margin:0">bt_navigator → planner_server (A*) → controller_server (RPP) → /cmd_vel</p>
+            </div>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private static readonly (string Name, double X, double Y)[] s_presets = [("dock", 2.0, 2.0), ("aisle 3", 12.0, 6.0), ("far corner", 21.0, 13.5), ("charger", 3.0, 13.0)];
+
+    private ActionClient<NavigateToPoseGoal, NavigateToPoseResult, NavigateToPoseFeedback>? _client;
+    private ClientGoalHandle<NavigateToPoseGoal, NavigateToPoseResult, NavigateToPoseFeedback>? _handle;
+    private IDisposable? _hold;
+    private PlanarPose? _pose;
+    private PlanarPose? _goal;
+    private string _status = "idle", _remaining = "—", _elapsed = "—";
+    private int _recoveries;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _client = Node.CreateActionClient<NavigateToPoseGoal, NavigateToPoseResult, NavigateToPoseFeedback>("/navigate_to_pose");
+        Every(TimeSpan.FromMilliseconds(100), _ =>
+        {
+            var p = Runtime.Robot.Pose;
+            _pose = new PlanarPose(p.X, p.Y, p.Theta);
+            return Task.CompletedTask;
+        });
+    }
+
+    private async Task GoToAsync(PlanarPose target)
+    {
+        if (Runtime.World.IsOccupied(new ROS2.Net.Simulation.Vec2(target.X, target.Y), 0.25))
+        {
+            _status = T("that spot is inside an obstacle", "titik itu berada di dalam rintangan");
+            return;
+        }
+
+        if (_handle is not null)
+        {
+            await _handle.CancelAsync();
+        }
+
+        _hold ??= Runtime.HoldAutopilot();
+        _goal = target;
+        _status = "sending";
+        var yaw = Math.Atan2(target.Y - Runtime.Robot.Pose.Y, target.X - Runtime.Robot.Pose.X);
+        var goal = new NavigateToPoseGoal();
+        goal.Pose.Header.FrameId = "map";
+        goal.Pose.Pose.Position.X = target.X;
+        goal.Pose.Pose.Position.Y = target.Y;
+        goal.Pose.Pose.Orientation = MessageExtensions.QuaternionFromYaw(yaw);
+        try
+        {
+            await _client!.WaitForServerAsync(TimeSpan.FromSeconds(3));
+            var handle = await _client.SendGoalAsync(goal, fb =>
+            {
+                _remaining = $"{fb.DistanceRemaining:0.00} m";
+                _elapsed = $"{RosDuration.FromMsg(fb.NavigationTime).TotalSeconds:0.0} s";
+                _recoveries = fb.NumberOfRecoveries;
+                RequestRender();
+            });
+            _handle = handle;
+            _status = "navigating";
+            var result = await handle.GetResultAsync();
+            if (ReferenceEquals(_handle, handle))
+            {
+                _status = result.Status.ToString().ToLowerInvariant();
+                _handle = null;
+                _hold?.Dispose();
+                _hold = null;
+            }
+        }
+        catch (Exception ex) when (ex is GoalRejectedException or TimeoutException)
+        {
+            _status = ex.Message;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        if (_handle is { } h)
+        {
+            await h.CancelAsync();
+        }
+    }
+
+    protected override async ValueTask DisposeCoreAsync()
+    {
+        if (_handle is { } h)
+        {
+            await h.CancelAsync();
+        }
+
+        _hold?.Dispose();
+        await base.DisposeCoreAsync();
+    }
+
+    private const string Code = """
+        // The stack: planner, controller and BT navigator, fed with /map and a pose provider.
+        var pose = new OdometryPoseProvider(tools);          // or a DelegatePoseProvider
+        new PlannerServerNode(context, pose);                // compute_path_to_pose → /plan
+        new ControllerServerNode(context, pose);             // follow_path → /cmd_vel
+        new BtNavigatorNode(context, pose);                  // navigate_to_pose
+
+        // Send a goal exactly as RViz's "Nav2 Goal" would:
+        var nav = node.CreateActionClient<NavigateToPoseGoal, NavigateToPoseResult, NavigateToPoseFeedback>("/navigate_to_pose");
+        var goal = new NavigateToPoseGoal();
+        goal.Pose.Header.FrameId = "map";
+        goal.Pose.Pose.Position.X = 12; goal.Pose.Pose.Position.Y = 6;
+        var result = await nav.SendGoalAndWaitAsync(goal, fb => Console.WriteLine(fb.DistanceRemaining));
+        """;
+}

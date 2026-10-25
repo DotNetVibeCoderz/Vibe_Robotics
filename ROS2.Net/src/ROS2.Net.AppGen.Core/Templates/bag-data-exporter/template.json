@@ -1,0 +1,15 @@
+{
+  "name": "Bag data exporter",
+  "category": "Tools",
+  "description": "Command-line tool: prints rosbag2 info for an MCAP bag and exports every topic to JSONL plus flat CSV files, ready for pandas or ML training.",
+  "appKind": "console",
+  "tags": [
+    "tools",
+    "rosbag2",
+    "dataset",
+    "cli"
+  ],
+  "packages": [
+    "ROS2.Net.Bag"
+  ]
+}

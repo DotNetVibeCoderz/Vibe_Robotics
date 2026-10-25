@@ -1,0 +1,126 @@
+@page "/arm"
+@inherits GalleryPage
+@using System.Text
+@using ROS2.Net.Manipulation
+@using ROS2.Net.Msgs.SensorMsgs
+
+<PageTitle>Robot arm IK · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="arm" Code="@Code">
+    <div class="grid two">
+        <div class="grid halves">
+            <div class="panel">
+                <h3>@T("Side view (x–z)", "Tampak samping (x–z)")</h3>
+                <svg viewBox="-0.85 -1.0 1.7 1.25" class="armview">
+                    <line x1="-1" y1="0" x2="1" y2="0" class="ground" />
+                    <polyline points="@Side" class="links" />
+                    @foreach (var p in _points)
+                    {
+                        <circle cx="@F(p.X)" cy="@F(-p.Z)" r="0.025" class="joint" />
+                    }
+                    <circle cx="@F(_x)" cy="@F(-_z)" r="0.045" class="target" />
+                </svg>
+            </div>
+            <div class="panel">
+                <h3>@T("Top view (x–y)", "Tampak atas (x–y)")</h3>
+                <svg viewBox="-0.9 -0.9 1.8 1.8" class="armview">
+                    <circle r="0.85" class="reach" />
+                    <polyline points="@Top" class="links" />
+                    @foreach (var p in _points)
+                    {
+                        <circle cx="@F(p.X)" cy="@F(-p.Y)" r="0.025" class="joint" />
+                    }
+                    <circle cx="@F(_x)" cy="@F(-_y)" r="0.045" class="target" />
+                </svg>
+            </div>
+        </div>
+        <div class="stack">
+            <div class="panel stack">
+                <h3>@T("Tool target", "Target tool")</h3>
+                <label class="field">x <b>@F(_x) m</b><input type="range" min="-0.8" max="0.8" step="0.01" @bind="_x" @bind:event="oninput" @bind:after="Solve" /></label>
+                <label class="field">y <b>@F(_y) m</b><input type="range" min="-0.8" max="0.8" step="0.01" @bind="_y" @bind:event="oninput" @bind:after="Solve" /></label>
+                <label class="field">z <b>@F(_z) m</b><input type="range" min="0.0" max="0.9" step="0.01" @bind="_z" @bind:event="oninput" @bind:after="Solve" /></label>
+                <dl class="kv">
+                    <dt>IK</dt><dd class="@(_ok ? "" : "err")">@_status</dd>
+                </dl>
+            </div>
+            <JointStatePanel State="_state" />
+        </div>
+    </div>
+</DemoFrame>
+
+<style>
+    .armview { width: 100%; height: 330px; display: block; }
+    .armview .ground { stroke: var(--rn-line); stroke-width: 0.01; }
+    .armview .reach { fill: none; stroke: var(--rn-line); stroke-width: 0.006; stroke-dasharray: 0.03 0.03; }
+    .armview .links { fill: none; stroke: var(--rn-violet); stroke-width: 0.045; stroke-linecap: round; stroke-linejoin: round; }
+    .armview .joint { fill: var(--rn-ink); }
+    .armview .target { fill: none; stroke: var(--rn-cyan); stroke-width: 0.012; }
+    .err { color: var(--rn-danger); }
+</style>
+
+@code {
+    private static readonly UrdfModel s_model = UrdfModel.LoadBuiltIn("ur5");
+    private readonly KinematicChain _chain = new(s_model, "base_link", "tool0");
+    private IkSolver? _solver;
+    private Publisher<JointState>? _pub;
+    private double[] _q = [0, -1.2, 1.5, -1.9, -1.57, 0];
+    private List<Vec3> _points = [];
+    private double _x = 0.45, _y = 0.2, _z = 0.35;
+    private bool _ok = true;
+    private string _status = "";
+    private JointState _state = new();
+
+    private string Side => string.Join(' ', _points.Select(p => $"{F(p.X)},{F(-p.Z)}"));
+
+    private string Top => string.Join(' ', _points.Select(p => $"{F(p.X)},{F(-p.Y)}"));
+
+    private static string F(double v) => v.ToString("0.###", CultureInfo.InvariantCulture);
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _solver = new IkSolver(_chain, new IkOptions { Restarts = 8, MaxIterations = 120 });
+        _pub = Node.CreatePublisher<JointState>("/joint_states");
+        Solve();
+    }
+
+    private void Solve()
+    {
+        // Tool pointing down, like a pick from above.
+        var target = Pose3.FromXyzRpy(_x, _y, _z, Math.PI, 0, 0);
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var result = _solver!.Solve(target, _q);
+        _ok = result.Success;
+        if (result.Success)
+        {
+            _q = result.Solution;
+            _status = string.Create(CultureInfo.InvariantCulture, $"solved in {result.Iterations} it · {sw.Elapsed.TotalMilliseconds:0.0} ms · err {result.PositionError * 1000:0.000} mm");
+        }
+        else
+        {
+            _status = T("unreachable with the tool pointing down", "tidak terjangkau dengan tool menghadap ke bawah");
+        }
+
+        _points = [Vec3.Zero, .. _chain.LinkPoses(_q).Select(p => p.Position)];
+        _state = new JointState { Name = _chain.JointNames, Position = (double[])_q.Clone() };
+        _state.Header.FrameId = "base_link";
+        RosTime.Now().CopyTo(_state.Header.Stamp);
+        _pub?.Publish(_state);
+    }
+
+    private const string Code = """
+        using ROS2.Net.Manipulation;
+
+        var model = UrdfModel.LoadBuiltIn("ur5");                 // or UrdfModel.LoadFile("my_robot.urdf")
+        var arm = new KinematicChain(model, "base_link", "tool0");
+        var ik = new IkSolver(arm);
+
+        var target = Pose3.FromXyzRpy(0.45, 0.2, 0.35, Math.PI, 0, 0);
+        var result = ik.Solve(target, seed: currentJoints);
+        if (result.Success)
+            jointStates.Publish(new JointState { Name = arm.JointNames, Position = result.Solution });
+
+        var tip = arm.ForwardKinematics(result.Solution);       // back to a pose
+        """;
+}

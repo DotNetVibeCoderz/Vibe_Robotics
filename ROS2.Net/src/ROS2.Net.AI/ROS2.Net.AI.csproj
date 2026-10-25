@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.AI</RootNamespace>
+    <Description>AI for ROS2.Net robots: Gym-style reinforcement-learning environments over the simulator (RLNet DQN/Q-table training and policy runner nodes), ONNX Runtime model inference nodes, an LLM natural-language commander (OpenAI-compatible: Ollama, llama.cpp, Azure OpenAI) with a safety limiter, and telemetry anomaly detection.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Simulation\ROS2.Net.Simulation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Gravicode.RLNet" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Simulation.Tests" />
+  </ItemGroup>
+
+</Project>

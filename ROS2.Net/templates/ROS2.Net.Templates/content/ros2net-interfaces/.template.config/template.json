@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gravicode Studios (Kang Fadhil)",
+  "classifications": [
+    "ROS2.Net",
+    "Robotics",
+    "ROS 2",
+    "Library"
+  ],
+  "identity": "ROS2.Net.Templates.Interfaces",
+  "name": "ROS2.Net Interfaces Library",
+  "description": "A class library of custom ROS 2 messages, services and actions generated at compile time.",
+  "shortName": "ros2net-interfaces",
+  "sourceName": "Ros2NetInterfaces",
+  "defaultName": "MyRobot",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "preferNameDirectory": true,
+  "symbols": {
+    "rosVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "0.1.0",
+      "replaces": "ROS2NET_VERSION",
+      "description": "ROS2.Net package version."
+    },
+    "rosPackage": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "my_robot_msgs",
+      "replaces": "my_robot_msgs",
+      "fileRename": "my_robot_msgs",
+      "description": "ROS package name of the interfaces (snake_case)."
+    }
+  }
+}

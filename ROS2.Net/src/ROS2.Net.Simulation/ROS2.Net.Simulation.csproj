@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Simulation</RootNamespace>
+    <Description>ROS2.Net robot simulator engine: deterministic 2.5D worlds, differential/Ackermann/omni robots, LiDAR, IMU, odometry, GPS, range, battery and camera sensors, built-in scenarios and a ROS bridge node publishing standard topics (odom, scan, imu, tf, clock, map) plus a turtlesim-compatible mode.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Simulation.Tests" />
+    <InternalsVisibleTo Include="ROS2.Net.AI" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,140 @@
+@page "/actions"
+@inherits GalleryPage
+@using ROS2.Net.Msgs.ExampleInterfaces
+
+<PageTitle>Actions · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="actions" Code="@Code">
+    <div class="grid two">
+        <div class="panel stack">
+            <h3>@T("Goal", "Goal")</h3>
+            <label class="field">order <b>@_order</b><input type="range" min="3" max="30" @bind="_order" @bind:event="oninput" /></label>
+            <div class="row">
+                <button class="rn-btn primary" @onclick="SendAsync" disabled="@(_handle is not null)">@T("Send goal", "Kirim goal")</button>
+                <button class="rn-btn" @onclick="CancelAsync" disabled="@(_handle is null)">@T("Cancel goal", "Batalkan goal")</button>
+            </div>
+            <div class="progress" aria-label="progress"><span style="width:@(Progress)%"></span></div>
+            <dl class="kv">
+                <dt>@T("Status", "Status")</dt><dd>@_status</dd>
+                <dt>@T("Feedback messages", "Pesan feedback")</dt><dd>@_feedbackCount</dd>
+            </dl>
+            <div class="seq mono">
+                @foreach (var n in _sequence)
+                {
+                    <span>@n</span>
+                }
+            </div>
+        </div>
+        <div class="panel stack">
+            <h3>@T("Events", "Kejadian")</h3>
+            <ul class="feed">
+                @foreach (var e in _events)
+                {
+                    <li>@((MarkupString)e)</li>
+                }
+            </ul>
+        </div>
+    </div>
+</DemoFrame>
+
+<style>
+    .seq { display: flex; flex-wrap: wrap; gap: 6px; }
+    .seq span { padding: 4px 8px; border-radius: 5px; background: var(--rn-surface-2); border: 1px solid var(--rn-line); font-size: 12px; }
+    .seq span:last-child { border-color: var(--rn-cyan); color: var(--rn-cyan); }
+</style>
+
+@code {
+    private ActionClient<FibonacciGoal, FibonacciResult, FibonacciFeedback>? _client;
+    private ClientGoalHandle<FibonacciGoal, FibonacciResult, FibonacciFeedback>? _handle;
+    private readonly LinkedList<string> _events = new();
+    private int[] _sequence = [];
+    private int _order = 12;
+    private int _feedbackCount;
+    private string _status = "idle";
+
+    private double Progress => _order <= 1 ? 0 : Math.Min(100, Math.Max(0, (_sequence.Length - 1) * 100.0 / _order));
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _client = Node.CreateActionClient<FibonacciGoal, FibonacciResult, FibonacciFeedback>("/fibonacci");
+    }
+
+    private async Task SendAsync()
+    {
+        _sequence = [];
+        _feedbackCount = 0;
+        await _client!.WaitForServerAsync(TimeSpan.FromSeconds(3));
+        try
+        {
+            _handle = await _client.SendGoalAsync(new FibonacciGoal { Order = _order }, fb =>
+            {
+                _sequence = fb.Sequence;
+                Interlocked.Increment(ref _feedbackCount);
+                RequestRender();
+            });
+            _status = "accepted";
+            Add($"goal <span class=\"ok\">accepted</span> · {_handle.GoalId.ToString()[..8]}");
+            _handle.StatusChanged += s =>
+            {
+                _status = s.ToString().ToLowerInvariant();
+                RequestRender();
+            };
+            var result = await _handle.GetResultAsync();
+            _status = result.Status.ToString().ToLowerInvariant();
+            if (result.Succeeded)
+            {
+                _sequence = result.Result.Sequence;
+            }
+
+            Add($"result <span class=\"{(result.Succeeded ? "ok" : "err")}\">{_status}</span> · {result.Result.Sequence.Length} numbers");
+        }
+        catch (GoalRejectedException)
+        {
+            Add("<span class=\"err\">goal rejected</span>");
+        }
+        finally
+        {
+            _handle = null;
+        }
+    }
+
+    private async Task CancelAsync()
+    {
+        if (_handle is { } h && await h.CancelAsync())
+        {
+            Add("cancel request <span class=\"ok\">accepted</span>");
+        }
+    }
+
+    private void Add(string line)
+    {
+        _events.AddFirst($"{DateTime.Now:HH:mm:ss} · {line}");
+        while (_events.Count > 30)
+        {
+            _events.RemoveLast();
+        }
+    }
+
+    private const string Code = """
+        // Server: return the result, or throw after honoring a cancel request.
+        node.CreateActionServer<FibonacciGoal, FibonacciResult, FibonacciFeedback>("fibonacci", async (goal, ct) =>
+        {
+            var seq = new List<int> { 0, 1 };
+            for (var i = 1; i < goal.Goal.Order; i++)
+            {
+                ct.ThrowIfCancellationRequested();
+                seq.Add(seq[i] + seq[i - 1]);
+                goal.PublishFeedback(new FibonacciFeedback { Sequence = seq.ToArray() });
+                await Task.Delay(250, ct);
+            }
+            return new FibonacciResult { Sequence = seq.ToArray() };
+        });
+
+        // Client
+        var client = node.CreateActionClient<FibonacciGoal, FibonacciResult, FibonacciFeedback>("fibonacci");
+        var handle = await client.SendGoalAsync(new FibonacciGoal { Order = 12 },
+            feedback => Console.WriteLine(string.Join(", ", feedback.Sequence)));
+        var result = await handle.GetResultAsync();   // or: await handle.CancelAsync();
+        """;
+}

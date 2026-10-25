@@ -1,0 +1,670 @@
+class ROS2.Net.Navigation.Angles
+  static Double Normalize(Double a)
+  static Double Difference(Double a, Double b)
+class ROS2.Net.Navigation.Behaviors.BackUpBehavior
+  ctor(Double distance=0.3, Double speed=0.1, Double timeout=10)
+  String Name { get; }
+  Func<Pose2D,Boolean> IsColliding { get; set; }
+  Void Start(Pose2D pose)
+  BehaviorStatus Update(Pose2D pose, Double dt, Velocity2D& command)
+enum ROS2.Net.Navigation.Behaviors.BehaviorStatus
+  Running, Succeeded, Failed
+class ROS2.Net.Navigation.Behaviors.ClearCostmapBehavior
+  ctor(Costmap2D[] costmaps)
+  String Name { get; }
+  Void Start(Pose2D pose)
+  BehaviorStatus Update(Pose2D pose, Double dt, Velocity2D& command)
+interface ROS2.Net.Navigation.Behaviors.IRecoveryBehavior
+  String Name { get; }
+  Void Start(Pose2D pose)
+  BehaviorStatus Update(Pose2D pose, Double dt, Velocity2D& command)
+class ROS2.Net.Navigation.Behaviors.SpinBehavior
+  ctor(Double targetYaw=1.5707963267948966, Double angularSpeed=1, Double timeout=15)
+  String Name { get; }
+  Double TargetYaw { get; set; }
+  Func<Pose2D,Boolean> IsColliding { get; set; }
+  Void Start(Pose2D pose)
+  BehaviorStatus Update(Pose2D pose, Double dt, Velocity2D& command)
+class ROS2.Net.Navigation.Behaviors.WaitBehavior
+  ctor(Double seconds=5)
+  String Name { get; }
+  Void Start(Pose2D pose)
+  BehaviorStatus Update(Pose2D pose, Double dt, Velocity2D& command)
+class ROS2.Net.Navigation.BehaviorTrees.ActionNode : BtNode
+  ctor(BtNodeConfig config, Func<BtNode,NodeStatus> tick)
+class ROS2.Net.Navigation.BehaviorTrees.AsyncActionNode : BtNode
+class ROS2.Net.Navigation.BehaviorTrees.BehaviorTree
+  ctor(BtNode root, Blackboard blackboard)
+  BtNode Root { get; }
+  Blackboard Blackboard { get; }
+  NodeStatus TickOnce()
+  Task<NodeStatus> TickWhileRunningAsync(TimeSpan period, CancellationToken cancellationToken=null, Action onTick=null)
+  Void Halt()
+  IEnumerable<BtNode> Nodes()
+class ROS2.Net.Navigation.BehaviorTrees.BehaviorTreeException : Exception
+  ctor(String message)
+class ROS2.Net.Navigation.BehaviorTrees.Blackboard
+  ctor()
+  Object Item { get; }
+  Void Set<T>(String key, T value)
+  Boolean TryGet<T>(String key, T& value)
+  T Get<T>(String key)
+  Boolean Contains(String key)
+class ROS2.Net.Navigation.BehaviorTrees.BtFactory
+  ctor()
+  BtFactory Register(String id, Func<BtNodeConfig,BtNode> create)
+  BtFactory RegisterControl(String id, Func<BtNodeConfig,ControlNode> create)
+  BtFactory RegisterDecorator(String id, Func<BtNodeConfig,DecoratorNode> create)
+  BtFactory RegisterAction(String id, Func<BtNode,NodeStatus> tick)
+  BtFactory RegisterCondition(String id, Func<BtNode,Boolean> condition)
+  BtFactory RegisterAsyncAction(String id, Func<BtNode,CancellationToken,Task<NodeStatus>> run)
+  Boolean IsRegistered(String id)
+  BehaviorTree CreateTreeFromText(String xml, Blackboard blackboard=null, String treeId=null)
+  BehaviorTree CreateTreeFromFile(String path, Blackboard blackboard=null)
+class ROS2.Net.Navigation.BehaviorTrees.BtNode
+  BtNodeConfig Config { get; }
+  String Name { get; }
+  Blackboard Blackboard { get; }
+  NodeStatus Status { get; }
+  NodeStatus Tick()
+  Void Halt()
+  T GetInput<T>(String port, T fallback=null)
+  Void SetOutput<T>(String port, T value)
+class ROS2.Net.Navigation.BehaviorTrees.BtNodeConfig
+  ctor(String Name, IReadOnlyDictionary<String,String> Ports, Blackboard Blackboard)
+  String Name { get; set; }
+  IReadOnlyDictionary<String,String> Ports { get; set; }
+  Blackboard Blackboard { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(BtNodeConfig other)
+  BtNodeConfig <Clone>$()
+  Void Deconstruct(String& Name, IReadOnlyDictionary`2& Ports, Blackboard& Blackboard)
+class ROS2.Net.Navigation.BehaviorTrees.ConditionNode : BtNode
+  ctor(BtNodeConfig config, Func<BtNode,Boolean> condition)
+class ROS2.Net.Navigation.BehaviorTrees.ControlNode : BtNode
+  List<BtNode> Children { get; }
+class ROS2.Net.Navigation.BehaviorTrees.DecoratorNode : BtNode
+  BtNode Child { get; set; }
+class ROS2.Net.Navigation.BehaviorTrees.DelegateAsyncActionNode : AsyncActionNode
+  ctor(BtNodeConfig config, Func<BtNode,CancellationToken,Task<NodeStatus>> run)
+class ROS2.Net.Navigation.BehaviorTrees.FallbackNode : ControlNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.ForceFailureNode : DecoratorNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.ForceSuccessNode : DecoratorNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.InverterNode : DecoratorNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.KeepRunningUntilFailureNode : DecoratorNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.NavTrees
+  field static String NavigateToPoseWithReplanningAndRecovery
+  field static String NavigateToPoseSimple
+enum ROS2.Net.Navigation.BehaviorTrees.NodeStatus
+  Idle, Running, Success, Failure
+class ROS2.Net.Navigation.BehaviorTrees.ParallelNode : ControlNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.PipelineSequenceNode : ControlNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.RateControllerNode : DecoratorNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.ReactiveFallbackNode : ControlNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.ReactiveSequenceNode : ControlNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.RecoveryNode : ControlNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.RepeatNode : DecoratorNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.RetryNode : DecoratorNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.RoundRobinNode : ControlNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.SequenceNode : ControlNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.BehaviorTrees.SubTreeNode : DecoratorNode
+  ctor(BtNodeConfig config)
+class ROS2.Net.Navigation.Control.DwbController : PathTrackingController
+  ctor()
+  String Name { get; }
+  Double MinLinearSpeed { get; set; }
+  Double LinearAcceleration { get; set; }
+  Double AngularAcceleration { get; set; }
+  Double SimTime { get; set; }
+  Double SimStep { get; set; }
+  Double ControlPeriod { get; set; }
+  Int32 LinearSamples { get; set; }
+  Int32 AngularSamples { get; set; }
+  Double CarrotDistance { get; set; }
+  DwbCritics Critics { get; set; }
+  Velocity2D ComputeVelocity(Pose2D pose, Velocity2D current, Costmap2D costmap)
+class ROS2.Net.Navigation.Control.DwbCritics
+  ctor()
+  Double PathDistance { get; set; }
+  Double GoalDistance { get; set; }
+  Double PathAlign { get; set; }
+  Double Obstacle { get; set; }
+  Double PreferForward { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(DwbCritics other)
+  DwbCritics <Clone>$()
+class ROS2.Net.Navigation.Control.GoalChecker
+  ctor(Double xyTolerance=0.25, Double yawTolerance=0.25, Boolean stateful=True)
+  Double XyTolerance { get; set; }
+  Double YawTolerance { get; set; }
+  Void Reset()
+  Boolean IsGoalReached(Pose2D pose, Pose2D goal)
+interface ROS2.Net.Navigation.Control.IController
+  String Name { get; }
+  Void SetPlan(IReadOnlyList<Pose2D> path)
+  Velocity2D ComputeVelocity(Pose2D pose, Velocity2D current, Costmap2D costmap)
+class ROS2.Net.Navigation.Control.PathTrackingController
+  String Name { get; }
+  Double MaxLinearSpeed { get; set; }
+  Double MaxAngularSpeed { get; set; }
+  Double GoalXyTolerance { get; set; }
+  Void SetPlan(IReadOnlyList<Pose2D> path)
+  Velocity2D ComputeVelocity(Pose2D pose, Velocity2D current, Costmap2D costmap)
+class ROS2.Net.Navigation.Control.ProgressChecker
+  ctor(Double requiredMovementRadius=0.5, Double movementTimeAllowanceSeconds=10)
+  Double RequiredMovementRadius { get; set; }
+  TimeSpan MovementTimeAllowance { get; set; }
+  Void Reset()
+  Boolean Check(Pose2D pose, Double nowSeconds)
+class ROS2.Net.Navigation.Control.PurePursuitController : PathTrackingController
+  ctor()
+  String Name { get; }
+  Double LookaheadDistance { get; set; }
+  Double RotateToHeadingAngle { get; set; }
+  Boolean UseRotateToHeading { get; set; }
+  Velocity2D ComputeVelocity(Pose2D pose, Velocity2D current, Costmap2D costmap)
+class ROS2.Net.Navigation.Control.RegulatedPurePursuitController : PurePursuitController
+  ctor()
+  String Name { get; }
+  Boolean UseVelocityScaledLookahead { get; set; }
+  Double LookaheadTime { get; set; }
+  Double MinLookahead { get; set; }
+  Double MaxLookahead { get; set; }
+  Double RegulatedMinRadius { get; set; }
+  Boolean UseCostRegulatedScaling { get; set; }
+  Double CostScalingGain { get; set; }
+  Double ApproachVelocityScalingDistance { get; set; }
+  Double MinApproachLinearVelocity { get; set; }
+  Double RegulatedMinSpeed { get; set; }
+  Velocity2D ComputeVelocity(Pose2D pose, Velocity2D current, Costmap2D costmap)
+struct ROS2.Net.Navigation.Control.Velocity2D
+  ctor(Double Linear, Double Angular)
+  Double Linear { get; set; }
+  Double Angular { get; set; }
+  static Velocity2D Zero { get; }
+  Twist ToTwist()
+  static Velocity2D FromTwist(Twist t)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Velocity2D other)
+  Void Deconstruct(Double& Linear, Double& Angular)
+class ROS2.Net.Navigation.Costmaps.Costmap2D
+  ctor(Int32 width, Int32 height, Double resolution, Pose2D origin=null, Byte defaultCost=0)
+  Int32 Width { get; }
+  Int32 Height { get; }
+  Double Resolution { get; }
+  Pose2D Origin { get; }
+  Byte DefaultCost { get; }
+  Byte[] Data { get; }
+  IReadOnlyList<ICostmapLayer> Layers { get; }
+  Object SyncRoot { get; }
+  static Costmap2D FromMap(OccupancyGridMap map, Boolean trackUnknown=False)
+  Costmap2D AddLayer(ICostmapLayer layer)
+  T GetLayer<T>()
+  Void Update()
+  Void ClearDynamic()
+  Int32 Index(Int32 cx, Int32 cy)
+  Boolean InBounds(Int32 cx, Int32 cy)
+  Byte GetCost(Int32 cx, Int32 cy)
+  Void SetCost(Int32 cx, Int32 cy, Byte cost)
+  Boolean WorldToCell(Double wx, Double wy, Int32& cx, Int32& cy)
+  ValueTuple<Double,Double> CellToWorld(Int32 cx, Int32 cy)
+  Byte GetCostAt(Double wx, Double wy)
+  OccupancyGrid ToMsg(String frameId=map, RosTime stamp=null)
+class ROS2.Net.Navigation.Costmaps.Costs
+  field static Byte Free
+  field static Byte Inscribed
+  field static Byte Lethal
+  field static Byte NoInformation
+  field static Byte MaxNonObstacle
+class ROS2.Net.Navigation.Costmaps.Footprint
+  Double Radius { get; }
+  IReadOnlyList<ValueTuple<Double,Double>> Polygon { get; }
+  Boolean IsCircular { get; }
+  Double InscribedRadius { get; }
+  static Footprint Circle(Double radius)
+  static Footprint FromPolygon(ValueTuple<Double,Double>[] vertices)
+  static Footprint Rectangle(Double length, Double width)
+  Byte Cost(Costmap2D costmap, Pose2D pose)
+  Boolean InCollision(Costmap2D costmap, Pose2D pose)
+interface ROS2.Net.Navigation.Costmaps.ICostmapLayer
+  String Name { get; }
+  Boolean Enabled { get; set; }
+  Void UpdateCosts(Costmap2D master)
+  Void Reset()
+class ROS2.Net.Navigation.Costmaps.InflationLayer
+  ctor(Double inflationRadius=0.55, Double costScalingFactor=3, Double inscribedRadius=0.2)
+  String Name { get; }
+  Boolean Enabled { get; set; }
+  Double InflationRadius { get; set; }
+  Double CostScalingFactor { get; set; }
+  Double InscribedRadius { get; set; }
+  Byte ComputeCost(Double distance)
+  Void UpdateCosts(Costmap2D master)
+  Void Reset()
+class ROS2.Net.Navigation.Costmaps.ObstacleLayer
+  ctor()
+  String Name { get; }
+  Boolean Enabled { get; set; }
+  Double ObstacleMaxRange { get; set; }
+  Double RaytraceMaxRange { get; set; }
+  Void AddScan(Costmap2D costmap, LaserScan scan, Pose2D sensorPose)
+  Void Mark(Costmap2D costmap, Double wx, Double wy)
+  Void UpdateCosts(Costmap2D master)
+  Void Reset()
+class ROS2.Net.Navigation.Costmaps.StaticLayer
+  ctor(OccupancyGridMap map, Boolean trackUnknown=False)
+  String Name { get; }
+  Boolean Enabled { get; set; }
+  OccupancyGridMap Map { get; }
+  Void SetMap(OccupancyGridMap map)
+  Void UpdateCosts(Costmap2D master)
+  Void Reset()
+class ROS2.Net.Navigation.GaussianRandom
+  ctor(Nullable<Int32> seed=null)
+  Double NextDouble()
+  Double Next(Double stdDev=1)
+class ROS2.Net.Navigation.Localization.Amcl
+  ctor(OccupancyGridMap map, AmclOptions options=null)
+  OccupancyGridMap Map { get; }
+  Int32 ParticleCount { get; }
+  Pose2D Estimate { get; }
+  Double[] Covariance { get; }
+  Boolean IsInitialized { get; }
+  Void SetMap(OccupancyGridMap map)
+  Pose2D GetParticle(Int32 i)
+  Void Initialize(Pose2D pose, Double sigmaXy=0.5, Double sigmaTheta=0.26)
+  Void InitializeGlobal()
+  Boolean Update(Pose2D odom, LaserScan scan, Pose2D laserOffset=null, Boolean force=False)
+  Void MotionUpdate(Pose2D from, Pose2D to)
+  Void SensorUpdate(LaserScan scan, Pose2D laserOffset=null)
+  Void Resample()
+  event Action<Amcl> Updated
+class ROS2.Net.Navigation.Localization.AmclOptions
+  ctor()
+  Int32 MinParticles { get; set; }
+  Int32 MaxParticles { get; set; }
+  Double Alpha1 { get; set; }
+  Double Alpha2 { get; set; }
+  Double Alpha3 { get; set; }
+  Double Alpha4 { get; set; }
+  Double ZHit { get; set; }
+  Double ZRand { get; set; }
+  Double SigmaHit { get; set; }
+  Double LaserMaxRange { get; set; }
+  Double LaserLikelihoodMaxDist { get; set; }
+  Int32 MaxBeams { get; set; }
+  LaserModel LaserModel { get; set; }
+  Double LikelihoodTemper { get; set; }
+  Double UpdateMinD { get; set; }
+  Double UpdateMinA { get; set; }
+  Int32 ResampleInterval { get; set; }
+  Double PfErr { get; set; }
+  Double PfZ { get; set; }
+  Double RecoveryAlphaSlow { get; set; }
+  Double RecoveryAlphaFast { get; set; }
+  Nullable<Int32> Seed { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(AmclOptions other)
+  AmclOptions <Clone>$()
+class ROS2.Net.Navigation.Localization.Ekf2D
+  ctor(Double[] processNoise=null)
+  Pose2D Pose { get; }
+  Double LinearVelocity { get; }
+  Double AngularVelocity { get; }
+  ReadOnlySpan<Double> Covariance { get; }
+  Double LastTime { get; }
+  field static Int32 X
+  field static Int32 Y
+  field static Int32 Theta
+  field static Int32 V
+  field static Int32 W
+  Void Reset(Pose2D pose, Double sigmaXy=0.01, Double sigmaTheta=0.01)
+  Void PredictTo(Double time)
+  Void Update(ReadOnlySpan<Int32> indices, ReadOnlySpan<Double> values, ReadOnlySpan<Double> variances)
+  Void UpdateTwist(Double time, Double linear, Double angular, Double linearVariance=0.01, Double angularVariance=0.02)
+  Void UpdateYawRate(Double time, Double yawRate, Double variance=0.001)
+  Void UpdateYaw(Double time, Double yaw, Double variance=0.01)
+  Void UpdatePosition(Double time, Double x, Double y, Double variance=0.05)
+enum ROS2.Net.Navigation.Localization.LaserModel
+  LikelihoodFieldProduct, LikelihoodField
+class ROS2.Net.Navigation.Localization.LikelihoodField
+  ctor(OccupancyGridMap map, Double maxDistance=2)
+  OccupancyGridMap Map { get; }
+  Double MaxDistance { get; }
+  ReadOnlySpan<Single> Distances { get; }
+  Double DistanceAt(Double wx, Double wy)
+class ROS2.Net.Navigation.Maps.OccupancyGridMap
+  ctor(Int32 width, Int32 height, Double resolution, Pose2D origin=null, SByte fill=-1)
+  Int32 Width { get; }
+  Int32 Height { get; }
+  Double Resolution { get; }
+  Pose2D Origin { get; }
+  SByte[] Data { get; }
+  SByte OccupiedThreshold { get; set; }
+  SByte FreeThreshold { get; set; }
+  Double WorldWidth { get; }
+  Double WorldHeight { get; }
+  SByte Item { get; set; }
+  field static SByte Unknown
+  field static SByte Free
+  field static SByte Occupied
+  Int32 Index(Int32 cx, Int32 cy)
+  Boolean InBounds(Int32 cx, Int32 cy)
+  Boolean WorldToCell(Double wx, Double wy, Int32& cx, Int32& cy)
+  ValueTuple<Double,Double> CellToWorld(Int32 cx, Int32 cy)
+  Boolean IsOccupied(Int32 cx, Int32 cy)
+  Boolean IsFree(Int32 cx, Int32 cy)
+  Void FillRect(Double x0, Double y0, Double x1, Double y1, SByte value)
+  static Void RayTrace(Int32 x0, Int32 y0, Int32 x1, Int32 y1, Func<Int32,Int32,Boolean> visit)
+  Double Raycast(Double wx, Double wy, Double angle, Double maxRange, Boolean unknownIsObstacle=False)
+  OccupancyGridMap Clone()
+  static OccupancyGridMap FromMsg(OccupancyGrid msg)
+  OccupancyGrid ToMsg(String frameId=map, RosTime stamp=null)
+  static OccupancyGridMap LoadMapServer(String yamlPath)
+  Void SaveMapServer(String basePath)
+class ROS2.Net.Navigation.Nodes.AmclNode : Node
+  ctor(Ros2Context context, AmclOptions amclOptions=null, String odomTopic=/odom, Nullable<Pose2D> initialPose=null, String name=amcl, NodeOptions options=null)
+  String GlobalFrame { get; }
+  String OdomFrame { get; }
+  Pose2D LaserOffset { get; set; }
+  Amcl Filter { get; }
+  Pose2D MapToOdom { get; }
+  Void SetInitialPose(Pose2D pose)
+  event Action<Pose2D> CorrectionUpdated
+class ROS2.Net.Navigation.Nodes.BtNavigatorNode : Node
+  ctor(Ros2Context context, IRobotPoseProvider pose, String behaviorTreeXml=null, String name=bt_navigator, NodeOptions options=null)
+  String BehaviorTreeXml { get; set; }
+  String GlobalFrame { get; }
+  TimeSpan TickPeriod { get; }
+  BtFactory Factory { get; }
+  Action<String> ClearCostmaps { get; set; }
+class ROS2.Net.Navigation.Nodes.ControllerServerNode : Node
+  ctor(Ros2Context context, IRobotPoseProvider pose, Costmap2D costmap=null, String name=controller_server, NodeOptions options=null)
+  Double ControllerFrequency { get; }
+  String DefaultControllerId { get; }
+  Costmap2D Costmap { get; set; }
+  GoalChecker GoalChecker { get; }
+  ProgressChecker ProgressChecker { get; }
+  Void AddController(String id, IController controller)
+  IController GetController(String id)
+class ROS2.Net.Navigation.Nodes.CostmapOptions
+  ctor()
+  Double InflationRadius { get; set; }
+  Double CostScalingFactor { get; set; }
+  Double RobotRadius { get; set; }
+  Boolean TrackUnknown { get; set; }
+  String MapTopic { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(CostmapOptions other)
+  CostmapOptions <Clone>$()
+class ROS2.Net.Navigation.Nodes.DelegatePoseProvider
+  ctor(Func<Nullable<ValueTuple<Pose2D,Velocity2D>>> source)
+  Boolean TryGetPose(Pose2D& pose, Velocity2D& velocity)
+class ROS2.Net.Navigation.Nodes.EkfNode : Node
+  ctor(Ros2Context context, String odomTopic=/odom, String imuTopic=/imu, String name=ekf_filter_node, NodeOptions options=null)
+  Double Frequency { get; }
+  String OdomFrame { get; }
+  String BaseFrame { get; }
+  Ekf2D Filter { get; }
+interface ROS2.Net.Navigation.Nodes.IRobotPoseProvider
+  Boolean TryGetPose(Pose2D& pose, Velocity2D& velocity)
+class ROS2.Net.Navigation.Nodes.MapServerNode : Node
+  ctor(Ros2Context context, OccupancyGridMap map, String frameId=map, String name=map_server, NodeOptions options=null)
+  String FrameId { get; }
+  OccupancyGridMap Map { get; }
+  static MapServerNode FromFile(Ros2Context context, String yamlPath, String frameId=map)
+  Void SetMap(OccupancyGridMap map)
+class ROS2.Net.Navigation.Nodes.OdometryPoseProvider
+  ctor(Node node, String topic=/odom)
+  Pose2D Correction { get; set; }
+  Pose2D OdometryPose { get; }
+  Boolean HasOdometry { get; }
+  Boolean TryGetPose(Pose2D& pose, Velocity2D& velocity)
+  Void Dispose()
+  event Action<Pose2D> OdometryReceived
+class ROS2.Net.Navigation.Nodes.PlannerServerNode : Node
+  ctor(Ros2Context context, IRobotPoseProvider pose, Costmap2D costmap=null, CostmapOptions costmapOptions=null, String name=planner_server, NodeOptions options=null)
+  String FrameId { get; }
+  String DefaultPlannerId { get; }
+  Costmap2D Costmap { get; }
+  Void AddPlanner(String id, IGlobalPlanner planner)
+  Void SetMap(OccupancyGridMap map)
+class ROS2.Net.Navigation.Nodes.SlamNode : Node
+  ctor(Ros2Context context, SlamOptions slamOptions=null, String odomTopic=/odom, String name=slam_toolbox, NodeOptions options=null)
+  String MapFrame { get; }
+  String OdomFrame { get; }
+  OnlineSlam Slam { get; }
+  Void PublishMap()
+  Void SaveMap(String basePath)
+class ROS2.Net.Navigation.Nodes.TfHelpers
+  static TransformStamped ToTransform(Pose2D pose, String parent, String child, RosTime stamp)
+  static TFMessage ToTfMessage(Pose2D pose, String parent, String child, RosTime stamp)
+class ROS2.Net.Navigation.Planning.AStarPlanner : GridPlannerBase
+  ctor(GridPlannerOptions options=null)
+  String Name { get; }
+class ROS2.Net.Navigation.Planning.DijkstraPlanner : GridPlannerBase
+  ctor(GridPlannerOptions options=null)
+  String Name { get; }
+class ROS2.Net.Navigation.Planning.Dubins
+  static List<Pose2D> Sample(Pose2D from, Pose2D to, Double radius, Double spacing)
+class ROS2.Net.Navigation.Planning.GridPlannerBase
+  GridPlannerOptions Options { get; }
+  String Name { get; }
+  Int32 LastExpansions { get; }
+  PlanResult CreatePlan(Costmap2D costmap, Pose2D start, Pose2D goal, CancellationToken cancellationToken=null)
+class ROS2.Net.Navigation.Planning.GridPlannerOptions
+  ctor()
+  Boolean AllowUnknown { get; set; }
+  Double CostWeight { get; set; }
+  Byte ObstacleCost { get; set; }
+  Double GoalTolerance { get; set; }
+  Int32 MaxIterations { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(GridPlannerOptions other)
+  GridPlannerOptions <Clone>$()
+class ROS2.Net.Navigation.Planning.HybridAStarOptions
+  ctor()
+  Double MinTurningRadius { get; set; }
+  Int32 AngleBins { get; set; }
+  Boolean AllowReverse { get; set; }
+  Double ReversePenalty { get; set; }
+  Double ChangePenalty { get; set; }
+  Double NonStraightPenalty { get; set; }
+  Double CostWeight { get; set; }
+  Int32 AnalyticExpansionInterval { get; set; }
+  Double GoalTolerance { get; set; }
+  Double GoalHeadingTolerance { get; set; }
+  Int32 MaxIterations { get; set; }
+  Boolean AllowUnknown { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(HybridAStarOptions other)
+  HybridAStarOptions <Clone>$()
+class ROS2.Net.Navigation.Planning.HybridAStarPlanner
+  ctor(Footprint footprint, HybridAStarOptions options=null)
+  HybridAStarOptions Options { get; }
+  Footprint Footprint { get; }
+  String Name { get; }
+  Int32 LastExpansions { get; }
+  PlanResult CreatePlan(Costmap2D costmap, Pose2D start, Pose2D goal, CancellationToken cancellationToken=null)
+interface ROS2.Net.Navigation.Planning.IGlobalPlanner
+  String Name { get; }
+  PlanResult CreatePlan(Costmap2D costmap, Pose2D start, Pose2D goal, CancellationToken cancellationToken=null)
+class ROS2.Net.Navigation.Planning.PathSmoother
+  ctor()
+  Double DataWeight { get; set; }
+  Double SmoothWeight { get; set; }
+  Int32 MaxIterations { get; set; }
+  Double Tolerance { get; set; }
+  List<Pose2D> Smooth(IReadOnlyList<Pose2D> path, Costmap2D costmap=null)
+class ROS2.Net.Navigation.Planning.PathUtils
+  static Double Length(IReadOnlyList<Pose2D> poses)
+  static List<Pose2D> OrientAlongPath(IReadOnlyList<ValueTuple<Double,Double>> points, Double finalTheta)
+  static List<Pose2D> Densify(IReadOnlyList<Pose2D> poses, Double spacing)
+  static Path ToMsg(IReadOnlyList<Pose2D> poses, String frameId, RosTime stamp)
+  static List<Pose2D> FromMsg(Path path)
+  static Boolean IsCollisionFree(Costmap2D costmap, Footprint footprint, IReadOnlyList<Pose2D> poses)
+class ROS2.Net.Navigation.Planning.PlanResult
+  ctor(Boolean Success, IReadOnlyList<Pose2D> Poses, String Error=null)
+  Boolean Success { get; set; }
+  IReadOnlyList<Pose2D> Poses { get; set; }
+  String Error { get; set; }
+  Double Length { get; }
+  static PlanResult Fail(String error)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(PlanResult other)
+  PlanResult <Clone>$()
+  Void Deconstruct(Boolean& Success, IReadOnlyList`1& Poses, String& Error)
+class ROS2.Net.Navigation.Planning.ThetaStarPlanner : GridPlannerBase
+  ctor(GridPlannerOptions options=null)
+  String Name { get; }
+struct ROS2.Net.Navigation.Pose2D
+  ctor(Double X, Double Y, Double Theta)
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Theta { get; set; }
+  static Pose2D Identity { get; }
+  Pose2D Compose(Pose2D other)
+  Pose2D Inverse()
+  Pose2D Between(Pose2D other)
+  ValueTuple<Double,Double> TransformPoint(Double x, Double y)
+  Double DistanceTo(Pose2D other)
+  Double DistanceSquaredTo(Pose2D other)
+  static Pose2D FromMsg(Pose pose)
+  Pose ToMsg()
+  PoseStamped ToPoseStamped(String frameId, RosTime stamp)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Pose2D other)
+  Void Deconstruct(Double& X, Double& Y, Double& Theta)
+class ROS2.Net.Navigation.Slam.CorrelativeScanMatcher
+  ctor()
+  Int32 CoarseFactor { get; set; }
+  MatchResult Match(MatchGrid grid, IReadOnlyList<ValueTuple<Double,Double>> points, Pose2D guess, Double linearWindow, Double angularWindow, Double angularStep)
+  static Double Score(MatchGrid grid, IReadOnlyList<ValueTuple<Double,Double>> points, Pose2D pose)
+class ROS2.Net.Navigation.Slam.MatchGrid
+  Double OriginX { get; }
+  Double OriginY { get; }
+  Double Resolution { get; }
+  Int32 Width { get; }
+  Int32 Height { get; }
+  Single[] Values { get; }
+  static MatchGrid Build(IReadOnlyList<ValueTuple<Double,Double>> points, Double resolution, Double sigma, Double margin=2)
+  MatchGrid Downsample(Int32 factor)
+  Double ValueAtBilinear(Double x, Double y)
+  Single ValueAt(Double x, Double y)
+struct ROS2.Net.Navigation.Slam.MatchResult
+  ctor(Pose2D Pose, Double Score)
+  Pose2D Pose { get; set; }
+  Double Score { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(MatchResult other)
+  Void Deconstruct(Pose2D& Pose, Double& Score)
+class ROS2.Net.Navigation.Slam.OnlineSlam
+  ctor(SlamOptions options=null)
+  SlamOptions Options { get; }
+  PoseGraph Graph { get; }
+  IReadOnlyList<SlamKeyframe> Keyframes { get; }
+  Int32 LoopClosureCount { get; }
+  Pose2D Pose { get; }
+  Pose2D MapToOdom { get; }
+  Boolean Process(Pose2D odom, LaserScan scan)
+  Boolean Process(Pose2D odom, ValueTuple<Double,Double>[] points)
+  OccupancyGridMap GetMap()
+  Void SaveMap(String basePath)
+  event Action<Int32> LoopClosed
+class ROS2.Net.Navigation.Slam.PoseGraph
+  ctor()
+  IReadOnlyList<Pose2D> Nodes { get; }
+  IReadOnlyList<PoseGraphEdge> Edges { get; }
+  Int32 AddNode(Pose2D pose)
+  Void SetNode(Int32 index, Pose2D pose)
+  Void AddEdge(PoseGraphEdge edge)
+  Double Chi2()
+  Double Optimize(Int32 maxIterations=20, Double tolerance=1E-06)
+class ROS2.Net.Navigation.Slam.PoseGraphEdge
+  ctor(Int32 From, Int32 To, Pose2D Measurement, Double InfoXy, Double InfoTheta, Boolean IsLoopClosure)
+  Int32 From { get; set; }
+  Int32 To { get; set; }
+  Pose2D Measurement { get; set; }
+  Double InfoXy { get; set; }
+  Double InfoTheta { get; set; }
+  Boolean IsLoopClosure { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(PoseGraphEdge other)
+  PoseGraphEdge <Clone>$()
+  Void Deconstruct(Int32& From, Int32& To, Pose2D& Measurement, Double& InfoXy, Double& InfoTheta, Boolean& IsLoopClosure)
+class ROS2.Net.Navigation.Slam.ScanPoints
+  static ValueTuple<Double,Double>[] FromScan(LaserScan scan, Pose2D laserOffset=null, Double maxRange=1.7976931348623157E+308, Int32 stride=1)
+class ROS2.Net.Navigation.Slam.SlamKeyframe
+  ctor(Int32 Node, ValueTuple<Double,Double>[] Points, Pose2D Odometry)
+  Int32 Node { get; set; }
+  ValueTuple<Double,Double>[] Points { get; set; }
+  Pose2D Odometry { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(SlamKeyframe other)
+  SlamKeyframe <Clone>$()
+  Void Deconstruct(Int32& Node, ValueTuple`2[]& Points, Pose2D& Odometry)
+enum ROS2.Net.Navigation.Slam.SlamMode
+  Mapping, Localization
+class ROS2.Net.Navigation.Slam.SlamOptions
+  ctor()
+  Double Resolution { get; set; }
+  Double MaxLaserRange { get; set; }
+  Double MinimumTravelDistance { get; set; }
+  Double MinimumTravelHeading { get; set; }
+  Int32 ScanBufferSize { get; set; }
+  Double CorrelationSearchSpaceDimension { get; set; }
+  Double CorrelationAngularWindow { get; set; }
+  Double SmearDeviation { get; set; }
+  Boolean DoLoopClosing { get; set; }
+  Double LoopSearchMaximumDistance { get; set; }
+  Int32 LoopMatchMinimumChainSize { get; set; }
+  Double LoopSearchSpaceDimension { get; set; }
+  Double LoopAngularWindow { get; set; }
+  Double LoopMatchMinimumResponse { get; set; }
+  Int32 BeamStride { get; set; }
+  Pose2D LaserOffset { get; set; }
+  SlamMode Mode { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(SlamOptions other)
+  SlamOptions <Clone>$()

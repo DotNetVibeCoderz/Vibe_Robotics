@@ -1,0 +1,76 @@
+@page "/lifecycle"
+@inherits GalleryPage
+@using StdMsgs = ROS2.Net.Msgs.StdMsgs
+
+<PageTitle>Lifecycle · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="lifecycle" Code="@Code">
+    <div class="stack">
+        <LifecycleStateView TargetNode="/gallery/lc_talker" />
+        <div class="grid halves">
+            <div class="panel stack">
+                <h3>/gallery/lifecycle_chatter</h3>
+                <ul class="feed">
+                    @foreach (var m in _messages)
+                    {
+                        <li>@m</li>
+                    }
+                </ul>
+                <p class="note">@T("The lifecycle publisher only publishes while the node is Active. Shutdown is final, as in ROS 2: restart the gallery to start over.",
+                                   "Lifecycle publisher hanya menerbitkan saat node Active. Shutdown bersifat final, seperti di ROS 2: jalankan ulang galeri untuk memulai lagi.")</p>
+            </div>
+            <div class="panel stack">
+                <h3>/gallery/lc_talker/transition_event</h3>
+                <ul class="feed">
+                    @foreach (var t in _transitions)
+                    {
+                        <li>@t</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private readonly LinkedList<string> _messages = new();
+    private readonly LinkedList<string> _transitions = new();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Subscribe<StdMsgs.String>("/gallery/lifecycle_chatter", m => Push(_messages, m.Data));
+        Subscribe<ROS2.Net.Msgs.LifecycleMsgs.TransitionEvent>("/gallery/lc_talker/transition_event",
+            e => Push(_transitions, $"{e.StartState.Label} → {e.GoalState.Label}  ({e.Transition.Label})"));
+    }
+
+    private static void Push(LinkedList<string> list, string text)
+    {
+        lock (list)
+        {
+            list.AddFirst($"{DateTime.Now:HH:mm:ss} {text}");
+            if (list.Count > 25)
+            {
+                list.RemoveLast();
+            }
+        }
+    }
+
+    private const string Code = """
+        public sealed class LcTalker(Ros2Context ctx) : LifecycleNode(ctx, "lc_talker")
+        {
+            private LifecyclePublisher<StdMsgs.String>? _pub;
+
+            protected override ValueTask<CallbackReturn> OnConfigure(LifecycleState previous)
+            {
+                _pub = CreateLifecyclePublisher<StdMsgs.String>("lifecycle_chatter");
+                CreateTimer(TimeSpan.FromMilliseconds(500), () => _pub.Publish(new() { Data = "hello" }));
+                return ValueTask.FromResult(CallbackReturn.Success);
+            }
+        }
+
+        // Drive it from code, or remotely: `ros2 lifecycle set /lc_talker activate`
+        await node.ConfigureAsync();
+        await node.ActivateAsync();
+        """;
+}

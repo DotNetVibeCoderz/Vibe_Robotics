@@ -1,0 +1,112 @@
+@inherits RosComponentBase
+@using ROS2.Net.Tf2
+
+<div class="tf rn-card">
+    @if (_roots.Count == 0)
+    {
+        <div class="empty">Waiting for /tf and /tf_static…</div>
+    }
+    else
+    {
+        <ul class="tree">
+            @foreach (var r in _roots)
+            {
+                @RenderFrame(r)
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    private sealed record FrameNode(string Name, string Detail, List<FrameNode> Children);
+
+    private TfBuffer? _ownBuffer;
+    private TransformListener? _listener;
+    private List<FrameNode> _roots = [];
+
+    /// <summary>Shared buffer to display; when null the component listens to /tf itself.</summary>
+    [Parameter] public TfBuffer? Buffer { get; set; }
+
+    private TfBuffer ActiveBuffer => Buffer ?? _ownBuffer!;
+
+    protected override void OnInitialized()
+    {
+        if (Buffer is null)
+        {
+            _ownBuffer = new TfBuffer();
+            _listener = new TransformListener(_ownBuffer, Node);
+        }
+
+        Every(TimeSpan.FromMilliseconds(500), _ =>
+        {
+            Build();
+            return Task.CompletedTask;
+        });
+    }
+
+    private void Build()
+    {
+        var buffer = ActiveBuffer;
+        var names = buffer.FrameNames;
+        var children = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+        var roots = new List<string>();
+        foreach (var f in names)
+        {
+            var parent = buffer.GetParent(f);
+            if (string.IsNullOrEmpty(parent))
+            {
+                roots.Add(f);
+            }
+            else
+            {
+                if (!children.TryGetValue(parent, out var list))
+                {
+                    children[parent] = list = [];
+                }
+
+                list.Add(f);
+            }
+        }
+
+        FrameNode Make(string name, string? parent, int depth)
+        {
+            var detail = string.Empty;
+            if (parent is not null && buffer.TryLookupTransform(parent, name, RosTime.Zero, out var t, out _))
+            {
+                var (_, _, yaw) = t.Rotation.ToRpy();
+                detail = string.Create(CultureInfo.InvariantCulture, $"xyz ({t.Translation.X:0.00}, {t.Translation.Y:0.00}, {t.Translation.Z:0.00})  yaw {yaw * 180 / Math.PI:0.0}°");
+            }
+
+            var kids = depth > 32 || !children.TryGetValue(name, out var c) ? [] : c.Order(StringComparer.Ordinal).Select(k => Make(k, name, depth + 1)).ToList();
+            return new FrameNode(name, detail, kids);
+        }
+
+        _roots = roots.Order(StringComparer.Ordinal).Select(r => Make(r, null, 0)).ToList();
+    }
+
+    private RenderFragment RenderFrame(FrameNode f) => __builder =>
+    {
+        <li>
+            <span class="frame rn-mono">@f.Name</span>
+            @if (f.Detail.Length > 0)
+            {
+                <span class="detail rn-mono">@f.Detail</span>
+            }
+            @if (f.Children.Count > 0)
+            {
+                <ul>
+                    @foreach (var c in f.Children)
+                    {
+                        @RenderFrame(c)
+                    }
+                </ul>
+            }
+        </li>
+    };
+
+    protected override ValueTask DisposeCoreAsync()
+    {
+        _listener?.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}

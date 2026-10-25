@@ -1,0 +1,11 @@
+.map { position: relative; overflow: hidden; background: var(--rn-map-unknown); }
+svg { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
+.empty { font: 0.4px var(--rn-font); fill: var(--rn-muted); text-anchor: middle; }
+.path { fill: none; stroke: var(--rn-cyan); stroke-width: 0.06; stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 0.06px var(--rn-cyan)); }
+.goal { fill: var(--rn-warn); }
+.goal-halo { fill: color-mix(in srgb, var(--rn-warn) 22%, transparent); stroke: var(--rn-warn); stroke-width: 0.02; }
+.robot-body { fill: var(--rn-violet); stroke: #fff; stroke-width: 0.025; }
+.robot-dir { fill: #fff; opacity: .9; }
+.toolbar { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
+.toolbar .rn-btn { padding: 6px 10px; background: color-mix(in srgb, var(--rn-surface) 85%, transparent); backdrop-filter: blur(6px); }
+.meta { position: absolute; left: 10px; bottom: 8px; font-size: 11px; color: var(--rn-muted); background: color-mix(in srgb, var(--rn-bg) 70%, transparent); padding: 3px 6px; border-radius: 4px; }

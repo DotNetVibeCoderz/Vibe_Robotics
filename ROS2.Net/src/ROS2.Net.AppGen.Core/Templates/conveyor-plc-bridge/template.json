@@ -1,0 +1,14 @@
+{
+  "name": "Conveyor PLC bridge",
+  "category": "Industry",
+  "description": "A lifecycle-managed conveyor controller (a PLC stand-in) exposes start/stop as a std_srvs/SetBool service, a speed parameter with limits, and publishes speed and item counts.",
+  "appKind": "console",
+  "tags": [
+    "industry",
+    "lifecycle",
+    "plc",
+    "services",
+    "parameters"
+  ],
+  "packages": []
+}

@@ -1,0 +1,49 @@
+@page "/teleop"
+@inherits GalleryPage
+
+<PageTitle>Teleop · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="teleop" Code="@Code">
+    <div class="grid two">
+        <SimView Height="520" />
+        <div class="stack">
+            <div class="panel stack" style="align-items:center">
+                <h3 style="align-self:flex-start">@T("Joystick → /cmd_vel", "Joystick → /cmd_vel")</h3>
+                <TeleopJoystick Topic="/cmd_vel" MaxLinear="0.6" MaxAngular="2.0" Size="220" />
+                <p class="note">@T("Drag the knob, or click it and use W A S D. The autopilot is paused while this page is open.",
+                                   "Geser kenop, atau klik lalu gunakan W A S D. Autopilot dijeda selama halaman ini terbuka.")</p>
+            </div>
+            <LivePlot Topic="/odom" Fields="@(["twist.twist.linear.x", "twist.twist.angular.z"])" Height="190" />
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private IDisposable? _hold;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _hold = Runtime.HoldAutopilot();
+    }
+
+    protected override ValueTask DisposeCoreAsync()
+    {
+        _hold?.Dispose();
+        return base.DisposeCoreAsync();
+    }
+
+    private const string Code = """
+        @* Blazor *@
+        <TeleopJoystick Topic="/cmd_vel" MaxLinear="0.6" MaxAngular="2.0" />
+        <LivePlot Topic="/odom" Fields="@(["twist.twist.linear.x", "twist.twist.angular.z"])" />
+
+        // Program.cs
+        builder.Services.AddRos2Blazor(o => o.Rmw = "rtps");   // or inprocess / rosbridge
+
+        // The robot (here: ROS2.Net.Simulation) subscribes geometry_msgs/Twist on /cmd_vel.
+        var world = Scenarios.Create(ScenarioKind.Warehouse, robots: 1);
+        using var sim = new SimulationNode(context, world);
+        sim.Start();
+        """;
+}

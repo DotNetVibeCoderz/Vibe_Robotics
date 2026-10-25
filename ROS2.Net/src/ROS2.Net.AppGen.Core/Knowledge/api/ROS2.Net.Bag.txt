@@ -1,0 +1,272 @@
+class ROS2.Net.Bag.BagExporter
+  static Int64 ToJsonLines(BagReader reader, TextWriter output, IEnumerable<String> topics=null, Nullable<RosTime> start=null, Nullable<RosTime> end=null)
+  static Int64 ToCsv(BagReader reader, String topic, TextWriter output, Int32 maxArrayElements=64, Nullable<RosTime> start=null, Nullable<RosTime> end=null)
+  static Int64 ToJsonLinesFile(BagReader reader, String path, IEnumerable<String> topics=null)
+  static Int64 ToCsvFile(BagReader reader, String topic, String path, Int32 maxArrayElements=64)
+class ROS2.Net.Bag.BagFileInfo
+  ctor(String Path, RosTime StartingTime, RosDuration Duration, UInt64 MessageCount)
+  String Path { get; set; }
+  RosTime StartingTime { get; set; }
+  RosDuration Duration { get; set; }
+  UInt64 MessageCount { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(BagFileInfo other)
+  BagFileInfo <Clone>$()
+  Void Deconstruct(String& Path, RosTime& StartingTime, RosDuration& Duration, UInt64& MessageCount)
+class ROS2.Net.Bag.BagInfo
+  String Path { get; }
+  BagMetadata Metadata { get; }
+  IReadOnlyList<ValueTuple<String,Int64>> Files { get; }
+  Int64 TotalSize { get; }
+  static BagInfo Read(String path)
+  String ToString()
+  static String FormatSize(Int64 bytes)
+struct ROS2.Net.Bag.BagMessage
+  ctor(String Topic, String Type, RosTime LogTime, RosTime PublishTime, UInt32 Sequence, ReadOnlyMemory<Byte> Data)
+  String Topic { get; set; }
+  String Type { get; set; }
+  RosTime LogTime { get; set; }
+  RosTime PublishTime { get; set; }
+  UInt32 Sequence { get; set; }
+  ReadOnlyMemory<Byte> Data { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(BagMessage other)
+  Void Deconstruct(String& Topic, String& Type, RosTime& LogTime, RosTime& PublishTime, UInt32& Sequence, ReadOnlyMemory`1& Data)
+class ROS2.Net.Bag.BagMetadata
+  ctor()
+  Int32 Version { get; set; }
+  String StorageIdentifier { get; set; }
+  RosTime StartingTime { get; set; }
+  RosDuration Duration { get; set; }
+  UInt64 MessageCount { get; set; }
+  List<BagTopicInfo> Topics { get; }
+  List<BagFileInfo> Files { get; }
+  String CompressionFormat { get; set; }
+  String CompressionMode { get; set; }
+  String RosDistro { get; set; }
+  RosTime EndTime { get; }
+  field static String FileName
+  String ToYaml()
+  Void Save(String bagDirectory)
+  static BagMetadata Load(String bagDirectory)
+  static BagMetadata Parse(String yaml)
+class ROS2.Net.Bag.BagPlayer
+  ctor(Node node, String bagPath, BagPlayerOptions options=null)
+  ctor(Node node, BagReader reader, BagPlayerOptions options=null)
+  BagReader Reader { get; }
+  Int64 PlayedCount { get; }
+  Boolean IsPaused { get; }
+  Double Rate { get; set; }
+  RosTime PlaybackTime { get; }
+  Void Pause()
+  Void Resume()
+  Void TogglePause()
+  Task<Boolean> StepAsync()
+  Task PlayAsync(CancellationToken cancellationToken=null)
+  Void Dispose()
+  event Action<BagMessage> MessagePlayed
+class ROS2.Net.Bag.BagPlayerOptions
+  ctor()
+  Double Rate { get; set; }
+  Boolean Loop { get; set; }
+  TimeSpan StartOffset { get; set; }
+  List<String> Topics { get; }
+  Dictionary<String,String> Remappings { get; }
+  Double ClockRate { get; set; }
+  Boolean StartPaused { get; set; }
+  TimeSpan Delay { get; set; }
+  Dictionary<String,QosProfile> QosOverrides { get; }
+class ROS2.Net.Bag.BagReader
+  String Path { get; }
+  BagMetadata Metadata { get; }
+  IReadOnlyList<BagTopicInfo> Topics { get; }
+  IReadOnlyList<String> Files { get; }
+  static BagReader Open(String path)
+  IEnumerable<BagMessage> ReadMessages(Nullable<RosTime> start=null, Nullable<RosTime> end=null, IEnumerable<String> topics=null)
+  static T Deserialize<T>(BagMessage message)
+  static IRosMessage Deserialize(BagMessage message)
+  String ToJson(BagMessage message, Boolean indented=False)
+  Void Dispose()
+class ROS2.Net.Bag.BagRecorder
+  ctor(Node node, String bagDirectory, BagRecorderOptions options=null)
+  String BagDirectory { get; }
+  UInt64 MessageCount { get; }
+  IReadOnlyList<String> RecordedTopics { get; }
+  Void Start()
+  Task<Boolean> WaitForTopicsAsync(Int32 count, TimeSpan timeout, CancellationToken cancellationToken=null)
+  Task StopAsync()
+  ValueTask DisposeAsync()
+  event Action<String,String> TopicAdded
+class ROS2.Net.Bag.BagRecorderOptions
+  ctor()
+  List<String> Topics { get; }
+  Boolean All { get; set; }
+  String Include { get; set; }
+  String Exclude { get; set; }
+  Boolean IncludeHidden { get; set; }
+  Dictionary<String,String> TopicTypes { get; }
+  TimeSpan DiscoveryInterval { get; set; }
+  Nullable<QosProfile> QosOverride { get; set; }
+  BagWriterOptions Writer { get; set; }
+class ROS2.Net.Bag.BagTopicInfo
+  ctor(String Name, String Type, String SerializationFormat, IReadOnlyList<QosProfile> OfferedQos, UInt64 MessageCount)
+  String Name { get; set; }
+  String Type { get; set; }
+  String SerializationFormat { get; set; }
+  IReadOnlyList<QosProfile> OfferedQos { get; set; }
+  UInt64 MessageCount { get; set; }
+  QosProfile PlaybackQos { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(BagTopicInfo other)
+  BagTopicInfo <Clone>$()
+  Void Deconstruct(String& Name, String& Type, String& SerializationFormat, IReadOnlyList`1& OfferedQos, UInt64& MessageCount)
+class ROS2.Net.Bag.BagWriter
+  ctor(String directory, BagWriterOptions options=null)
+  String Directory { get; }
+  UInt64 MessageCount { get; }
+  Void AddTopic(String topic, String type, IReadOnlyList<QosProfile> offeredQos=null)
+  Boolean HasTopic(String topic)
+  Void Write(String topic, ReadOnlySpan<Byte> cdr, RosTime receiveTime, Nullable<RosTime> publishTime=null)
+  Void Write<T>(String topic, T message, RosTime receiveTime)
+  Void Close()
+  Void Dispose()
+class ROS2.Net.Bag.BagWriterOptions
+  ctor()
+  McapCompression Compression { get; set; }
+  Int32 ChunkSize { get; set; }
+  Int64 MaxFileSize { get; set; }
+  Nullable<TimeSpan> MaxFileDuration { get; set; }
+  Boolean Overwrite { get; set; }
+class ROS2.Net.Bag.Mcap.McapChannel
+  ctor(UInt16 Id, UInt16 SchemaId, String Topic, String MessageEncoding, IReadOnlyDictionary<String,String> Metadata)
+  UInt16 Id { get; set; }
+  UInt16 SchemaId { get; set; }
+  String Topic { get; set; }
+  String MessageEncoding { get; set; }
+  IReadOnlyDictionary<String,String> Metadata { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(McapChannel other)
+  McapChannel <Clone>$()
+  Void Deconstruct(UInt16& Id, UInt16& SchemaId, String& Topic, String& MessageEncoding, IReadOnlyDictionary`2& Metadata)
+class ROS2.Net.Bag.Mcap.McapChunkIndex
+  ctor(UInt64 MessageStartTime, UInt64 MessageEndTime, UInt64 ChunkStartOffset, UInt64 ChunkLength, IReadOnlyDictionary<UInt16,UInt64> MessageIndexOffsets, UInt64 MessageIndexLength, String Compression, UInt64 CompressedSize, UInt64 UncompressedSize)
+  UInt64 MessageStartTime { get; set; }
+  UInt64 MessageEndTime { get; set; }
+  UInt64 ChunkStartOffset { get; set; }
+  UInt64 ChunkLength { get; set; }
+  IReadOnlyDictionary<UInt16,UInt64> MessageIndexOffsets { get; set; }
+  UInt64 MessageIndexLength { get; set; }
+  String Compression { get; set; }
+  UInt64 CompressedSize { get; set; }
+  UInt64 UncompressedSize { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(McapChunkIndex other)
+  McapChunkIndex <Clone>$()
+  Void Deconstruct(UInt64& MessageStartTime, UInt64& MessageEndTime, UInt64& ChunkStartOffset, UInt64& ChunkLength, IReadOnlyDictionary`2& MessageIndexOffsets, UInt64& MessageIndexLength, String& Compression, UInt64& CompressedSize, UInt64& UncompressedSize)
+enum ROS2.Net.Bag.Mcap.McapCompression
+  None, Zstd, Lz4
+class ROS2.Net.Bag.Mcap.McapException : Exception
+  ctor(String message)
+struct ROS2.Net.Bag.Mcap.McapMessage
+  ctor(UInt16 ChannelId, UInt32 Sequence, UInt64 LogTime, UInt64 PublishTime, ReadOnlyMemory<Byte> Data)
+  UInt16 ChannelId { get; set; }
+  UInt32 Sequence { get; set; }
+  UInt64 LogTime { get; set; }
+  UInt64 PublishTime { get; set; }
+  ReadOnlyMemory<Byte> Data { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(McapMessage other)
+  Void Deconstruct(UInt16& ChannelId, UInt32& Sequence, UInt64& LogTime, UInt64& PublishTime, ReadOnlyMemory`1& Data)
+class ROS2.Net.Bag.Mcap.McapMetadata
+  ctor(String Name, IReadOnlyDictionary<String,String> Values)
+  String Name { get; set; }
+  IReadOnlyDictionary<String,String> Values { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(McapMetadata other)
+  McapMetadata <Clone>$()
+  Void Deconstruct(String& Name, IReadOnlyDictionary`2& Values)
+enum ROS2.Net.Bag.Mcap.McapOpcode
+  Header, Footer, Schema, Channel, Message, Chunk, MessageIndex, ChunkIndex, Attachment, AttachmentIndex, Statistics, Metadata, MetadataIndex, SummaryOffset, DataEnd
+class ROS2.Net.Bag.Mcap.McapReader
+  ctor(Stream stream, Boolean leaveOpen=False, Boolean validateCrc=True)
+  Boolean ValidateCrc { get; }
+  Boolean HasSummary { get; }
+  String Profile { get; }
+  String Library { get; }
+  IReadOnlyDictionary<UInt16,McapSchema> Schemas { get; }
+  IReadOnlyDictionary<UInt16,McapChannel> Channels { get; }
+  IReadOnlyList<McapChunkIndex> ChunkIndexes { get; }
+  McapStatistics Statistics { get; }
+  Int32 ChunksRead { get; }
+  static McapReader Open(String path, Boolean validateCrc=True)
+  Void Verify()
+  IEnumerable<McapMetadata> ReadMetadata()
+  IEnumerable<McapMessage> ReadMessages(UInt64 startTime=0, UInt64 endTime=18446744073709551615, ISet<UInt16> channels=null)
+  Void Dispose()
+class ROS2.Net.Bag.Mcap.McapSchema
+  ctor(UInt16 Id, String Name, String Encoding, Byte[] Data)
+  UInt16 Id { get; set; }
+  String Name { get; set; }
+  String Encoding { get; set; }
+  Byte[] Data { get; set; }
+  String DataText { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(McapSchema other)
+  McapSchema <Clone>$()
+  Void Deconstruct(UInt16& Id, String& Name, String& Encoding, Byte[]& Data)
+class ROS2.Net.Bag.Mcap.McapStatistics
+  ctor(UInt64 MessageCount, UInt16 SchemaCount, UInt32 ChannelCount, UInt32 AttachmentCount, UInt32 MetadataCount, UInt32 ChunkCount, UInt64 MessageStartTime, UInt64 MessageEndTime, IReadOnlyDictionary<UInt16,UInt64> ChannelMessageCounts)
+  UInt64 MessageCount { get; set; }
+  UInt16 SchemaCount { get; set; }
+  UInt32 ChannelCount { get; set; }
+  UInt32 AttachmentCount { get; set; }
+  UInt32 MetadataCount { get; set; }
+  UInt32 ChunkCount { get; set; }
+  UInt64 MessageStartTime { get; set; }
+  UInt64 MessageEndTime { get; set; }
+  IReadOnlyDictionary<UInt16,UInt64> ChannelMessageCounts { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(McapStatistics other)
+  McapStatistics <Clone>$()
+  Void Deconstruct(UInt64& MessageCount, UInt16& SchemaCount, UInt32& ChannelCount, UInt32& AttachmentCount, UInt32& MetadataCount, UInt32& ChunkCount, UInt64& MessageStartTime, UInt64& MessageEndTime, IReadOnlyDictionary`2& ChannelMessageCounts)
+class ROS2.Net.Bag.Mcap.McapWriter
+  ctor(Stream output, McapWriterOptions options=null, Boolean leaveOpen=False)
+  Int64 Position { get; }
+  UInt64 MessageCount { get; }
+  IReadOnlyList<McapChannel> Channels { get; }
+  UInt16 AddSchema(String name, String encoding, ReadOnlySpan<Byte> data)
+  UInt16 AddChannel(UInt16 schemaId, String topic, String messageEncoding, IReadOnlyDictionary<String,String> metadata=null)
+  Void WriteMessage(UInt16 channelId, UInt32 sequence, UInt64 logTime, UInt64 publishTime, ReadOnlySpan<Byte> data)
+  Void AddMetadata(String name, IReadOnlyDictionary<String,String> values)
+  Void FlushChunk()
+  Void Close()
+  Void Dispose()
+class ROS2.Net.Bag.Mcap.McapWriterOptions
+  ctor()
+  String Profile { get; set; }
+  String Library { get; set; }
+  Int32 ChunkSize { get; set; }
+  McapCompression Compression { get; set; }
+  Boolean ComputeCrc { get; set; }
+class ROS2.Net.Bag.QosYaml
+  static String Serialize(IEnumerable<QosProfile> profiles)
+  static IReadOnlyList<QosProfile> Parse(String yaml)
+  static QosProfile Adapt(IReadOnlyList<QosProfile> offered, Int32 depth=100)

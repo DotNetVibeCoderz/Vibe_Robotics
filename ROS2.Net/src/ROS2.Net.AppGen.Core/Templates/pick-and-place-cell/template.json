@@ -1,0 +1,15 @@
+{
+  "name": "Pick-and-place work cell",
+  "category": "Industry",
+  "description": "Plans a pick-and-place cycle for a UR5 arm: grasp poses by IK, collision-free RRT-Connect motions around a fixture, and time-parameterized trajectories with cycle-time reporting.",
+  "appKind": "console",
+  "tags": [
+    "manipulation",
+    "industry",
+    "planning",
+    "cycle-time"
+  ],
+  "packages": [
+    "ROS2.Net.Manipulation"
+  ]
+}

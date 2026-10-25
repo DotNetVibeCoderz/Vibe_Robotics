@@ -1,0 +1,69 @@
+@inherits RosComponentBase
+@using ROS2.Net.Msgs.SensorMsgs
+
+<figure class="imgview rn-card">
+    @if (_src is null)
+    {
+        <div class="empty" style="height:@(Height)px">Waiting for images…</div>
+    }
+    else
+    {
+        <img src="@_src" alt="@(Alt ?? Topic ?? "image")" style="height:@(Height)px" />
+    }
+    <figcaption class="rn-mono"><span>@(Topic ?? "image")</span><span>@_info</span></figcaption>
+</figure>
+
+@code {
+    private string? _src;
+    private string _info = string.Empty;
+    private long _lastEncode;
+
+    /// <summary>sensor_msgs/Image topic. Ignored when <see cref="Image"/> is set.</summary>
+    [Parameter] public string? Topic { get; set; }
+
+    [Parameter] public Image? Image { get; set; }
+
+    /// <summary>Maximum frames encoded per second.</summary>
+    [Parameter] public double MaxFps { get; set; } = 10;
+
+    [Parameter] public int Height { get; set; } = 240;
+
+    [Parameter] public string? Alt { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Image is null && !string.IsNullOrEmpty(Topic))
+        {
+            Subscribe<Image>(Topic, Update, QosProfile.SensorData);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Image is not null)
+        {
+            _lastEncode = 0;
+            Update(Image);
+        }
+    }
+
+    private void Update(Image image)
+    {
+        var now = Environment.TickCount64;
+        if (now - _lastEncode < 1000 / Math.Max(1, MaxFps))
+        {
+            return;
+        }
+
+        _lastEncode = now;
+        try
+        {
+            _src = "data:image/png;base64," + Convert.ToBase64String(ROS2.Net.Perception.Images.Png.Encode(image));
+            _info = $"{image.Width}×{image.Height} {image.Encoding}";
+        }
+        catch (Exception ex) when (ex is NotSupportedException or ArgumentException)
+        {
+            _info = $"cannot display {image.Encoding}";
+        }
+    }
+}

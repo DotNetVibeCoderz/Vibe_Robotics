@@ -1,0 +1,5 @@
+# A list of parameter names.
+string[] names
+---
+# List of types which is the same length and order as the provided names.
+uint8[] types

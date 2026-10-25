@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Ros2AppGen</RootNamespace>
+    <AssemblyName>ROS2AppGen</AssemblyName>
+    <Product>ROS2.Net App Generator</Product>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <ApplicationIcon>..\..\assets\icon.ico</ApplicationIcon>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ROS2.Net.AppGen.Core\ROS2.Net.AppGen.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Avalonia.AvaloniaEdit" />
+    <PackageReference Include="AvaloniaEdit.TextMate" />
+    <PackageReference Include="TextMateSharp.Grammars" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="..\..\assets\icon-128.png" Link="Assets\icon-128.png" />
+    <!-- Settings (incl. API keys) live in App.config next to the executable; it is created from this
+         template on first run and is git-ignored. -->
+    <None Include="App.config.template" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.AppGen.UI.Tests" />
+  </ItemGroup>
+
+</Project>

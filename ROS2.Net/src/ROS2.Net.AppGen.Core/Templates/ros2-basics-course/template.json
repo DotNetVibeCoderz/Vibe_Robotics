@@ -1,0 +1,13 @@
+{
+  "name": "ROS 2 basics course",
+  "category": "Education",
+  "description": "An interactive tour of ROS 2 concepts \u2014 topics, QoS, services, actions, parameters and lifecycle \u2014 each lesson running live with explanations.",
+  "appKind": "console",
+  "tags": [
+    "education",
+    "beginner",
+    "tutorial",
+    "concepts"
+  ],
+  "packages": []
+}

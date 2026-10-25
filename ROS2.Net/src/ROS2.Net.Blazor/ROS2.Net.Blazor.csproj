@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Blazor</RootNamespace>
+    <Description>Blazor components for ROS2.Net: teleop joystick, LiDAR, occupancy grid and point cloud views, topic monitor, node graph, TF tree, parameter editor, image view, /rosout console, live plots, battery gauge, joint states and lifecycle control — live-bound to ROS 2 topics.</Description>
+    <PackageTags>$(PackageTags);blazor;components;ui</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Hosting\ROS2.Net.Hosting.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Tf2\ROS2.Net.Tf2.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Perception\ROS2.Net.Perception.csproj" />
+  </ItemGroup>
+
+</Project>

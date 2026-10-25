@@ -1,0 +1,15 @@
+{
+  "name": "Robot simulator dashboard",
+  "category": "Simulator",
+  "description": "Desktop app with a live top-down warehouse simulation, joystick teleoperation, LiDAR polar view and battery gauge.",
+  "appKind": "avalonia",
+  "tags": [
+    "simulation",
+    "teleop",
+    "desktop",
+    "lidar"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

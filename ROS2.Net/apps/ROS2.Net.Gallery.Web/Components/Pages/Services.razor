@@ -1,0 +1,102 @@
+@page "/services"
+@inherits GalleryPage
+@using ROS2.Net.Msgs.ExampleInterfaces
+
+<PageTitle>Services · ROS2.Net</PageTitle>
+
+<DemoFrame Demo="services" Code="@Code">
+    <div class="grid halves">
+        <div class="panel stack">
+            <h3>@T("Request", "Permintaan")</h3>
+            <div class="row">
+                <label class="field">a <input class="rn-input" type="number" @bind="_a" /></label>
+                <label class="field">b <input class="rn-input" type="number" @bind="_b" /></label>
+            </div>
+            <div class="row">
+                <button class="rn-btn primary" @onclick="CallAsync" disabled="@_busy">@T("Call", "Panggil") /add_two_ints</button>
+                <button class="rn-btn" @onclick="CallManyAsync" disabled="@_busy">@T("Call 100×", "Panggil 100×")</button>
+            </div>
+            <dl class="kv">
+                <dt>@T("Service ready", "Service siap")</dt><dd>@(_client?.IsServiceReady == true ? "yes" : "no")</dd>
+                <dt>@T("Last latency", "Latensi terakhir")</dt><dd>@_latency</dd>
+            </dl>
+        </div>
+        <div class="panel stack">
+            <h3>@T("Responses", "Respons")</h3>
+            <ul class="feed">
+                @foreach (var line in _log)
+                {
+                    <li>@((MarkupString)line)</li>
+                }
+            </ul>
+        </div>
+    </div>
+</DemoFrame>
+
+@code {
+    private ServiceClient<AddTwoIntsRequest, AddTwoIntsResponse>? _client;
+    private readonly LinkedList<string> _log = new();
+    private long _a = 2, _b = 40;
+    private bool _busy;
+    private string _latency = "—";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _client = Node.CreateClient<AddTwoIntsRequest, AddTwoIntsResponse>("/add_two_ints");
+    }
+
+    private async Task CallAsync()
+    {
+        _busy = true;
+        try
+        {
+            await _client!.WaitForServiceAsync(TimeSpan.FromSeconds(2));
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var res = await _client.CallAsync(new AddTwoIntsRequest { A = _a, B = _b }, TimeSpan.FromSeconds(2));
+            _latency = $"{sw.Elapsed.TotalMilliseconds:0.00} ms";
+            Add($"<span class=\"ok\">{_a} + {_b} = {res.Sum}</span>");
+        }
+        catch (ServiceTimeoutException ex)
+        {
+            Add($"<span class=\"err\">{System.Net.WebUtility.HtmlEncode(ex.Message)}</span>");
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task CallManyAsync()
+    {
+        _busy = true;
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var tasks = Enumerable.Range(1, 100).Select(i => _client!.CallAsync(new AddTwoIntsRequest { A = i, B = i }, TimeSpan.FromSeconds(5))).ToList();
+        var results = await Task.WhenAll(tasks);
+        _latency = $"{sw.Elapsed.TotalMilliseconds / 100:0.00} ms avg";
+        Add($"<span class=\"ok\">100 concurrent calls, Σ sums = {results.Sum(r => r.Sum)} in {sw.Elapsed.TotalMilliseconds:0} ms</span>");
+        _busy = false;
+    }
+
+    private void Add(string line)
+    {
+        _log.AddFirst(line);
+        while (_log.Count > 30)
+        {
+            _log.RemoveLast();
+        }
+    }
+
+    private const string Code = """
+        // Server
+        var server = context.CreateNode("add_two_ints_server");
+        server.CreateService<AddTwoIntsRequest, AddTwoIntsResponse>("add_two_ints",
+            request => new AddTwoIntsResponse { Sum = request.A + request.B });
+
+        // Client: the response completes the Task directly, no spinning needed.
+        var client = node.CreateClient<AddTwoIntsRequest, AddTwoIntsResponse>("add_two_ints");
+        await client.WaitForServiceAsync(TimeSpan.FromSeconds(5));
+        var response = await client.CallAsync(new AddTwoIntsRequest { A = 2, B = 40 }, TimeSpan.FromSeconds(2));
+        Console.WriteLine(response.Sum); // 42
+        """;
+}

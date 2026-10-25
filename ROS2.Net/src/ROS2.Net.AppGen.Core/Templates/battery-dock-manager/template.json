@@ -1,0 +1,15 @@
+{
+  "name": "Battery & docking behavior tree",
+  "category": "Housekeeping",
+  "description": "A BehaviorTree.CPP-style XML tree decides between patrolling and returning to the charger based on the simulated battery level.",
+  "appKind": "console",
+  "tags": [
+    "behavior-tree",
+    "battery",
+    "docking",
+    "navigation"
+  ],
+  "packages": [
+    "ROS2.Net.Navigation"
+  ]
+}

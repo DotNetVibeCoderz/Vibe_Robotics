@@ -1,0 +1,15 @@
+{
+  "name": "Fire detection patrol",
+  "category": "Disaster & Safety",
+  "description": "A safety robot patrols warehouse checkpoints; simulated thermal hotspots trigger alerts on /alerts with location and severity, and the robot stops to confirm.",
+  "appKind": "console",
+  "tags": [
+    "safety",
+    "patrol",
+    "alerts",
+    "warehouse"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

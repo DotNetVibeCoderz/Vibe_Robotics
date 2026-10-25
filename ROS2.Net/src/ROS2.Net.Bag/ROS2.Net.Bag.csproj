@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Bag</RootNamespace>
+    <Description>rosbag2 for ROS2.Net: a spec-compliant MCAP reader/writer (chunked, indexed, CRC-checked, zstd/lz4), rosbag2 metadata.yaml, recorder, player with /clock, bag info and dataset export (JSONL/CSV) for AI training.</Description>
+    <PackageTags>$(PackageTags);rosbag;rosbag2;mcap;recording;dataset</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Hashing" />
+    <PackageReference Include="ZstdSharp.Port" />
+    <PackageReference Include="K4os.Compression.LZ4.Streams" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Tf2.Tests" />
+  </ItemGroup>
+
+</Project>

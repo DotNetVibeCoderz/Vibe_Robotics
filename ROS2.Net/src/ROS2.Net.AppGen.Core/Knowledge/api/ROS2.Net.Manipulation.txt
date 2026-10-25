@@ -1,0 +1,484 @@
+class ROS2.Net.Manipulation.AttachedObject
+  ctor(String Id, String Link, Pose3 PoseInLink, IReadOnlyList<CollisionShape> Shapes, IReadOnlyCollection<String> TouchLinks)
+  String Id { get; set; }
+  String Link { get; set; }
+  Pose3 PoseInLink { get; set; }
+  IReadOnlyList<CollisionShape> Shapes { get; set; }
+  IReadOnlyCollection<String> TouchLinks { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(AttachedObject other)
+  AttachedObject <Clone>$()
+  Void Deconstruct(String& Id, String& Link, Pose3& PoseInLink, IReadOnlyList`1& Shapes, IReadOnlyCollection`1& TouchLinks)
+class ROS2.Net.Manipulation.BoxGeometry : Geometry
+  ctor(Vec3 Size)
+  Vec3 Size { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Geometry other)
+  Boolean Equals(BoxGeometry other)
+  BoxGeometry <Clone>$()
+  Void Deconstruct(Vec3& Size)
+class ROS2.Net.Manipulation.BoxShape : CollisionShape
+  ctor(Pose3 Pose, Vec3 HalfExtents)
+  Pose3 Pose { get; set; }
+  Vec3 HalfExtents { get; set; }
+  CollisionShape Transformed(Pose3 pose)
+  Double DistanceToPoint(Vec3 p)
+  Double DistanceToSegment(Vec3 a, Vec3 b)
+  static Boolean Overlaps(BoxShape a, BoxShape b)
+  Double SeparationLowerBound(BoxShape other)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(CollisionShape other)
+  Boolean Equals(BoxShape other)
+  BoxShape <Clone>$()
+  Void Deconstruct(Pose3& Pose, Vec3& HalfExtents)
+class ROS2.Net.Manipulation.CapsuleShape : CollisionShape
+  ctor(Vec3 A, Vec3 B, Double Radius)
+  Vec3 A { get; set; }
+  Vec3 B { get; set; }
+  Double Radius { get; set; }
+  CollisionShape Transformed(Pose3 pose)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(CollisionShape other)
+  Boolean Equals(CapsuleShape other)
+  CapsuleShape <Clone>$()
+  Void Deconstruct(Vec3& A, Vec3& B, Double& Radius)
+class ROS2.Net.Manipulation.CartesianPathResult
+  ctor(IReadOnlyList<Double[]> Waypoints, Double Fraction)
+  IReadOnlyList<Double[]> Waypoints { get; set; }
+  Double Fraction { get; set; }
+  Boolean Complete { get; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(CartesianPathResult other)
+  CartesianPathResult <Clone>$()
+  Void Deconstruct(IReadOnlyList`1& Waypoints, Double& Fraction)
+class ROS2.Net.Manipulation.CartesianPlanner
+  ctor(KinematicChain chain, PlanningScene scene=null)
+  KinematicChain Chain { get; }
+  PlanningScene Scene { get; }
+  Double EndEffectorStep { get; set; }
+  Double RotationStep { get; set; }
+  Double JumpThreshold { get; set; }
+  CartesianPathResult Plan(Double[] start, IReadOnlyList<Pose3> targets)
+class ROS2.Net.Manipulation.CollisionShape
+  Boolean Intersects(CollisionShape other, Double margin=0)
+  static Double Distance(CollisionShape a, CollisionShape b)
+  CollisionShape Transformed(Pose3 pose)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(CollisionShape other)
+  CollisionShape <Clone>$()
+class ROS2.Net.Manipulation.CylinderGeometry : Geometry
+  ctor(Double Radius, Double Length)
+  Double Radius { get; set; }
+  Double Length { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Geometry other)
+  Boolean Equals(CylinderGeometry other)
+  CylinderGeometry <Clone>$()
+  Void Deconstruct(Double& Radius, Double& Length)
+class ROS2.Net.Manipulation.Geometry
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Geometry other)
+  Geometry <Clone>$()
+class ROS2.Net.Manipulation.Geometry3
+  static Double PointSegmentDistance(Vec3 p, Vec3 a, Vec3 b)
+  static Double SegmentSegmentDistance(Vec3 p1, Vec3 q1, Vec3 p2, Vec3 q2)
+  static CollisionShape FromGeometry(GeometryElement element)
+class ROS2.Net.Manipulation.GeometryElement
+  ctor(Pose3 Origin, Geometry Geometry, String Name=null, String Material=null)
+  Pose3 Origin { get; set; }
+  Geometry Geometry { get; set; }
+  String Name { get; set; }
+  String Material { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(GeometryElement other)
+  GeometryElement <Clone>$()
+  Void Deconstruct(Pose3& Origin, Geometry& Geometry, String& Name, String& Material)
+enum ROS2.Net.Manipulation.IkMethod
+  LevenbergMarquardt, DampedLeastSquares
+class ROS2.Net.Manipulation.IkOptions
+  ctor()
+  IkMethod Method { get; set; }
+  Int32 MaxIterations { get; set; }
+  Int32 Restarts { get; set; }
+  Double PositionTolerance { get; set; }
+  Double OrientationTolerance { get; set; }
+  Boolean PositionOnly { get; set; }
+  Double Damping { get; set; }
+  Int32 RandomSeed { get; set; }
+  Func<Double[],Boolean> Validator { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(IkOptions other)
+  IkOptions <Clone>$()
+class ROS2.Net.Manipulation.IkResult
+  ctor(Boolean Success, Double[] Solution, Double PositionError, Double OrientationError, Int32 Iterations)
+  Boolean Success { get; set; }
+  Double[] Solution { get; set; }
+  Double PositionError { get; set; }
+  Double OrientationError { get; set; }
+  Int32 Iterations { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(IkResult other)
+  IkResult <Clone>$()
+  Void Deconstruct(Boolean& Success, Double[]& Solution, Double& PositionError, Double& OrientationError, Int32& Iterations)
+class ROS2.Net.Manipulation.IkSolver
+  ctor(KinematicChain chain, IkOptions options=null)
+  KinematicChain Chain { get; }
+  IkOptions Options { get; }
+  IkResult Solve(Pose3 target, ReadOnlySpan<Double> seed)
+  IkResult Solve(Pose3 target)
+  static Nullable<ValueTuple<Double,Double>> TwoLinkPlanar(Double x, Double y, Double l1, Double l2, Boolean elbowUp=True)
+class ROS2.Net.Manipulation.Inertial
+  ctor(Pose3 Origin, Double Mass, Double Ixx, Double Ixy, Double Ixz, Double Iyy, Double Iyz, Double Izz)
+  Pose3 Origin { get; set; }
+  Double Mass { get; set; }
+  Double Ixx { get; set; }
+  Double Ixy { get; set; }
+  Double Ixz { get; set; }
+  Double Iyy { get; set; }
+  Double Iyz { get; set; }
+  Double Izz { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Inertial other)
+  Inertial <Clone>$()
+  Void Deconstruct(Pose3& Origin, Double& Mass, Double& Ixx, Double& Ixy, Double& Ixz, Double& Iyy, Double& Iyz, Double& Izz)
+class ROS2.Net.Manipulation.JointLimits
+  ctor(Double Lower, Double Upper, Double Effort, Double Velocity)
+  Double Lower { get; set; }
+  Double Upper { get; set; }
+  Double Effort { get; set; }
+  Double Velocity { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(JointLimits other)
+  JointLimits <Clone>$()
+  Void Deconstruct(Double& Lower, Double& Upper, Double& Effort, Double& Velocity)
+class ROS2.Net.Manipulation.JointMimic
+  ctor(String Joint, Double Multiplier, Double Offset)
+  String Joint { get; set; }
+  Double Multiplier { get; set; }
+  Double Offset { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(JointMimic other)
+  JointMimic <Clone>$()
+  Void Deconstruct(String& Joint, Double& Multiplier, Double& Offset)
+enum ROS2.Net.Manipulation.JointType
+  Fixed, Revolute, Continuous, Prismatic, Floating, Planar
+class ROS2.Net.Manipulation.KinematicChain
+  ctor(UrdfModel model, String baseLink, String tipLink)
+  UrdfModel Model { get; }
+  String BaseLink { get; }
+  String TipLink { get; }
+  IReadOnlyList<UrdfJoint> Joints { get; }
+  String[] JointNames { get; }
+  Int32 Dof { get; }
+  Double[] LowerLimits { get; }
+  Double[] UpperLimits { get; }
+  Double[] VelocityLimits { get; }
+  Pose3 ForwardKinematics(ReadOnlySpan<Double> q)
+  Pose3[] LinkPoses(ReadOnlySpan<Double> q)
+  Pose3 Jacobian(ReadOnlySpan<Double> q, Span<Double> jacobian)
+  Void ClampToLimits(Span<Double> q)
+  Boolean WithinLimits(ReadOnlySpan<Double> q)
+  Double[] RandomConfiguration(Random random)
+class ROS2.Net.Manipulation.MeshGeometry : Geometry
+  ctor(String Filename, Vec3 Scale)
+  String Filename { get; set; }
+  Vec3 Scale { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Geometry other)
+  Boolean Equals(MeshGeometry other)
+  MeshGeometry <Clone>$()
+  Void Deconstruct(String& Filename, Vec3& Scale)
+class ROS2.Net.Manipulation.MotionPlan
+  ctor(Boolean Success, IReadOnlyList<Double[]> Waypoints, JointTrajectory Trajectory, String Message=)
+  Boolean Success { get; set; }
+  IReadOnlyList<Double[]> Waypoints { get; set; }
+  JointTrajectory Trajectory { get; set; }
+  String Message { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(MotionPlan other)
+  MotionPlan <Clone>$()
+  Void Deconstruct(Boolean& Success, IReadOnlyList`1& Waypoints, JointTrajectory& Trajectory, String& Message)
+class ROS2.Net.Manipulation.MoveGroup
+  ctor(Node node, KinematicChain chain, PlanningScene scene=null, String controllerAction=/joint_trajectory_controller/follow_joint_trajectory)
+  Node Node { get; }
+  KinematicChain Chain { get; }
+  PlanningScene Scene { get; }
+  RrtConnectPlanner Planner { get; set; }
+  CartesianPlanner Cartesian { get; }
+  Double MaxVelocityScaling { get; set; }
+  Double MaxAccelerationScaling { get; set; }
+  Double[] AccelerationLimits { get; set; }
+  VelocityProfile Profile { get; set; }
+  Boolean HasCurrentState { get; }
+  Double[] CurrentJointValues { get; }
+  Pose3 CurrentPose { get; }
+  Void SetCurrentJointValues(Double[] q)
+  MotionPlan PlanToJointTarget(Double[] target, Double[] start=null)
+  MotionPlan PlanToPose(Pose3 pose, Double[] start=null, Boolean positionOnly=False)
+  MotionPlan PlanCartesian(IReadOnlyList<Pose3> poses, Double[] start=null)
+  JointTrajectory Time(IReadOnlyList<Double[]> waypoints)
+  Task<Boolean> ExecuteAsync(JointTrajectory trajectory, CancellationToken cancellationToken=null)
+  Task<Boolean> MoveToJointTargetAsync(Double[] target, CancellationToken cancellationToken=null)
+  Task<Boolean> MoveToPoseAsync(Pose3 pose, CancellationToken cancellationToken=null)
+  Void Dispose()
+class ROS2.Net.Manipulation.PickAndPlace
+  ctor(MoveGroup group, Func<Double,CancellationToken,Task<Boolean>> gripper)
+  MoveGroup Group { get; }
+  Double ApproachDistance { get; set; }
+  Double RetreatDistance { get; set; }
+  Double OpenPosition { get; set; }
+  Double ClosedPosition { get; set; }
+  IReadOnlyList<PickPlaceStep> Plan(Pose3 graspPose, Pose3 placePose)
+  Task<Boolean> ExecuteAsync(Pose3 graspPose, Pose3 placePose, String objectId=null, CancellationToken cancellationToken=null)
+class ROS2.Net.Manipulation.PickPlaceStep
+  ctor(String Name, MotionPlan Plan, Nullable<Double> GripperPosition=null)
+  String Name { get; set; }
+  MotionPlan Plan { get; set; }
+  Nullable<Double> GripperPosition { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(PickPlaceStep other)
+  PickPlaceStep <Clone>$()
+  Void Deconstruct(String& Name, MotionPlan& Plan, Nullable`1& GripperPosition)
+class ROS2.Net.Manipulation.PlanningScene
+  ctor(UrdfModel model)
+  UrdfModel Model { get; }
+  Dictionary<String,Double> DefaultJointValues { get; }
+  Double Padding { get; set; }
+  IReadOnlyCollection<WorldObject> WorldObjects { get; }
+  IReadOnlyCollection<AttachedObject> AttachedObjects { get; }
+  Void Allow(String a, String b)
+  Void Disallow(String a, String b)
+  Boolean IsAllowed(String a, String b)
+  Int32 AllowCollisionsAt(IReadOnlyDictionary<String,Double> state)
+  Void AddWorldObject(WorldObject obj)
+  Void AddBox(String id, Vec3 center, Vec3 size, Nullable<Quat> rotation=null)
+  Void AddSphere(String id, Vec3 center, Double radius)
+  Boolean RemoveWorldObject(String id)
+  Void Attach(String objectId, String link, IReadOnlyDictionary<String,Double> state, IEnumerable<String> touchLinks=null)
+  Void Detach(String objectId, IReadOnlyDictionary<String,Double> state)
+  Boolean IsStateValid(IReadOnlyDictionary<String,Double> state)
+  Boolean IsStateValid(KinematicChain chain, ReadOnlySpan<Double> q)
+  Dictionary<String,Double> StateFor(KinematicChain chain, ReadOnlySpan<Double> q)
+  Nullable<ValueTuple<String,String>> FirstCollision(IReadOnlyDictionary<String,Double> state)
+class ROS2.Net.Manipulation.PlanResult
+  ctor(Boolean Success, IReadOnlyList<Double[]> Waypoints, Int32 Iterations, TimeSpan PlanningTime, String Message=)
+  Boolean Success { get; set; }
+  IReadOnlyList<Double[]> Waypoints { get; set; }
+  Int32 Iterations { get; set; }
+  TimeSpan PlanningTime { get; set; }
+  String Message { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(PlanResult other)
+  PlanResult <Clone>$()
+  Void Deconstruct(Boolean& Success, IReadOnlyList`1& Waypoints, Int32& Iterations, TimeSpan& PlanningTime, String& Message)
+struct ROS2.Net.Manipulation.Pose3
+  ctor(Vec3 Position, Quat Rotation)
+  Vec3 Position { get; set; }
+  Quat Rotation { get; set; }
+  static Pose3 Identity { get; }
+  static Pose3 FromXyzRpy(Double x, Double y, Double z, Double roll=0, Double pitch=0, Double yaw=0)
+  Pose3 Inverse()
+  Vec3 Apply(Vec3 p)
+  static Pose3 Interpolate(Pose3 a, Pose3 b, Double t)
+  Double[] ToMatrix4()
+  Pose ToMsg()
+  Transform ToTransformMsg()
+  static Pose3 From(Pose p)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Pose3 other)
+  Void Deconstruct(Vec3& Position, Quat& Rotation)
+struct ROS2.Net.Manipulation.Quat
+  ctor(Double X, Double Y, Double Z, Double W)
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Z { get; set; }
+  Double W { get; set; }
+  static Quat Identity { get; }
+  static Quat FromAxisAngle(Vec3 axis, Double angle)
+  static Quat FromRpy(Double roll, Double pitch, Double yaw)
+  ValueTuple<Double,Double,Double> ToRpy()
+  Quat Normalized()
+  Quat Conjugate()
+  Vec3 Rotate(Vec3 v)
+  Double Dot(Quat o)
+  Vec3 ToRotationVector()
+  Double AngleTo(Quat o)
+  static Quat Slerp(Quat a, Quat b, Double t)
+  Quaternion ToMsg()
+  static Quat From(Quaternion q)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Quat other)
+  Void Deconstruct(Double& X, Double& Y, Double& Z, Double& W)
+class ROS2.Net.Manipulation.RobotKinematics
+  ctor(UrdfModel model)
+  UrdfModel Model { get; }
+  Dictionary<String,Pose3> LinkPoses(Func<String,Nullable<Double>> jointValue)
+  Dictionary<String,Pose3> LinkPoses(IReadOnlyDictionary<String,Double> values)
+  Double JointPosition(UrdfJoint joint, Func<String,Nullable<Double>> jointValue)
+class ROS2.Net.Manipulation.RobotStatePublisher : Node
+  ctor(Ros2Context context, UrdfModel model, String name=robot_state_publisher, NodeOptions options=null)
+  UrdfModel Model { get; }
+  String FramePrefix { get; }
+  Void PublishJointPositions(IReadOnlyDictionary<String,Double> positions, Nullable<RosTime> stamp=null)
+  Dictionary<String,Pose3> LinkPoses()
+class ROS2.Net.Manipulation.RrtConnectPlanner
+  ctor(KinematicChain chain, PlanningScene scene=null, RrtOptions options=null)
+  KinematicChain Chain { get; }
+  PlanningScene Scene { get; }
+  RrtOptions Options { get; }
+  Boolean IsValid(Double[] q)
+  Boolean IsEdgeValid(Double[] a, Double[] b)
+  PlanResult Plan(Double[] start, Double[] goal)
+class ROS2.Net.Manipulation.RrtOptions
+  ctor()
+  Int32 MaxIterations { get; set; }
+  Double StepSize { get; set; }
+  Double EdgeResolution { get; set; }
+  TimeSpan Timeout { get; set; }
+  Int32 ShortcutIterations { get; set; }
+  Int32 RandomSeed { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(RrtOptions other)
+  RrtOptions <Clone>$()
+class ROS2.Net.Manipulation.SphereGeometry : Geometry
+  ctor(Double Radius)
+  Double Radius { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Geometry other)
+  Boolean Equals(SphereGeometry other)
+  SphereGeometry <Clone>$()
+  Void Deconstruct(Double& Radius)
+class ROS2.Net.Manipulation.SphereShape : CollisionShape
+  ctor(Vec3 Center, Double Radius)
+  Vec3 Center { get; set; }
+  Double Radius { get; set; }
+  CollisionShape Transformed(Pose3 pose)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(CollisionShape other)
+  Boolean Equals(SphereShape other)
+  SphereShape <Clone>$()
+  Void Deconstruct(Vec3& Center, Double& Radius)
+class ROS2.Net.Manipulation.TimeParameterization
+  static JointTrajectory Compute(IReadOnlyList<String> jointNames, IReadOnlyList<Double[]> waypoints, IReadOnlyList<Double> maxVelocity, IReadOnlyList<Double> maxAcceleration, VelocityProfile profile=Trapezoidal, Double sampleTime=0.02, Double velocityScaling=1, Double accelerationScaling=1)
+  static Double Duration(JointTrajectory trajectory)
+class ROS2.Net.Manipulation.UrdfException : FormatException
+  ctor(String message)
+class ROS2.Net.Manipulation.UrdfJoint
+  ctor()
+  String Name { get; set; }
+  JointType Type { get; set; }
+  String Parent { get; set; }
+  String Child { get; set; }
+  Pose3 Origin { get; set; }
+  Vec3 Axis { get; set; }
+  JointLimits Limits { get; set; }
+  JointMimic Mimic { get; set; }
+  Boolean IsMovable { get; }
+  Double Lower { get; }
+  Double Upper { get; }
+  Pose3 Transform(Double position)
+class ROS2.Net.Manipulation.UrdfLink
+  ctor()
+  String Name { get; set; }
+  Inertial Inertial { get; set; }
+  List<GeometryElement> Visuals { get; }
+  List<GeometryElement> Collisions { get; }
+class ROS2.Net.Manipulation.UrdfModel
+  String Name { get; }
+  String Xml { get; }
+  IReadOnlyCollection<UrdfLink> Links { get; }
+  IReadOnlyCollection<UrdfJoint> Joints { get; }
+  String RootLink { get; }
+  IReadOnlyList<UrdfJoint> ActuatedJoints { get; }
+  UrdfLink GetLink(String name)
+  UrdfJoint GetJoint(String name)
+  Boolean TryGetJoint(String name, UrdfJoint& joint)
+  UrdfJoint ParentJointOf(String link)
+  IEnumerable<UrdfJoint> ChildJointsOf(String link)
+  IEnumerable<UrdfJoint> TreeOrder()
+  static UrdfModel LoadFile(String path)
+  static UrdfModel LoadBuiltIn(String name)
+  static UrdfModel Parse(String xml)
+struct ROS2.Net.Manipulation.Vec3
+  ctor(Double X, Double Y, Double Z)
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Z { get; set; }
+  static Vec3 Zero { get; }
+  static Vec3 UnitX { get; }
+  static Vec3 UnitY { get; }
+  static Vec3 UnitZ { get; }
+  Double Length { get; }
+  Double LengthSquared { get; }
+  Vec3 Normalized()
+  Double Dot(Vec3 o)
+  Vec3 Cross(Vec3 o)
+  static Vec3 Lerp(Vec3 a, Vec3 b, Double t)
+  Point ToPoint()
+  Vector3 ToVector3()
+  static Vec3 From(Point p)
+  static Vec3 From(Vector3 v)
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Vec3 other)
+  Void Deconstruct(Double& X, Double& Y, Double& Z)
+enum ROS2.Net.Manipulation.VelocityProfile
+  Trapezoidal, Quintic
+class ROS2.Net.Manipulation.WorldObject
+  ctor(String Id, Pose3 Pose, IReadOnlyList<CollisionShape> Shapes)
+  String Id { get; set; }
+  Pose3 Pose { get; set; }
+  IReadOnlyList<CollisionShape> Shapes { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(WorldObject other)
+  WorldObject <Clone>$()
+  Void Deconstruct(String& Id, Pose3& Pose, IReadOnlyList`1& Shapes)

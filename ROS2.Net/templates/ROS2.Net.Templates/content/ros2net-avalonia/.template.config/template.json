@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gravicode Studios (Kang Fadhil)",
+  "classifications": [
+    "ROS2.Net",
+    "Robotics",
+    "ROS 2",
+    "Desktop",
+    "Avalonia"
+  ],
+  "identity": "ROS2.Net.Templates.Avalonia",
+  "name": "ROS2.Net Avalonia App",
+  "description": "An Avalonia desktop app connected to ROS 2: live topic view and teleop.",
+  "shortName": "ros2net-avalonia",
+  "sourceName": "Ros2NetAvalonia",
+  "defaultName": "MyRobot",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "preferNameDirectory": true,
+  "symbols": {
+    "rosVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "0.1.0",
+      "replaces": "ROS2NET_VERSION",
+      "description": "ROS2.Net package version."
+    }
+  }
+}

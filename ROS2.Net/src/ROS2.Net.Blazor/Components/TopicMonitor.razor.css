@@ -1,0 +1,10 @@
+.monitor { overflow: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font: 600 11px var(--rn-font); letter-spacing: .06em; text-transform: uppercase; color: var(--rn-muted); padding: 10px 12px; border-bottom: 1px solid var(--rn-line); position: sticky; top: 0; background: var(--rn-surface); }
+td { padding: 8px 12px; border-bottom: 1px solid color-mix(in srgb, var(--rn-line) 55%, transparent); }
+.n { text-align: right; white-space: nowrap; }
+.topic { color: var(--rn-ink); white-space: nowrap; }
+.type { color: var(--rn-muted); font-size: 12px; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 8px; background: var(--rn-line); vertical-align: 1px; }
+tr.live .dot { background: var(--rn-ok); box-shadow: 0 0 6px var(--rn-ok); }
+.empty { color: var(--rn-muted); text-align: center; padding: 24px; }

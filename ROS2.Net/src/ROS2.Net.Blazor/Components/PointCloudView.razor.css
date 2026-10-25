@@ -1,0 +1,4 @@
+.cloud { display: flex; flex-direction: column; overflow: hidden; background: var(--rn-bg); }
+svg { flex: 1; width: 100%; min-height: 0; }
+.grid { stroke: var(--rn-line); stroke-width: 0.01; fill: none; opacity: .7; vector-effect: non-scaling-stroke; }
+.meta { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 11px; color: var(--rn-muted); border-top: 1px solid var(--rn-line); }

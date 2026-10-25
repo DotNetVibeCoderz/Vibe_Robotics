@@ -1,0 +1,174 @@
+@inherits RosComponentBase
+@using ROS2.Net.Msgs.GeometryMsgs
+
+<div class="teleop" tabindex="0" @onkeydown="OnKeyDown" @onkeyup="OnKeyUp" @onblur="Stop"
+     aria-label="Teleop joystick: drag, or use W A S D / arrow keys" role="application">
+    <svg width="@Size" height="@Size" viewBox="-1.1 -1.1 2.2 2.2"
+         @onpointerdown="OnPointerDown" @onpointermove="OnPointerMove" @onpointerup="OnPointerUp" @onpointerleave="OnPointerUp"
+         @onpointerdown:preventDefault>
+        <defs>
+            <radialGradient id="@($"pad{_id}")">
+                <stop offset="0%" stop-color="var(--rn-surface-2)" />
+                <stop offset="100%" stop-color="var(--rn-surface)" />
+            </radialGradient>
+            <linearGradient id="@($"knob{_id}")" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="var(--rn-violet)" />
+                <stop offset="100%" stop-color="var(--rn-cyan)" />
+            </linearGradient>
+        </defs>
+        <circle r="1" fill="url(#pad@(_id))" stroke="var(--rn-line)" stroke-width="0.02" />
+        <circle r="0.62" fill="none" stroke="var(--rn-line)" stroke-width="0.01" stroke-dasharray="0.04 0.04" />
+        <line x1="-1" y1="0" x2="1" y2="0" stroke="var(--rn-line)" stroke-width="0.01" />
+        <line x1="0" y1="-1" x2="0" y2="1" stroke="var(--rn-line)" stroke-width="0.01" />
+        <text y="-0.78" class="glyph">W</text><text y="0.9" class="glyph">S</text>
+        <text x="-0.84" y="0.05" class="glyph">A</text><text x="0.84" y="0.05" class="glyph">D</text>
+        <line x1="0" y1="0" x2="@Svg.F(_x)" y2="@Svg.F(_y)" stroke="url(#knob@(_id))" stroke-width="0.05" stroke-linecap="round" opacity="0.6" />
+        <circle cx="@Svg.F(_x)" cy="@Svg.F(_y)" r="0.24" fill="url(#knob@(_id))" class="@(_active ? "knob active" : "knob")" />
+    </svg>
+    <div class="readout rn-mono">
+        <span>v <b>@_linear.ToString("+0.00;-0.00", CultureInfo.InvariantCulture)</b> m/s</span>
+        <span>ω <b>@_angular.ToString("+0.00;-0.00", CultureInfo.InvariantCulture)</b> rad/s</span>
+    </div>
+</div>
+
+@code {
+    private static int s_ids;
+    private readonly int _id = Interlocked.Increment(ref s_ids);
+    private Publisher<Twist>? _pub;
+    private double _x, _y, _linear, _angular;
+    private bool _active;
+    private readonly HashSet<string> _keys = [];
+
+    /// <summary>Topic to publish geometry_msgs/Twist on. Leave empty to only raise <see cref="OnCommand"/>.</summary>
+    [Parameter] public string? Topic { get; set; } = "/cmd_vel";
+
+    [Parameter] public double MaxLinear { get; set; } = 0.5;
+
+    [Parameter] public double MaxAngular { get; set; } = 1.5;
+
+    /// <summary>Publish rate while the stick is held (Hz).</summary>
+    [Parameter] public double RateHz { get; set; } = 10;
+
+    [Parameter] public int Size { get; set; } = 200;
+
+    [Parameter] public EventCallback<Twist> OnCommand { get; set; }
+
+    public double Linear => _linear;
+
+    public double Angular => _angular;
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(Topic))
+        {
+            _pub = Node.CreatePublisher<Twist>(Topic);
+        }
+
+        Every(TimeSpan.FromSeconds(1.0 / Math.Max(1, RateHz)), _ =>
+        {
+            if (_active)
+            {
+                Send();
+            }
+
+            return Task.CompletedTask;
+        });
+    }
+
+    private void OnPointerDown(PointerEventArgs e)
+    {
+        _active = true;
+        Move(e);
+    }
+
+    private void OnPointerMove(PointerEventArgs e)
+    {
+        if (_active)
+        {
+            Move(e);
+        }
+    }
+
+    private void OnPointerUp(PointerEventArgs e)
+    {
+        if (_active)
+        {
+            Stop();
+        }
+    }
+
+    private void Move(PointerEventArgs e)
+    {
+        // offsetX/Y are relative to the svg; map pixels to the [-1.1, 1.1] view box.
+        var x = (e.OffsetX / Size * 2.2) - 1.1;
+        var y = (e.OffsetY / Size * 2.2) - 1.1;
+        SetStick(x, y);
+    }
+
+    /// <summary>Sets the stick deflection in [-1, 1] (y down = reverse), as a pointer would.</summary>
+    public void SetStick(double x, double y)
+    {
+        var len = Math.Sqrt((x * x) + (y * y));
+        if (len > 1)
+        {
+            x /= len;
+            y /= len;
+        }
+
+        _x = x;
+        _y = y;
+        _linear = Math.Round(-y * MaxLinear, 3);
+        _angular = Math.Round(-x * MaxAngular, 3);
+        Send();
+        RequestRender();
+    }
+
+    private void Stop()
+    {
+        _active = false;
+        _keys.Clear();
+        SetStick(0, 0);
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (_keys.Add(e.Key.ToLowerInvariant()))
+        {
+            _active = true;
+            ApplyKeys();
+        }
+    }
+
+    private void OnKeyUp(KeyboardEventArgs e)
+    {
+        _keys.Remove(e.Key.ToLowerInvariant());
+        if (_keys.Count == 0)
+        {
+            Stop();
+        }
+        else
+        {
+            ApplyKeys();
+        }
+    }
+
+    private void ApplyKeys()
+    {
+        double x = 0, y = 0;
+        if (_keys.Contains("w") || _keys.Contains("arrowup")) y -= 1;
+        if (_keys.Contains("s") || _keys.Contains("arrowdown")) y += 1;
+        if (_keys.Contains("a") || _keys.Contains("arrowleft")) x -= 1;
+        if (_keys.Contains("d") || _keys.Contains("arrowright")) x += 1;
+        SetStick(x * 0.8, y * 0.8);
+    }
+
+    private void Send()
+    {
+        var twist = MessageExtensions.Twist2D(_linear, _angular);
+        _pub?.Publish(twist);
+        if (OnCommand.HasDelegate)
+        {
+            _ = InvokeAsync(() => OnCommand.InvokeAsync(twist));
+        }
+    }
+}

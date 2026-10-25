@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Rmw.Rtps</RootNamespace>
+    <Description>Pure managed DDS-RTPS 2.x middleware for ROS2.Net (identifier "rtps"): SPDP/SEDP discovery, reliable and best-effort endpoints, fragmentation, ROS 2 topic/service name mangling and ros_discovery_info graph — no native DDS library required.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Rmw.Rtps.Tests" />
+  </ItemGroup>
+
+</Project>

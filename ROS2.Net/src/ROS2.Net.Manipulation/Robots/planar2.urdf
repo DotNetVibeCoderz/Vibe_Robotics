@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!-- A planar two-link arm (links of 1.0 m and 0.8 m rotating about Z), handy for checking kinematics by hand. -->
+<robot name="planar2">
+  <link name="base"/>
+  <joint name="j1" type="revolute">
+    <parent link="base"/><child link="link1"/>
+    <axis xyz="0 0 1"/><limit lower="-3.1416" upper="3.1416" effort="10" velocity="2"/>
+  </joint>
+  <link name="link1"><collision><origin xyz="0.5 0 0"/><geometry><box size="1.0 0.05 0.05"/></geometry></collision></link>
+  <joint name="j2" type="revolute">
+    <parent link="link1"/><child link="link2"/>
+    <origin xyz="1.0 0 0"/><axis xyz="0 0 1"/><limit lower="-3.1416" upper="3.1416" effort="10" velocity="2"/>
+  </joint>
+  <link name="link2"><collision><origin xyz="0.4 0 0"/><geometry><box size="0.8 0.05 0.05"/></geometry></collision></link>
+  <joint name="tip_joint" type="fixed">
+    <parent link="link2"/><child link="tip"/>
+    <origin xyz="0.8 0 0"/>
+  </joint>
+  <link name="tip"/>
+</robot>

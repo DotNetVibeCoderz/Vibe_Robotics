@@ -1,0 +1,91 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject Lang L
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject Ros2Context Ros
+
+<div class="shell">
+    <aside class="rail" aria-label="Demos">
+        <a class="brand" href="/">
+            <img src="icon.png" alt="" width="36" height="36" />
+            <span>
+                <b>ROS2.Net</b>
+                <small>Gallery</small>
+            </span>
+        </a>
+        <nav>
+            @foreach (var group in Demos.All.GroupBy(d => d.Group))
+            {
+                <div class="group">@(L.IsIndonesian ? group.First().GroupId : group.Key)</div>
+                @foreach (var d in group)
+                {
+                    <NavLink class="item" href="@d.Href">
+                        <span class="title">@(L.IsIndonesian ? d.TitleId : d.Title)</span>
+                        <span class="ros">@d.RosName</span>
+                    </NavLink>
+                }
+            }
+        </nav>
+        <footer class="credit">
+            @L.T("Made by Gravicode Studios, led by Kang Fadhil", "Dibuat oleh Gravicode Studios dipimpin oleh Kang Fadhil")
+        </footer>
+    </aside>
+    <div class="main">
+        <header class="topbar">
+            <div class="status">
+                <span class="live-dot" aria-hidden="true"></span>
+                <span class="mono">rmw <b>@Ros.Rmw.Identifier</b> · domain <b>@Ros.DomainId</b> · @_nodeCount @L.T("nodes", "node")</span>
+            </div>
+            <div class="toggles">
+                <div class="seg" role="group" aria-label="Language">
+                    <button class="@(L.IsIndonesian ? "" : "on")" @onclick="() => L.Set(false)">EN</button>
+                    <button class="@(L.IsIndonesian ? "on" : "")" @onclick="() => L.Set(true)">ID</button>
+                </div>
+                <button class="theme" @onclick="ToggleTheme" aria-label="@L.T("Switch theme", "Ganti tema")">@(_dark ? "☾" : "☀")</button>
+            </div>
+        </header>
+        <main>
+            @Body
+        </main>
+    </div>
+</div>
+
+@code {
+    private bool _dark = true;
+    private int _nodeCount;
+    private Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        L.Changed += OnChanged;
+        _timer = new Timer(_ =>
+        {
+            _nodeCount = Ros.Rmw.Graph.GetNodes().Count(n => !n.Name.StartsWith("web_", StringComparison.Ordinal));
+            _ = InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(2));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dark = await JS.InvokeAsync<string>("rnTheme.get") != "light";
+            StateHasChanged();
+        }
+    }
+
+    private async Task ToggleTheme()
+    {
+        _dark = !_dark;
+        await JS.InvokeVoidAsync("rnTheme.set", _dark ? "dark" : "light");
+    }
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        L.Changed -= OnChanged;
+        _timer?.Dispose();
+    }
+}

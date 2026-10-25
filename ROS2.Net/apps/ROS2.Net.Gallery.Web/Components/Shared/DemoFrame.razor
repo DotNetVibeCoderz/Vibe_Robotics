@@ -1,0 +1,39 @@
+@implements IDisposable
+@inject Lang L
+
+<section class="demo">
+    <div class="demo-head">
+        <div>
+            <div class="eyebrow">@Info.RosName</div>
+            <h1 tabindex="-1">@(L.IsIndonesian ? Info.TitleId : Info.Title)</h1>
+            <p>@(L.IsIndonesian ? Info.SummaryId : Info.Summary)</p>
+        </div>
+        <div class="tabs" role="tablist">
+            <button role="tab" aria-selected="@(!_code)" class="@(_code ? "" : "on")" @onclick="() => _code = false">@L.T("Live demo", "Demo langsung")</button>
+            <button role="tab" aria-selected="@_code" class="@(_code ? "on" : "")" @onclick="() => _code = true">@L.T("View code", "Lihat kode")</button>
+        </div>
+    </div>
+    <div style="@(_code ? "display:none" : "")">@ChildContent</div>
+    @if (_code)
+    {
+        <CodeBlock Source="@Code" />
+    }
+</section>
+
+@code {
+    private bool _code;
+
+    [Parameter, EditorRequired] public string Demo { get; set; } = "";
+
+    [Parameter, EditorRequired] public string Code { get; set; } = "";
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private Demo Info => Demos.Get(Demo);
+
+    protected override void OnInitialized() => L.Changed += Changed;
+
+    private void Changed() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => L.Changed -= Changed;
+}

@@ -1,0 +1,59 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ROS2.Net.AI/ROS2.Net.AI.csproj" />
+    <Project Path="src/ROS2.Net.AppGen.Core/ROS2.Net.AppGen.Core.csproj" />
+    <Project Path="src/ROS2.Net.Avalonia/ROS2.Net.Avalonia.csproj" />
+    <Project Path="src/ROS2.Net.Bag/ROS2.Net.Bag.csproj" />
+    <Project Path="src/ROS2.Net.Blazor/ROS2.Net.Blazor.csproj" />
+    <Project Path="src/ROS2.Net.Control/ROS2.Net.Control.csproj" />
+    <Project Path="src/ROS2.Net.Core/ROS2.Net.Core.csproj" />
+    <Project Path="src/ROS2.Net.Hosting/ROS2.Net.Hosting.csproj" />
+    <Project Path="src/ROS2.Net.Manipulation/ROS2.Net.Manipulation.csproj" />
+    <Project Path="src/ROS2.Net.Msgs/ROS2.Net.Msgs.csproj" />
+    <Project Path="src/ROS2.Net.Native/ROS2.Net.Native.csproj" />
+    <Project Path="src/ROS2.Net.Navigation/ROS2.Net.Navigation.csproj" />
+    <Project Path="src/ROS2.Net.Perception.Onnx/ROS2.Net.Perception.Onnx.csproj" />
+    <Project Path="src/ROS2.Net.Perception/ROS2.Net.Perception.csproj" />
+    <Project Path="src/ROS2.Net.Rmw.Rosbridge/ROS2.Net.Rmw.Rosbridge.csproj" />
+    <Project Path="src/ROS2.Net.Rmw.Rtps/ROS2.Net.Rmw.Rtps.csproj" />
+    <Project Path="src/ROS2.Net.Rosidl.Generator/ROS2.Net.Rosidl.Generator.csproj" />
+    <Project Path="src/ROS2.Net.Rosidl/ROS2.Net.Rosidl.csproj" />
+    <Project Path="src/ROS2.Net.Security/ROS2.Net.Security.csproj" />
+    <Project Path="src/ROS2.Net.Simulation/ROS2.Net.Simulation.csproj" />
+    <Project Path="src/ROS2.Net.Tf2/ROS2.Net.Tf2.csproj" />
+    <Project Path="src/ROS2.Net/ROS2.Net.csproj" />
+  </Folder>
+  <Folder Name="/apps/">
+    <Project Path="apps/ROS2.Net.AppGen/ROS2.Net.AppGen.csproj" />
+    <Project Path="apps/ROS2.Net.Cli/ROS2.Net.Cli.csproj" />
+    <Project Path="apps/ROS2.Net.Gallery.Desktop/ROS2.Net.Gallery.Desktop.csproj" />
+    <Project Path="apps/ROS2.Net.Gallery.Web/ROS2.Net.Gallery.Web.csproj" />
+    <Project Path="apps/ROS2.Net.Simulator/ROS2.Net.Simulator.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/ROS2.Net.Samples.Composition/ROS2.Net.Samples.Composition.csproj" />
+    <Project Path="samples/ROS2.Net.Samples.FibonacciAction/ROS2.Net.Samples.FibonacciAction.csproj" />
+    <Project Path="samples/ROS2.Net.Samples.LifecycleNode/ROS2.Net.Samples.LifecycleNode.csproj" />
+    <Project Path="samples/ROS2.Net.Samples.Parameters/ROS2.Net.Samples.Parameters.csproj" />
+    <Project Path="samples/ROS2.Net.Samples.ServiceClient/ROS2.Net.Samples.ServiceClient.csproj" />
+    <Project Path="samples/ROS2.Net.Samples.TalkerListener/ROS2.Net.Samples.TalkerListener.csproj" />
+  </Folder>
+  <Folder Name="/templates/">
+    <Project Path="templates/ROS2.Net.Templates/ROS2.Net.Templates.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ROS2.Net.AppGen.Tests/ROS2.Net.AppGen.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.AppGen.UI.Tests/ROS2.Net.AppGen.UI.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Avalonia.Tests/ROS2.Net.Avalonia.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Blazor.Tests/ROS2.Net.Blazor.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Cli.Tests/ROS2.Net.Cli.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Control.Tests/ROS2.Net.Control.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Integration.Tests/ROS2.Net.Integration.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Navigation.Tests/ROS2.Net.Navigation.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Perception.Tests/ROS2.Net.Perception.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Rmw.Rtps.Tests/ROS2.Net.Rmw.Rtps.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Simulation.Tests/ROS2.Net.Simulation.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Tests/ROS2.Net.Tests.csproj" />
+    <Project Path="tests/ROS2.Net.Tf2.Tests/ROS2.Net.Tf2.Tests.csproj" />
+  </Folder>
+</Solution>

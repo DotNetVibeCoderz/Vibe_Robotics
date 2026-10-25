@@ -1,0 +1,9 @@
+.scan { position: relative; display: flex; flex-direction: column; overflow: hidden; background: radial-gradient(circle at 50% 50%, var(--rn-surface-2), var(--rn-surface) 70%); }
+svg { flex: 1; width: 100%; min-height: 0; }
+.ring { fill: none; stroke: var(--rn-line); stroke-width: 0.012; }
+.ring-label { font: 0.16px var(--rn-mono); fill: var(--rn-muted); }
+.axis { stroke: var(--rn-line); stroke-width: 0.008; stroke-dasharray: 0.05 0.05; }
+.area { fill: color-mix(in srgb, var(--rn-cyan) 14%, transparent); stroke: color-mix(in srgb, var(--rn-cyan) 45%, transparent); stroke-width: 0.01; }
+.hit { fill: var(--rn-cyan); }
+.robot { fill: var(--rn-violet); }
+.meta { display: flex; justify-content: space-between; padding: 8px 12px; font-size: 11px; color: var(--rn-muted); border-top: 1px solid var(--rn-line); }

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- netstandard2.0 so the same sources compile into the Roslyn source generator. -->
+    <!-- Directory.Build.props sets a single TargetFramework; clear it so both targets build in solution builds. -->
+    <TargetFramework></TargetFramework>
+    <TargetFrameworks>netstandard2.0;net10.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Description>ROS 2 interface definition (rosidl) parser and C# emitter for ROS2.Net: parses .msg, .srv and .action files and generates CDR + JSON serializable C# types.</Description>
+  </PropertyGroup>
+
+</Project>

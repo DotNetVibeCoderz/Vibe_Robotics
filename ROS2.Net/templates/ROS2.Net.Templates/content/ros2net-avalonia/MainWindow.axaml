@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Ros2NetAvalonia.MainWindow"
+        Title="Ros2NetAvalonia" Width="820" Height="520" Background="#0F1020">
+  <DockPanel Margin="20">
+    <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,16">
+      <TextBlock Text="Ros2NetAvalonia" FontSize="22" FontWeight="SemiBold" Foreground="#E8E9FF" />
+      <TextBlock Text="ROS 2 desktop dashboard · powered by ROS2.Net · Made by Gravicode Studios, led by Kang Fadhil" Foreground="#8F93C4" />
+    </StackPanel>
+    <Grid ColumnDefinitions="260,*">
+      <Border Background="#181A33" CornerRadius="14" Padding="16" Margin="0,0,16,0">
+        <StackPanel Spacing="12">
+          <TextBlock Text="Teleop  /cmd_vel" Foreground="#E8E9FF" FontWeight="SemiBold" />
+          <Grid ColumnDefinitions="60,60,60" RowDefinitions="60,60,60">
+            <Button Grid.Column="1" Content="▲" Click="OnForward" Margin="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <Button Grid.Row="1" Content="◀" Click="OnLeft" Margin="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <Button Grid.Row="1" Grid.Column="1" Content="■" Click="OnStop" Margin="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <Button Grid.Row="1" Grid.Column="2" Content="▶" Click="OnRight" Margin="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <Button Grid.Row="2" Grid.Column="1" Content="▼" Click="OnBack" Margin="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+          </Grid>
+          <TextBlock Text="Pose  /odom" Foreground="#E8E9FF" FontWeight="SemiBold" Margin="0,12,0,0" />
+          <TextBlock x:Name="PoseText" Text="waiting…" Foreground="#00D1FF" FontSize="16" />
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Background="#181A33" CornerRadius="14" Padding="16">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Text="Chatter  /chatter" Foreground="#E8E9FF" FontWeight="SemiBold" Margin="0,0,0,8" />
+          <ListBox x:Name="ChatterList" Background="Transparent" FontFamily="Consolas" />
+        </DockPanel>
+      </Border>
+    </Grid>
+  </DockPanel>
+</Window>

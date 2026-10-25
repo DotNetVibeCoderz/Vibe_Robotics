@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Security</RootNamespace>
+    <Description>SROS2 tooling for ROS2.Net: create keystores and enclaves in the ros2 security layout (ECDSA P-256 CA, identity certificates, DDS-Security governance and permissions signed as S/MIME), generate permissions from policies, and verify signatures.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+  </ItemGroup>
+
+</Project>

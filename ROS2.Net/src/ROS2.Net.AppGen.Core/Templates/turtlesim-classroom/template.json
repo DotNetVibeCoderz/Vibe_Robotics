@@ -1,0 +1,15 @@
+{
+  "name": "Turtlesim classroom",
+  "category": "Education",
+  "description": "Step-by-step turtlesim lessons: drive in a square with a closed loop on /turtle1/pose, then a circle, using only ROS topics.",
+  "appKind": "console",
+  "tags": [
+    "education",
+    "turtlesim",
+    "feedback-control",
+    "beginner"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

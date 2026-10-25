@@ -1,0 +1,97 @@
+@inherits RosComponentBase
+@using ROS2.Net.Rmw
+
+<div class="graph rn-card" style="height:@(Height)px">
+    @if (_nodes.Count == 0)
+    {
+        <div class="empty">No nodes discovered yet.</div>
+    }
+    else
+    {
+        <svg viewBox="0 0 1000 @Svg.F(_height)" preserveAspectRatio="xMidYMin meet">
+            <defs>
+                <marker id="arrow-pub" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--rn-violet)" /></marker>
+                <marker id="arrow-sub" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--rn-cyan)" /></marker>
+            </defs>
+            @foreach (var e in _edges)
+            {
+                <path d="@e.Path" class="@(e.Publish ? "edge pub" : "edge sub")" marker-end="@(e.Publish ? "url(#arrow-pub)" : "url(#arrow-sub)")" />
+            }
+            @foreach (var n in _nodes)
+            {
+                <g transform="@($"translate({Svg.F(n.X)} {Svg.F(n.Y)})")">
+                    <rect x="0" y="-15" width="240" height="30" rx="15" class="node" />
+                    <text x="16" y="5" class="label">@Trim(n.Name, 30)</text>
+                </g>
+            }
+            @foreach (var t in _topics)
+            {
+                <g transform="@($"translate({Svg.F(t.X)} {Svg.F(t.Y)})")">
+                    <rect x="0" y="-13" width="260" height="26" rx="4" class="topic" />
+                    <text x="12" y="5" class="label mono">@Trim(t.Name, 34)</text>
+                </g>
+            }
+        </svg>
+    }
+    <div class="legend rn-mono"><span class="pub">● publishes</span><span class="sub">● subscribes</span></div>
+</div>
+
+@code {
+    private sealed record Box(string Name, double X, double Y);
+    private sealed record Edge(string Path, bool Publish);
+
+    private List<Box> _nodes = [];
+    private List<Box> _topics = [];
+    private List<Edge> _edges = [];
+    private double _height = 400;
+
+    [Parameter] public int Height { get; set; } = 460;
+
+    [Parameter] public bool IncludeHidden { get; set; }
+
+    /// <summary>Topics left out to reduce clutter.</summary>
+    [Parameter] public IReadOnlyCollection<string> Exclude { get; set; } = ["/rosout", "/parameter_events"];
+
+    /// <summary>Hide this component's own node and other web_* helper nodes.</summary>
+    [Parameter] public bool HideUiNodes { get; set; } = true;
+
+    protected override void OnInitialized() => Every(TimeSpan.FromSeconds(1.5), _ =>
+    {
+        Layout();
+        return Task.CompletedTask;
+    });
+
+    private void Layout()
+    {
+        var endpoints = Context.Rmw.Graph.GetEndpoints()
+            .Where(e => e.Kind is EndpointKind.Publisher or EndpointKind.Subscription)
+            .Where(e => IncludeHidden || !RosNames.IsHidden(e.Name))
+            .Where(e => !Exclude.Contains(e.Name))
+            .Where(e => !HideUiNodes || !e.NodeName.StartsWith("web_", StringComparison.Ordinal))
+            .ToList();
+        var nodeNames = endpoints.Select(e => RosNames.FullyQualifiedNodeName(e.NodeNamespace, e.NodeName)).Distinct().Order(StringComparer.Ordinal).ToList();
+        var topicNames = endpoints.Select(e => e.Name).Distinct().Order(StringComparer.Ordinal).ToList();
+        const double rowNode = 46, rowTopic = 38, top = 30;
+        _height = Math.Max(200, (Math.Max(nodeNames.Count * rowNode, topicNames.Count * rowTopic)) + (2 * top));
+        var nodeOffset = (_height - (nodeNames.Count * rowNode)) / 2 + (rowNode / 2);
+        var topicOffset = (_height - (topicNames.Count * rowTopic)) / 2 + (rowTopic / 2);
+        _nodes = nodeNames.Select((n, i) => new Box(n, 40, nodeOffset + (i * rowNode))).ToList();
+        _topics = topicNames.Select((t, i) => new Box(t, 700, topicOffset + (i * rowTopic))).ToList();
+        var nodeY = _nodes.ToDictionary(n => n.Name, n => n.Y);
+        var topicY = _topics.ToDictionary(t => t.Name, t => t.Y);
+        _edges = endpoints
+            .Select(e => (Node: RosNames.FullyQualifiedNodeName(e.NodeNamespace, e.NodeName), e.Name, Pub: e.Kind == EndpointKind.Publisher))
+            .Distinct()
+            .Select(e =>
+            {
+                var y1 = nodeY[e.Node] + (e.Pub ? -5 : 5);
+                var y2 = topicY[e.Name] + (e.Pub ? -4 : 4);
+                return e.Pub
+                    ? new Edge($"M 280 {Svg.F(y1)} C 480 {Svg.F(y1)}, 500 {Svg.F(y2)}, 696 {Svg.F(y2)}", true)
+                    : new Edge($"M 700 {Svg.F(y2)} C 500 {Svg.F(y2)}, 480 {Svg.F(y1)}, 284 {Svg.F(y1)}", false);
+            })
+            .ToList();
+    }
+
+    private static string Trim(string s, int max) => s.Length <= max ? s : "…" + s[^(max - 1)..];
+}

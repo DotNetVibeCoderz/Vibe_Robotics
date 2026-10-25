@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Control</RootNamespace>
+    <Description>ros2_control for ROS2.Net: hardware interfaces, resource manager, a real-time controller manager and standard controllers (PID, joint state broadcaster, forward command, diff drive, Ackermann, joint trajectory, gripper).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Rosidl.Generator\ROS2.Net.Rosidl.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- controller_manager_msgs (Humble layout, interoperates with `ros2 control`) and ROS2.Net's own gripper action. -->
+    <AdditionalFiles Include="interfaces\**\*.msg;interfaces\**\*.srv;interfaces\**\*.action" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Control.Tests" />
+  </ItemGroup>
+
+</Project>

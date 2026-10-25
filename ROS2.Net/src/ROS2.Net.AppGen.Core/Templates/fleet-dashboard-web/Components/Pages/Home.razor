@@ -1,0 +1,14 @@
+@page "/"
+
+<PageTitle>{{ProjectName}}</PageTitle>
+
+<h1>Fleet operations</h1>
+<p class="muted">@AppTarget.Describe(). Every widget is a ROS 2 subscriber.</p>
+
+<section class="grid">
+    <div class="card"><h2>Warehouse map</h2><OccupancyGridView Topic="/map" /></div>
+    <div class="card"><h2>LiDAR</h2><LaserScanView Topic="@(AppTarget.RobotNamespaces()[0] + "/scan")" MaxRange="4" /></div>
+    <div class="card"><h2>Speed (m/s)</h2><LivePlot Topic="@(AppTarget.RobotNamespaces()[0] + "/odom")" Fields="@(["twist.twist.linear.x"])" /></div>
+    <div class="card"><h2>ROS graph</h2><NodeGraph /></div>
+    <div class="card"><h2>Topics</h2><TopicMonitor /></div>
+</section>

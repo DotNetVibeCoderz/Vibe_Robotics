@@ -1,0 +1,30 @@
+enum ROS2.Net.Hosting.Ros2ExecutorKind
+  SingleThreaded, MultiThreaded, Realtime
+class ROS2.Net.Hosting.Ros2HostOptions
+  ctor()
+  Nullable<Int32> DomainId { get; set; }
+  String Rmw { get; set; }
+  IRmwFactory RmwFactory { get; set; }
+  Dictionary<String,String> RmwSettings { get; set; }
+  Boolean UseIntraProcessComms { get; set; }
+  List<String> Arguments { get; set; }
+  Nullable<Boolean> LocalhostOnly { get; set; }
+  String Enclave { get; set; }
+  Ros2ExecutorKind Executor { get; set; }
+  Int32 ThreadCount { get; set; }
+  Boolean StopApplicationOnShutdown { get; set; }
+  Action<Ros2ContextOptions> ConfigureContext { get; set; }
+class ROS2.Net.Hosting.Ros2NodeRegistration
+  ctor(Func<IServiceProvider,Node> Factory)
+  Func<IServiceProvider,Node> Factory { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(Ros2NodeRegistration other)
+  Ros2NodeRegistration <Clone>$()
+  Void Deconstruct(Func`2& Factory)
+class ROS2.Net.Hosting.Ros2ServiceCollectionExtensions
+  static IServiceCollection AddRos2(IServiceCollection services, Action<Ros2HostOptions> configure=null)
+  static IServiceCollection AddRos2(IServiceCollection services, IConfiguration configuration, Action<Ros2HostOptions> configure=null)
+  static IServiceCollection AddRos2Node<TNode>(IServiceCollection services, Func<IServiceProvider,NodeOptions> options=null)
+  static IServiceCollection AddRos2Node(IServiceCollection services, String name, Action<IServiceProvider,Node> configure, String namespace=null, NodeOptions options=null)

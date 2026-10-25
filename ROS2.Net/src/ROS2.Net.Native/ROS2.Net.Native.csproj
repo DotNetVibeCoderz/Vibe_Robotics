@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Native</RootNamespace>
+    <Description>Native (Rust) acceleration kernels for ROS2.Net — voxel grids, outlier removal, k-d trees, Euclidean clustering, RANSAC, ICP, laser projection and occupancy ray tracing — with bit-compatible managed fallbacks when the native library is unavailable.</Description>
+    <NativeRoot>$(MSBuildThisFileDirectory)..\..\native\ros2net_native\target\release\</NativeRoot>
+  </PropertyGroup>
+
+  <!-- The native library is optional: everything falls back to managed code when it is missing. -->
+  <ItemGroup>
+    <Content Include="$(NativeRoot)ros2net_native.dll" Condition="Exists('$(NativeRoot)ros2net_native.dll')" Link="ros2net_native.dll" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="runtimes/win-x64/native" Visible="false" />
+    <Content Include="$(NativeRoot)libros2net_native.so" Condition="Exists('$(NativeRoot)libros2net_native.so')" Link="libros2net_native.so" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="runtimes/linux-x64/native" Visible="false" />
+    <Content Include="$(NativeRoot)libros2net_native.dylib" Condition="Exists('$(NativeRoot)libros2net_native.dylib')" Link="libros2net_native.dylib" CopyToOutputDirectory="PreserveNewest" Pack="true" PackagePath="runtimes/osx-arm64/native" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ROS2.Net.Perception.Tests" />
+  </ItemGroup>
+
+</Project>

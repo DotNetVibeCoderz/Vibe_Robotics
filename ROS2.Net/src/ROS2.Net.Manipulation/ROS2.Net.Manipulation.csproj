@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>ROS2.Net.Manipulation</RootNamespace>
+    <Description>MoveIt-style manipulation for ROS2.Net: URDF parsing, robot_state_publisher, forward/inverse kinematics, Jacobians, collision checking, RRT-Connect planning, Cartesian paths, time parameterization and a MoveGroup facade.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ROS2.Net.Core\ROS2.Net.Core.csproj" />
+    <ProjectReference Include="..\ROS2.Net.Msgs\ROS2.Net.Msgs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Robots\*.urdf" LogicalName="ROS2.Net.Manipulation.Robots.%(Filename).urdf" />
+  </ItemGroup>
+
+</Project>

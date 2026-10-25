@@ -1,0 +1,16 @@
+{
+  "name": "Office delivery robot",
+  "category": "Work",
+  "description": "A delivery robot navigates between office rooms with a full Nav2-style stack (planner server, controller server, BT navigator) on the simulator.",
+  "appKind": "console",
+  "tags": [
+    "navigation",
+    "nav2",
+    "delivery",
+    "office"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation",
+    "ROS2.Net.Navigation"
+  ]
+}

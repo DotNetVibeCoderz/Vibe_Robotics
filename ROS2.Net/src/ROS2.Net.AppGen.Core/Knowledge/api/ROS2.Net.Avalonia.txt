@@ -1,0 +1,185 @@
+class ROS2.Net.Avalonia.Controls.BatteryGauge : RosDrawnControl
+  ctor()
+  Double Percentage { get; }
+  BatteryState State { get; set; }
+  Void Attach(Node node, String topic)
+enum ROS2.Net.Avalonia.Controls.CloudProjection
+  Top, Side, Front, Orbit
+class ROS2.Net.Avalonia.Controls.ImageView : RosDrawnControl
+  ctor()
+  Stretch Stretch { get; set; }
+  Void SetImage(Image image)
+  Void Attach(Node node, String topic)
+class ROS2.Net.Avalonia.Controls.JointStatePanel : RosDrawnControl
+  ctor()
+  Dictionary<String,ValueTuple<Double,Double>> Limits { get; }
+  JointState State { get; set; }
+  Void Attach(Node node, String topic=/joint_states)
+class ROS2.Net.Avalonia.Controls.LaserScanView : RosDrawnControl
+  ctor()
+  Double DisplayRange { get; set; }
+  LaserScan Scan { get; set; }
+  Void Attach(Node node, String topic)
+  Void Detach()
+class ROS2.Net.Avalonia.Controls.LogConsole : RosDrawnControl
+  ctor()
+  Int32 Capacity { get; set; }
+  Byte MinimumLevel { get; set; }
+  Int32 Count { get; }
+  Void Attach(Node node, String topic=/rosout)
+  Void Append(DateTime time, Byte level, String name, String text)
+  Void Clear()
+struct ROS2.Net.Avalonia.Controls.MapPose
+  ctor(Double X, Double Y, Double Yaw, Nullable<Color> Color=null, String Label=null)
+  Double X { get; set; }
+  Double Y { get; set; }
+  Double Yaw { get; set; }
+  Nullable<Color> Color { get; set; }
+  String Label { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(MapPose other)
+  Void Deconstruct(Double& X, Double& Y, Double& Yaw, Nullable`1& Color, String& Label)
+class ROS2.Net.Avalonia.Controls.NodeGraphView : RosDrawnControl
+  ctor()
+  Boolean ShowInfrastructure { get; set; }
+  Int32 NodeCount { get; }
+  Void Attach(Node node)
+  Void Detach()
+  Void Refresh()
+class ROS2.Net.Avalonia.Controls.OccupancyGridView : RosDrawnControl
+  ctor()
+  Boolean CostmapColors { get; set; }
+  IReadOnlyList<MapPose> Robots { get; set; }
+  IReadOnlyList<ValueTuple<Double,Double>> PathPoints { get; set; }
+  Nullable<MapPose> Goal { get; set; }
+  IReadOnlyList<ValueTuple<Double,Double>> Points { get; set; }
+  OccupancyGrid Grid { get; set; }
+  Void Attach(Node node, String mapTopic=/map, String pathTopic=null)
+  Void Detach()
+  Void FitToView()
+  Point WorldToScreen(Double x, Double y)
+  ValueTuple<Double,Double> ScreenToWorld(Point p)
+  event Action<Double,Double> WorldClicked
+class ROS2.Net.Avalonia.Controls.ParameterEditor : UserControl
+  ctor()
+  String RemoteNode { get; }
+  Int32 ParameterCount { get; }
+  Task AttachAsync(Node node, String remoteNode)
+  Task LoadAsync()
+class ROS2.Net.Avalonia.Controls.PlotView : RosDrawnControl
+  ctor()
+  Double WindowSeconds { get; set; }
+  Nullable<ValueTuple<Double,Double>> YRange { get; set; }
+  String Unit { get; set; }
+  String XUnit { get; set; }
+  Void AddSample(String series, Double t, Double value)
+  Void Clear()
+class ROS2.Net.Avalonia.Controls.PointCloudView : RosDrawnControl
+  ctor()
+  CloudProjection Projection { get; set; }
+  Double Extent { get; set; }
+  IReadOnlyList<ValueTuple<Single[],Nullable<Color>,Double>> Layers { get; }
+  Void SetPoints(Single[] xyz)
+  Void ClearLayers()
+  Void AddLayer(Single[] xyz, Nullable<Color> color=null, Double size=1.6)
+class ROS2.Net.Avalonia.Controls.RosDrawnControl : Control
+  String Title { get; set; }
+  Boolean ShowFrame { get; set; }
+  field static StyledProperty<String> TitleProperty
+  field static StyledProperty<Boolean> ShowFrameProperty
+  Void Render(DrawingContext context)
+class ROS2.Net.Avalonia.Controls.SimWorldView : RosDrawnControl
+  ctor()
+  Boolean ShowLidar { get; set; }
+  Boolean ShowTrails { get; set; }
+  Boolean ShowGrid { get; set; }
+  String SelectedRobot { get; set; }
+  Nullable<ValueTuple<Double,Double>> Goal { get; set; }
+  IReadOnlyList<ValueTuple<Double,Double>> PathPoints { get; set; }
+  Double FramesPerSecond { get; set; }
+  WorldSnapshot Snapshot { get; set; }
+  Void Attach(SimWorld world)
+  Void Detach()
+  Void FitToView()
+  Point WorldToScreen(Double x, Double y)
+  ValueTuple<Double,Double> ScreenToWorld(Point p)
+  Nullable<Pose2D> PoseOf(String robot)
+  event Action<Double,Double> WorldClicked
+  event Action<WorldSnapshot> SnapshotUpdated
+class ROS2.Net.Avalonia.Controls.TeleopJoystick : RosDrawnControl
+  ctor()
+  Double MaxLinear { get; set; }
+  Double MaxAngular { get; set; }
+  Double PublishRateHz { get; set; }
+  ValueTuple<Double,Double> Command { get; }
+  field static StyledProperty<Double> MaxLinearProperty
+  field static StyledProperty<Double> MaxAngularProperty
+  Void Attach(Node node, String topic)
+  Void Detach()
+  Void SetKnob(Double x, Double y)
+  event Action<Double,Double> CommandChanged
+enum ROS2.Net.Avalonia.Controls.TextAnchor
+  Left, Center, Right
+class ROS2.Net.Avalonia.Controls.TfTreeView : RosDrawnControl
+  ctor()
+  TfBuffer Buffer { get; set; }
+  Int32 FrameCount { get; }
+  Void Refresh()
+class ROS2.Net.Avalonia.Controls.TopicMonitor : RosDrawnControl
+  ctor()
+  Boolean ShowInfrastructure { get; set; }
+  Boolean MeasureRates { get; set; }
+  IReadOnlyList<TopicStats> Rows { get; }
+  Void Attach(Node node)
+  Void Detach()
+  Void Refresh()
+class ROS2.Net.Avalonia.Controls.TopicStats
+  ctor(String Name, String Type, Int32 Publishers, Int32 Subscribers, Double Hz, Double BytesPerSecond)
+  String Name { get; set; }
+  String Type { get; set; }
+  Int32 Publishers { get; set; }
+  Int32 Subscribers { get; set; }
+  Double Hz { get; set; }
+  Double BytesPerSecond { get; set; }
+  String ToString()
+  Int32 GetHashCode()
+  Boolean Equals(Object obj)
+  Boolean Equals(TopicStats other)
+  TopicStats <Clone>$()
+  Void Deconstruct(String& Name, String& Type, Int32& Publishers, Int32& Subscribers, Double& Hz, Double& BytesPerSecond)
+class ROS2.Net.Avalonia.RosPalette
+  static RosPalette Dark { get; }
+  static RosPalette Light { get; }
+  Boolean IsDark { get; }
+  Color Background { get; }
+  Color Surface { get; }
+  Color SurfaceRaised { get; }
+  Color Seam { get; }
+  Color Ink { get; }
+  Color Haze { get; }
+  Color Grid { get; }
+  Color Signal { get; }
+  Color Telemetry { get; }
+  Color Alert { get; }
+  Color Fault { get; }
+  Color Ok { get; }
+  IBrush Brush(Color c)
+  IBrush Brush(Color c, Double opacity)
+  IPen Pen(Color c, Double thickness=1, Double opacity=1)
+  IBrush SignalGradient(Nullable<RelativePoint> start=null, Nullable<RelativePoint> end=null)
+  Color Ramp(Double t)
+class ROS2.Net.Avalonia.RosTheme
+  static Typeface Sans { get; }
+  static Typeface SansBold { get; }
+  static Typeface SansSemiBold { get; }
+  static Typeface Mono { get; }
+  static FontFamily SansFamily { get; }
+  static FontFamily MonoFamily { get; }
+  static RosPalette Current { get; }
+  static Boolean IsDark { get; set; }
+class ROS2.Net.Avalonia.RosUi
+  static IDisposable SubscribeLatest<T>(Node node, String topic, Action<T> onUi, Nullable<QosProfile> qos=null)
+  static IDisposable SubscribeAll<T>(Node node, String topic, Action<IReadOnlyList<T>> onUi, Nullable<QosProfile> qos=null)
+  static Void OnUi(Action action)

@@ -1,0 +1,5 @@
+# Send the robot to a docking station.
+string station
+---
+bool success
+string message

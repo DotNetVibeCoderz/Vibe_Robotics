@@ -1,0 +1,15 @@
+{
+  "name": "Lab sample sorter arm",
+  "category": "Science",
+  "description": "A UR5-style arm computes inverse kinematics for every vial slot of a sample rack, plans collision-free motions around the rack with RRT-Connect and times them.",
+  "appKind": "console",
+  "tags": [
+    "manipulation",
+    "ik",
+    "laboratory",
+    "planning"
+  ],
+  "packages": [
+    "ROS2.Net.Manipulation"
+  ]
+}

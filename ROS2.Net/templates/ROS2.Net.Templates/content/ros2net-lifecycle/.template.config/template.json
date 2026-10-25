@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gravicode Studios (Kang Fadhil)",
+  "classifications": [
+    "ROS2.Net",
+    "Robotics",
+    "ROS 2",
+    "Console"
+  ],
+  "identity": "ROS2.Net.Templates.Lifecycle",
+  "name": "ROS2.Net Lifecycle Node",
+  "description": "A managed (lifecycle) ROS 2 node controllable with `ros2 lifecycle set`.",
+  "shortName": "ros2net-lifecycle",
+  "sourceName": "Ros2NetLifecycle",
+  "defaultName": "MyRobot",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "preferNameDirectory": true,
+  "symbols": {
+    "rosVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "0.1.0",
+      "replaces": "ROS2NET_VERSION",
+      "description": "ROS2.Net package version."
+    }
+  }
+}

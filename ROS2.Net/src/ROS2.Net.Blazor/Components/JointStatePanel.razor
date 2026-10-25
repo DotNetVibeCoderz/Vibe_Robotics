@@ -1,0 +1,49 @@
+@inherits RosComponentBase
+@using ROS2.Net.Msgs.SensorMsgs
+
+<div class="joints rn-card">
+    @if (_state is null || _state.Name.Length == 0)
+    {
+        <div class="empty">Waiting for joint states…</div>
+    }
+    else
+    {
+        @for (var i = 0; i < _state.Name.Length; i++)
+        {
+            var pos = i < _state.Position.Length ? _state.Position[i] : double.NaN;
+            var vel = i < _state.Velocity.Length ? _state.Velocity[i] : double.NaN;
+            var t = double.IsFinite(pos) ? Math.Clamp((pos + Math.PI) / (2 * Math.PI), 0, 1) : 0.5;
+            <div class="joint">
+                <span class="name rn-mono">@_state.Name[i]</span>
+                <div class="bar"><span class="zero"></span><span class="mark" style="left:@Svg.F(t * 100)%"></span></div>
+                <span class="val rn-mono">@(double.IsFinite(pos) ? (pos * 180 / Math.PI).ToString("+0.0;-0.0", CultureInfo.InvariantCulture) + "°" : "—")</span>
+                <span class="vel rn-mono">@(double.IsFinite(vel) ? vel.ToString("+0.00;-0.00", CultureInfo.InvariantCulture) + " rad/s" : "")</span>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private JointState? _state;
+
+    /// <summary>sensor_msgs/JointState topic. Ignored when <see cref="State"/> is set.</summary>
+    [Parameter] public string? Topic { get; set; }
+
+    [Parameter] public JointState? State { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (State is null && !string.IsNullOrEmpty(Topic))
+        {
+            Subscribe<JointState>(Topic, m => _state = m);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (State is not null)
+        {
+            _state = State;
+        }
+    }
+}

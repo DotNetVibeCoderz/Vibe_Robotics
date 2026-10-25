@@ -1,0 +1,15 @@
+{
+  "name": "Fleet operations dashboard (web)",
+  "category": "Logistics",
+  "description": "Blazor operations dashboard for a simulated warehouse fleet: ground-truth map, per-robot LiDAR, live speed plots and the ROS graph.",
+  "appKind": "blazor",
+  "tags": [
+    "fleet",
+    "dashboard",
+    "web",
+    "multi-robot"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}

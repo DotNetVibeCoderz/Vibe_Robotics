@@ -1,0 +1,18 @@
+[package]
+name = "ros2net_native"
+version = "0.1.0"
+edition = "2021"
+description = "Native acceleration kernels for ROS2.Net (point clouds, k-d trees, ICP, laser projection, occupancy ray tracing)"
+license = "MIT"
+authors = ["Gravicode Studios"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "unwind"

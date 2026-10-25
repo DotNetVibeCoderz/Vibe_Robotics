@@ -1,0 +1,86 @@
+@inherits RosComponentBase
+@using LogMsg = ROS2.Net.Msgs.RclInterfaces.Log
+
+<div class="console rn-card" style="height:@(Height)px">
+    <header>
+        @foreach (var level in s_levels)
+        {
+            <button class="chip @(_hidden.Contains(level.Value) ? "off" : "") @level.Css" @onclick="() => Toggle(level.Value)">@level.Label</button>
+        }
+        <input class="rn-input filter" placeholder="Filter by node or text" @bind="_filter" @bind:event="oninput" aria-label="Filter log" />
+    </header>
+    <div class="lines rn-mono" role="log" aria-live="polite">
+        @foreach (var l in Visible())
+        {
+            <div class="line @Css(l.Level)">
+                <span class="t">@l.Time.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture)</span>
+                <span class="lvl">@Label(l.Level)</span>
+                <span class="who">[@l.Name]</span>
+                <span class="msg">@l.Text</span>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private sealed record Entry(DateTime Time, byte Level, string Name, string Text);
+
+    private static readonly (byte Value, string Label, string Css)[] s_levels =
+    [
+        (LogMsg.DEBUG, "DEBUG", "debug"), (LogMsg.INFO, "INFO", "info"), (LogMsg.WARN, "WARN", "warn"),
+        (LogMsg.ERROR, "ERROR", "error"), (LogMsg.FATAL, "FATAL", "fatal"),
+    ];
+
+    private readonly LinkedList<Entry> _entries = new();
+    private readonly HashSet<byte> _hidden = [];
+    private string _filter = string.Empty;
+
+    [Parameter] public string Topic { get; set; } = "/rosout";
+
+    [Parameter] public int MaxLines { get; set; } = 300;
+
+    [Parameter] public int Height { get; set; } = 320;
+
+    protected override void OnInitialized() => Subscribe<LogMsg>(Topic, m =>
+    {
+        lock (_entries)
+        {
+            _entries.AddFirst(new Entry(RosTime.FromMsg(m.Stamp).ToDateTime().ToLocalTime(), m.Level, m.Name, m.Msg));
+            while (_entries.Count > MaxLines)
+            {
+                _entries.RemoveLast();
+            }
+        }
+    }, QosProfile.Rosout);
+
+    private List<Entry> Visible()
+    {
+        lock (_entries)
+        {
+            return _entries.Where(e => !_hidden.Contains(Bucket(e.Level)) &&
+                (_filter.Length == 0 || e.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase) || e.Text.Contains(_filter, StringComparison.OrdinalIgnoreCase)))
+                .Take(MaxLines).ToList();
+        }
+    }
+
+    private void Toggle(byte level)
+    {
+        if (!_hidden.Add(level))
+        {
+            _hidden.Remove(level);
+        }
+    }
+
+    private static byte Bucket(byte level) => level switch
+    {
+        <= LogMsg.DEBUG => LogMsg.DEBUG,
+        <= LogMsg.INFO => LogMsg.INFO,
+        <= LogMsg.WARN => LogMsg.WARN,
+        <= LogMsg.ERROR => LogMsg.ERROR,
+        _ => LogMsg.FATAL,
+    };
+
+    private static string Label(byte level) => s_levels.First(l => l.Value == Bucket(level)).Label;
+
+    private static string Css(byte level) => s_levels.First(l => l.Value == Bucket(level)).Css;
+}

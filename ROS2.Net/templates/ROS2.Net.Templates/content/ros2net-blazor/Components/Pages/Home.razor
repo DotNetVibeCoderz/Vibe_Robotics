@@ -1,0 +1,59 @@
+@page "/"
+@implements IDisposable
+@inject RobotLink Robot
+
+<PageTitle>Ros2NetBlazor</PageTitle>
+
+<section class="grid">
+    <div class="card">
+        <h2>Teleop <small>/cmd_vel</small></h2>
+        <div class="pad">
+            <span></span><button @onclick="() => Drive(Speed, 0)">▲</button><span></span>
+            <button @onclick="() => Drive(0, Turn)">◀</button><button class="stop" @onclick="() => Drive(0, 0)">■</button><button @onclick="() => Drive(0, -Turn)">▶</button>
+            <span></span><button @onclick="() => Drive(-Speed, 0)">▼</button><span></span>
+        </div>
+        <label>Speed <input type="range" min="0.1" max="1.5" step="0.1" @bind="Speed" @bind:event="oninput" /> @Speed.ToString("0.0") m/s</label>
+    </div>
+
+    <div class="card">
+        <h2>Pose <small>/odom</small></h2>
+        <p class="big">x @Robot.Pose.X.ToString("0.00") · y @Robot.Pose.Y.ToString("0.00") · θ @((Robot.Pose.Yaw * 180 / Math.PI).ToString("0"))°</p>
+    </div>
+
+    <div class="card wide">
+        <h2>Chatter <small>/chatter</small></h2>
+        @if (Robot.Chatter.Count == 0)
+        {
+            <p class="muted">Waiting for messages… run <code>ros2net run-demo talker</code>.</p>
+        }
+        <ul class="log">
+            @foreach (var line in Robot.Chatter)
+            {
+                <li>@line</li>
+            }
+        </ul>
+    </div>
+
+    <div class="card wide">
+        <h2>Topics</h2>
+        <ul class="log">
+            @foreach (var t in Robot.Topics)
+            {
+                <li><code>@t.Name</code> <span class="muted">@string.Join(", ", t.Types)</span></li>
+            }
+        </ul>
+    </div>
+</section>
+
+@code {
+    private double Speed { get; set; } = 0.5;
+    private double Turn => 1.0;
+
+    protected override void OnInitialized() => Robot.Changed += Refresh;
+
+    private void Refresh() => InvokeAsync(StateHasChanged);
+
+    private void Drive(double linear, double angular) => Robot.Drive(linear, angular);
+
+    public void Dispose() => Robot.Changed -= Refresh;
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Crop row follower",
+  "category": "Agriculture",
+  "description": "An agricultural robot drives down crop rows, centering itself between the plants with its LiDAR, and turns into the next row at each headland.",
+  "appKind": "console",
+  "tags": [
+    "agriculture",
+    "lidar",
+    "row-following",
+    "field-robot"
+  ],
+  "packages": [
+    "ROS2.Net.Simulation"
+  ]
+}
